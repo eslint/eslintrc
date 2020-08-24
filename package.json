@@ -4,7 +4,12 @@
   "description": "The legacy ESLintRC config file format for ESLint",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha tests/"
+    "test": "mocha tests/lib/shared",
+    "generate-release": "eslint-generate-release",
+    "generate-alpharelease": "eslint-generate-prerelease alpha",
+    "generate-betarelease": "eslint-generate-prerelease beta",
+    "generate-rcrelease": "eslint-generate-prerelease rc",
+    "publish-release": "eslint-publish-release"
   },
   "repository": {
     "type": "git",
@@ -22,8 +27,10 @@
   },
   "homepage": "https://github.com/eslint/eslintrc#readme",
   "devDependencies": {
+    "chai": "^4.2.0",
     "eslint": "^7.7.0",
-    "eslint-config-eslint": "^6.0.0"
+    "eslint-config-eslint": "^6.0.0",
+    "mocha": "^8.1.1"
   },
   "dependencies": {
     "ajv": "^6.12.4",
