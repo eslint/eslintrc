@@ -8,6 +8,9 @@
     "conf",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "mocha tests/lib/shared",
     "generate-release": "eslint-generate-release",
