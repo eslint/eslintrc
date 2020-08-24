@@ -16,10 +16,7 @@
     "generate-rcrelease": "eslint-generate-prerelease rc",
     "publish-release": "eslint-publish-release"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eslint/eslintrc.git"
-  },
+  "repository": "eslint/eslintrc",
   "keywords": [
     "ESLint",
     "ESLintRC",
