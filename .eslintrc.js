@@ -9,6 +9,22 @@ module.exports = {
         ecmaVersion: 2020
     },
 
+    /*
+     * it fixes eslint-plugin-jsdoc's reports: "Invalid JSDoc tag name "template" jsdoc/check-tag-names"
+     * refs: https://github.com/gajus/eslint-plugin-jsdoc#check-tag-names
+     */
+    settings: {
+        jsdoc: {
+            mode: "typescript"
+        }
+    },
+
+    // TODO: remove when linting problems gets fixed
+    ignorePatterns: ["/tests/", "/conf/eslint-all.js"],
+    rules: {
+        "class-methods-use-this": "off"
+    },
+
     overrides: [
         {
             files: ["tests/**/*"],
@@ -19,7 +35,7 @@ module.exports = {
                     message: "`assert.doesNotThrow()` should be replaced with a comment next to the code."
                 }]
             }
-        },
+        }
 
     ]
 };
