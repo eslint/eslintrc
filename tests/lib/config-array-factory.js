@@ -4,24 +4,32 @@
  */
 "use strict";
 
+//-----------------------------------------------------------------------------
+// Requirements
+//-----------------------------------------------------------------------------
+
 const os = require("os");
 const path = require("path");
 const { assert } = require("chai");
 const { spy } = require("sinon");
 const {
-    ConfigArray,
-    OverrideTester,
-    createContext
-} = require("../lib/");
-const {  } = require("../../../lib/cli-engine/config-array");
-const {  } = require("../../../lib/cli-engine/config-array");
-const {  } = require("../../../lib/cli-engine/config-array-factory");
-const { defineConfigArrayFactoryWithInMemoryFileSystem } = require("../../_utils");
+    Legacy: {
+        ConfigArray,
+        ConfigArrayFactory,
+        OverrideTester,
+        createConfigArrayFactoryContext: createContext
+    }
+} = require("../../lib/");
+const { createCustomTeardown } = require("../_utils");
+const { after, before } = require("lodash");
 
-const tempDir = path.join(os.tmpdir(), "eslint/config-array-factory");
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
 
-// For VSCode intellisense.
-/** @typedef {InstanceType<ReturnType<defineConfigArrayFactoryWithInMemoryFileSystem>["ConfigArrayFactory"]>} ConfigArrayFactory */
+const eslintAllPath = path.resolve(__dirname, "../fixtures/eslint-all.js");
+const eslintRecommendedPath = path.resolve(__dirname, "../fixtures/eslint-recommended.js");
+const tempDir = path.join(os.tmpdir(), "eslintrc/config-array-factory");
 
 /**
  * Assert a config array element.
@@ -97,16 +105,19 @@ function assertPluginDefinition(actual, providedExpected) {
 
 describe("ConfigArrayFactory", () => {
     describe("'create(configData, options)' method should normalize the config data.", () => {
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir
         });
 
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(() => {
-            factory = new ConfigArrayFactory();
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
         });
+
+        afterEach(cleanup);
 
         it("should return an empty config array if 'configData' is null.", () => {
             assert.strictEqual(factory.create(null).length, 0);
@@ -158,8 +169,9 @@ describe("ConfigArrayFactory", () => {
             "yml/.eslintrc.yml": "settings:\n  name: yml/.eslintrc.yml",
             "yaml/.eslintrc.yaml": "settings:\n  name: yaml/.eslintrc.yaml"
         };
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir,
+
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir,
             files: {
                 ...basicFiles,
                 "invalid-property.json": "{ \"files\": \"*.js\" }",
@@ -170,9 +182,12 @@ describe("ConfigArrayFactory", () => {
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(() => {
-            factory = new ConfigArrayFactory();
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
         });
+
+        afterEach(cleanup);
 
         it("should throw an error if 'filePath' is null.", () => {
             assert.throws(() => factory.loadFile(null));
@@ -248,8 +263,8 @@ describe("ConfigArrayFactory", () => {
             "yml/.eslintrc.yml": "settings:\n  name: yml/.eslintrc.yml",
             "yaml/.eslintrc.yaml": "settings:\n  name: yaml/.eslintrc.yaml"
         };
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir,
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir,
             files: {
                 ...basicFiles,
                 "invalid-property/.eslintrc.json": "{ \"files\": \"*.js\" }",
@@ -260,9 +275,12 @@ describe("ConfigArrayFactory", () => {
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(() => {
-            factory = new ConfigArrayFactory();
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
         });
+
+        afterEach(cleanup);
 
         it("should throw an error if 'directoryPath' is null.", () => {
             assert.throws(() => factory.loadInDirectory(null));
@@ -349,13 +367,14 @@ describe("ConfigArrayFactory", () => {
         }
 
         describe("misc", () => {
-            before(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir
-                });
-
-                factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir
             });
+
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+
+            beforeEach(prepare);
+            afterEach(cleanup);
 
             describe("if the config data was empty, the returned value", () => {
                 let configArray;
@@ -511,18 +530,19 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'parser' details", () => {
-            before(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir,
-                    files: {
-                        "node_modules/xxx-parser/index.js": "exports.name = 'xxx-parser';",
-                        "subdir/node_modules/xxx-parser/index.js": "exports.name = 'subdir/xxx-parser';",
-                        "parser.js": "exports.name = './parser.js';"
-                    }
-                });
-
-                factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "node_modules/xxx-parser/index.js": "exports.name = 'xxx-parser';",
+                    "subdir/node_modules/xxx-parser/index.js": "exports.name = 'subdir/xxx-parser';",
+                    "parser.js": "exports.name = './parser.js';"
+                }
             });
+
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+
+            beforeEach(prepare);
+            afterEach(cleanup);
 
             describe("if the 'parser' property was a valid package, the first config array element", () => {
                 let element;
@@ -618,20 +638,21 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'plugins' details", () => {
-            before(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir,
-                    files: {
-                        "node_modules/eslint-plugin-ext/index.js": "exports.processors = { '.abc': {}, '.xyz': {}, other: {} };",
-                        "node_modules/eslint-plugin-subdir/index.js": "",
-                        "node_modules/eslint-plugin-xxx/index.js": "exports.configs = { name: 'eslint-plugin-xxx' };",
-                        "subdir/node_modules/eslint-plugin-subdir/index.js": "",
-                        "parser.js": ""
-                    }
-                });
-
-                factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "node_modules/eslint-plugin-ext/index.js": "exports.processors = { '.abc': {}, '.xyz': {}, other: {} };",
+                    "node_modules/eslint-plugin-subdir/index.js": "",
+                    "node_modules/eslint-plugin-xxx/index.js": "exports.configs = { name: 'eslint-plugin-xxx' };",
+                    "subdir/node_modules/eslint-plugin-subdir/index.js": "",
+                    "parser.js": ""
+                }
             });
+
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+
+            beforeEach(prepare);
+            afterEach(cleanup);
 
             it("should throw an error if a 'plugins' value is a file path.", () => {
                 assert.throws(() => {
@@ -780,31 +801,36 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'extends' details", () => {
-            before(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir,
-                    files: {
-                        "node_modules/eslint-config-foo/index.js": "exports.env = { browser: true }",
-                        "node_modules/eslint-config-one/index.js": "module.exports = { extends: 'two', env: { browser: true } }",
-                        "node_modules/eslint-config-two/index.js": "module.exports = { env: { node: true } }",
-                        "node_modules/eslint-config-override/index.js": `
-                            module.exports = {
-                                rules: { regular: 1 },
-                                overrides: [
-                                    { files: '*.xxx', rules: { override: 1 } },
-                                    { files: '*.yyy', rules: { override: 2 } }
-                                ]
-                            }
-                        `,
-                        "node_modules/eslint-plugin-foo/index.js": "exports.configs = { bar: { env: { es6: true } } }",
-                        "node_modules/eslint-plugin-invalid-config/index.js": "exports.configs = { foo: {} }",
-                        "node_modules/eslint-plugin-error/index.js": "throw new Error('xxx error')",
-                        "base.js": "module.exports = { rules: { semi: [2, 'always'] } };"
-                    }
-                });
-
-                factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "node_modules/eslint-config-foo/index.js": "exports.env = { browser: true }",
+                    "node_modules/eslint-config-one/index.js": "module.exports = { extends: 'two', env: { browser: true } }",
+                    "node_modules/eslint-config-two/index.js": "module.exports = { env: { node: true } }",
+                    "node_modules/eslint-config-override/index.js": `
+                        module.exports = {
+                            rules: { regular: 1 },
+                            overrides: [
+                                { files: '*.xxx', rules: { override: 1 } },
+                                { files: '*.yyy', rules: { override: 2 } }
+                            ]
+                        }
+                    `,
+                    "node_modules/eslint-plugin-foo/index.js": "exports.configs = { bar: { env: { es6: true } } }",
+                    "node_modules/eslint-plugin-invalid-config/index.js": "exports.configs = { foo: {} }",
+                    "node_modules/eslint-plugin-error/index.js": "throw new Error('xxx error')",
+                    "base.js": "module.exports = { rules: { semi: [2, 'always'] } };"
+                }
             });
+
+            factory = new ConfigArrayFactory({
+                cwd: getPath(),
+                eslintAllPath,
+                eslintRecommendedPath
+            });
+
+            beforeEach(prepare);
+            afterEach(cleanup);
 
             it("should throw an error when extends config module is not found", () => {
                 assert.throws(() => {
@@ -868,8 +894,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:all' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
-                        filePath: require.resolve("../../../conf/eslint-all.js"),
-                        ...require("../../../conf/eslint-all.js")
+                        filePath: eslintAllPath,
+                        ...require(eslintAllPath)
                     });
                 });
 
@@ -898,8 +924,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:recommended' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:recommended",
-                        filePath: require.resolve("../../../conf/eslint-recommended.js"),
-                        ...require("../../../conf/eslint-recommended.js")
+                        filePath: eslintRecommendedPath,
+                        ...require(eslintRecommendedPath)
                     });
                 });
 
@@ -1089,37 +1115,38 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'overrides' details", () => {
-            before(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir,
-                    files: {
-                        "node_modules/eslint-config-foo/index.js": `
-                            module.exports = {
-                                rules: { eqeqeq: "error" }
-                            }
-                        `,
-                        "node_modules/eslint-config-has-overrides/index.js": `
-                            module.exports = {
-                                rules: { eqeqeq: "error" },
-                                overrides: [
-                                    {
-                                        files: ["**/foo/**/*.js"],
-                                        rules: { eqeqeq: "off" }
-                                    }
-                                ]
-                            }
-                        `,
-                        "node_modules/eslint-config-root/index.js": `
-                            module.exports = {
-                                root: true,
-                                rules: { eqeqeq: "error" }
-                            }
-                        `
-                    }
-                });
 
-                factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "node_modules/eslint-config-foo/index.js": `
+                        module.exports = {
+                            rules: { eqeqeq: "error" }
+                        }
+                    `,
+                    "node_modules/eslint-config-has-overrides/index.js": `
+                        module.exports = {
+                            rules: { eqeqeq: "error" },
+                            overrides: [
+                                {
+                                    files: ["**/foo/**/*.js"],
+                                    rules: { eqeqeq: "off" }
+                                }
+                            ]
+                        }
+                    `,
+                    "node_modules/eslint-config-root/index.js": `
+                        module.exports = {
+                            root: true,
+                            rules: { eqeqeq: "error" }
+                        }
+                    `
+                }
             });
+
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+            beforeEach(prepare);
+            afterEach(cleanup);
 
             describe("if 'overrides' property was given, the returned value", () => {
                 let configArray;
@@ -1358,18 +1385,22 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("additional plugin pool", () => {
-            beforeEach(() => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                    cwd: () => tempDir
-                });
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir
+            });
 
+            beforeEach(async () => {
+                await prepare();
                 factory = new ConfigArrayFactory({
+                    cwd: getPath(),
                     additionalPluginPool: new Map([
                         ["abc", { configs: { name: "abc" } }],
                         ["eslint-plugin-def", { configs: { name: "def" } }]
                     ])
                 });
             });
+
+            afterEach(cleanup);
 
             it("should use the matched plugin in the additional plugin pool; short to short", () => {
                 const configArray = create({ plugins: ["abc"] });
@@ -1427,8 +1458,19 @@ describe("ConfigArrayFactory", () => {
             "package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } } }",
             "yaml/.eslintrc.yaml": "env:\n    browser: true"
         };
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({ files });
-        const factory = new ConfigArrayFactory();
+        const { prepare, cleanup, getPath } = createCustomTeardown({ cwd: tempDir, files });
+        let factory;
+        
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({
+                cwd: getPath(),
+                eslintAllPath,
+                eslintRecommendedPath
+            });
+        });
+
+        afterEach(cleanup);
 
         /**
          * Apply `extends` property.
@@ -1518,11 +1560,12 @@ describe("ConfigArrayFactory", () => {
                 assert.strictEqual(err.messageTemplate, "plugin-missing");
                 assert.deepStrictEqual(err.messageData, {
                     pluginName: "eslint-plugin-nonexistent-plugin",
-                    resolvePluginsRelativeTo: process.cwd(),
+                    resolvePluginsRelativeTo: getPath(),
                     importerName: "whatever"
                 });
                 return;
             }
+
             assert.fail("Expected to throw an error");
         });
 
@@ -1535,7 +1578,7 @@ describe("ConfigArrayFactory", () => {
                 assert.strictEqual(err.messageTemplate, "plugin-missing");
                 assert.deepStrictEqual(err.messageData, {
                     pluginName: "eslint-plugin-nonexistent-plugin",
-                    resolvePluginsRelativeTo: process.cwd(),
+                    resolvePluginsRelativeTo: getPath(),
                     importerName: "whatever"
                 });
                 return;
@@ -1613,7 +1656,7 @@ describe("ConfigArrayFactory", () => {
     });
 
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
-    describe("loading config files should work properly.", () => {
+    describe.only("loading config files should work properly.", () => {
 
         /**
          * Load a given config file.
@@ -1629,8 +1672,8 @@ describe("ConfigArrayFactory", () => {
         }
 
         it("should throw error if file doesn't exist", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem();
-            const factory = new ConfigArrayFactory();
+            const { prepare, cleanup, getPath } = createCustomTeardown({ cwd: tempDir });
+            const factory = new ConfigArrayFactory({ cwd: getPath()});
 
             assert.throws(() => {
                 load(factory, "legacy/nofile.js");
@@ -1642,12 +1685,12 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a legacy file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "legacy/.eslintrc": "{ rules: { eqeqeq: 2 } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+            const factory = new ConfigArrayFactory({ cwd: getPath() });
             const config = load(factory, "legacy/.eslintrc");
 
             assertConfig(config, {
@@ -1658,7 +1701,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "js/.eslintrc.js": "module.exports = { rules: { semi: [2, 'always'] } };"
                 }
@@ -1674,7 +1717,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a JavaScript file with a .cjs extension", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "cjs/.eslintrc.cjs": "module.exports = { rules: { semi: [2, 'always'] } };"
                 }
@@ -1690,7 +1733,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should throw error when loading invalid JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "js/.eslintrc.broken.js": "module.exports = { rules: { semi: [2, 'always'] }"
                 }
@@ -1703,7 +1746,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should interpret parser module name when present in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "node_modules/foo/index.js": "",
                     "js/node_modules/foo/index.js": "",
@@ -1725,7 +1768,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should interpret parser path when present in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "js/.eslintrc.parser2.js": `module.exports = {
                         parser: './not-a-config.js',
@@ -1746,7 +1789,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should interpret parser module name or path when parser is set to default parser in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "js/.eslintrc.parser3.js": `module.exports = {
                         parser: 'espree',
@@ -1766,7 +1809,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a JSON file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "json/.eslintrc.json": "{ \"rules\": { \"quotes\": [2, \"double\"] } }"
                 }
@@ -1806,7 +1849,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a package.json file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } } }"
                 }
@@ -1820,7 +1863,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should throw error when loading invalid package.json file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "broken-package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } }"
                 }
@@ -1890,7 +1933,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a YAML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "yaml/.eslintrc.yaml": "env:\n    browser: true"
                 }
@@ -1904,7 +1947,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from an empty YAML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "yaml/.eslintrc.empty.yaml": "{}"
                 }
@@ -1916,7 +1959,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a YML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "yml/.eslintrc.yml": "env:\n    node: true"
                 }
@@ -1930,7 +1973,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from a YML file and apply extensions", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "extends/.eslintrc.yml": "extends: ../package-json/package.json\nrules:\n    booya: 2",
                     "package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } } }"
@@ -1946,7 +1989,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from `extends` chain.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "extends-chain": {
                         "node_modules/eslint-config-a": {
@@ -1975,7 +2018,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from `extends` chain with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "extends-chain-2": {
                         "node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
@@ -1996,7 +2039,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from `extends` chain in .eslintrc with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "extends-chain-2": {
                         "node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
@@ -2017,7 +2060,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load information from `parser` in .eslintrc with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "extends-chain-2": {
                         "parser.eslintrc.json": "{ \"parser\": \"./parser.js\" }",
@@ -2035,7 +2078,7 @@ describe("ConfigArrayFactory", () => {
 
         describe("Plugins", () => {
             it("should load information from a YML file and load plugins", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
                     files: {
                         "node_modules/eslint-plugin-test/index.js": `
                             module.exports = {
@@ -2067,7 +2110,7 @@ describe("ConfigArrayFactory", () => {
             });
 
             it("should load two separate configs from a plugin", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
                     files: {
                         "node_modules/eslint-plugin-test/index.js": `
                             module.exports = {
@@ -2099,7 +2142,7 @@ describe("ConfigArrayFactory", () => {
 
         describe("even if config files have Unicode BOM,", () => {
             it("should read the JSON config file correctly.", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
                     files: {
                         "bom/.eslintrc.json": "\uFEFF{ \"rules\": { \"semi\": \"error\" } }"
                     }
@@ -2115,7 +2158,7 @@ describe("ConfigArrayFactory", () => {
             });
 
             it("should read the YAML config file correctly.", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
                     files: {
                         "bom/.eslintrc.yaml": "\uFEFFrules:\n  semi: error"
                     }
@@ -2131,7 +2174,7 @@ describe("ConfigArrayFactory", () => {
             });
 
             it("should read the config in package.json correctly.", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
                     files: {
                         "bom/package.json": "\uFEFF{ \"eslintConfig\": { \"rules\": { \"semi\": \"error\" } } }"
                     }
@@ -2148,7 +2191,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("throws an error including the config file name if the config file is invalid", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+            const { prepare, cleanup, getPath } = createCustomTeardown({
                 files: {
                     "invalid/invalid-top-level-property.yml": "invalidProperty: 3"
                 }
@@ -2167,8 +2210,8 @@ describe("ConfigArrayFactory", () => {
 
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
     describe("'extends' property should resolve the location of configs properly.", () => {
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir,
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir,
             files: {
                 "node_modules/eslint-config-foo/index.js": "",
                 "node_modules/eslint-config-foo/bar.js": "",
@@ -2182,7 +2225,13 @@ describe("ConfigArrayFactory", () => {
                 ".eslintrc": ""
             }
         });
-        const factory = new ConfigArrayFactory();
+
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+        });
+
+        afterEach(cleanup);
 
         /**
          * Resolve `extends` module.
@@ -2248,15 +2297,21 @@ describe("ConfigArrayFactory", () => {
 
     // This group moved from 'tests/lib/config/plugins.js' when refactoring to keep the cumulated test cases.
     describe("'plugins' property should load a correct plugin.", () => {
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir,
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir,
             files: {
                 "node_modules/@scope/eslint-plugin-example/index.js": "exports.configs = { name: '@scope/eslint-plugin-example' };",
                 "node_modules/eslint-plugin-example/index.js": "exports.configs = { name: 'eslint-plugin-example' };",
                 "node_modules/eslint-plugin-throws-on-load/index.js": "throw new Error('error thrown while loading this module')"
             }
         });
-        const factory = new ConfigArrayFactory();
+
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+        });
+
+        afterEach(cleanup);
 
         /**
          * Load a plugin.
@@ -2290,7 +2345,7 @@ describe("ConfigArrayFactory", () => {
 
         it("should load a plugin when referenced by short name, even when using a custom loadPluginsRelativeTo value", () => {
             const { ConfigArrayFactory: FactoryWithPluginsInSubdir } = defineConfigArrayFactoryWithInMemoryFileSystem({
-                cwd: () => tempDir,
+                cwd: tempDir,
                 files: {
                     "subdir/node_modules/eslint-plugin-example/index.js": "exports.configs = { name: 'eslint-plugin-example' };"
                 }
@@ -2377,14 +2432,20 @@ describe("ConfigArrayFactory", () => {
 
     // This group moved from 'tests/lib/config/plugins.js' when refactoring to keep the cumulated test cases.
     describe("'plugins' property should load some correct plugins.", () => {
-        const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
-            cwd: () => tempDir,
+        const { prepare, cleanup, getPath } = createCustomTeardown({
+            cwd: tempDir,
             files: {
                 "node_modules/eslint-plugin-example1/index.js": "exports.configs = { name: 'eslint-plugin-example1' };",
                 "node_modules/eslint-plugin-example2/index.js": "exports.configs = { name: 'eslint-plugin-example2' };"
             }
         });
-        const factory = new ConfigArrayFactory();
+
+        beforeEach(async () => {
+            await prepare();
+            factory = new ConfigArrayFactory({ cwd: getPath() });
+        });
+
+        afterEach(cleanup);
 
         /**
          * Load a plugin.
