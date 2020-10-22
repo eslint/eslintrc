@@ -1615,6 +1615,14 @@ describe("ConfigArrayFactory", () => {
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
     describe("loading config files should work properly.", () => {
 
+        let cleanup;
+
+        beforeEach(() => {
+            cleanup = () => {};
+        });
+
+        afterEach(() => cleanup());
+
         /**
          * Load a given config file.
          * @param {ConfigArrayFactory} factory The factory to load.
@@ -1628,9 +1636,13 @@ describe("ConfigArrayFactory", () => {
                 .toCompatibleObjectAsConfigFileContent();
         }
 
-        it("should throw error if file doesn't exist", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem();
-            const factory = new ConfigArrayFactory();
+        it("should throw error if file doesn't exist", async () => {
+            const teardown = createCustomTeardown({ cwd: tempDir });
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath()});
+
 
             assert.throws(() => {
                 load(factory, "legacy/nofile.js");
@@ -1641,13 +1653,18 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a legacy file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a legacy file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "legacy/.eslintrc": "{ rules: { eqeqeq: 2 } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "legacy/.eslintrc");
 
             assertConfig(config, {
@@ -1657,13 +1674,20 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a JavaScript file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "js/.eslintrc.js": "module.exports = { rules: { semi: [2, 'always'] } };"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
+
             const config = load(factory, "js/.eslintrc.js");
 
             assertConfig(config, {
@@ -1673,13 +1697,20 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JavaScript file with a .cjs extension", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a JavaScript file with a .cjs extension", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "cjs/.eslintrc.cjs": "module.exports = { rules: { semi: [2, 'always'] } };"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
+
             const config = load(factory, "cjs/.eslintrc.cjs");
 
             assertConfig(config, {
@@ -1689,21 +1720,27 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should throw error when loading invalid JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should throw error when loading invalid JavaScript file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "js/.eslintrc.broken.js": "module.exports = { rules: { semi: [2, 'always'] }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
 
             assert.throws(() => {
                 load(factory, "js/.eslintrc.broken.js");
             }, /Cannot read config file/u);
         });
 
-        it("should interpret parser module name when present in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should interpret parser module name when present in a JavaScript file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "node_modules/foo/index.js": "",
                     "js/node_modules/foo/index.js": "",
@@ -1713,7 +1750,12 @@ describe("ConfigArrayFactory", () => {
                     };`
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "js/.eslintrc.parser.js");
 
             assertConfig(config, {
@@ -1724,8 +1766,9 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should interpret parser path when present in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should interpret parser path when present in a JavaScript file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "js/.eslintrc.parser2.js": `module.exports = {
                         parser: './not-a-config.js',
@@ -1734,7 +1777,12 @@ describe("ConfigArrayFactory", () => {
                     "js/not-a-config.js": ""
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "js/.eslintrc.parser2.js");
 
             assertConfig(config, {
@@ -1745,8 +1793,9 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should interpret parser module name or path when parser is set to default parser in a JavaScript file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should interpret parser module name or path when parser is set to default parser in a JavaScript file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "js/.eslintrc.parser3.js": `module.exports = {
                         parser: 'espree',
@@ -1754,7 +1803,12 @@ describe("ConfigArrayFactory", () => {
                     };`
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "js/.eslintrc.parser3.js");
 
             assertConfig(config, {
@@ -1765,13 +1819,19 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JSON file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a JSON file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "json/.eslintrc.json": "{ \"rules\": { \"quotes\": [2, \"double\"] } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "json/.eslintrc.json");
 
             assertConfig(config, {
@@ -1805,13 +1865,19 @@ describe("ConfigArrayFactory", () => {
             assertConfig(config, updatedConfig);
         });
 
-        it("should load information from a package.json file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a package.json file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "package-json/package.json");
 
             assertConfig(config, {
@@ -1819,13 +1885,18 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should throw error when loading invalid package.json file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should throw error when loading invalid package.json file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "broken-package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
 
             assert.throws(() => {
                 try {
@@ -1889,13 +1960,19 @@ describe("ConfigArrayFactory", () => {
             assertConfig(config, updatedConfig);
         });
 
-        it("should load information from a YAML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a YAML file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "yaml/.eslintrc.yaml": "env:\n    browser: true"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "yaml/.eslintrc.yaml");
 
             assertConfig(config, {
@@ -1903,25 +1980,37 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from an empty YAML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from an empty YAML file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "yaml/.eslintrc.empty.yaml": "{}"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "yaml/.eslintrc.empty.yaml");
 
             assertConfig(config, {});
         });
 
-        it("should load information from a YML file", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a YML file", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "yml/.eslintrc.yml": "env:\n    node: true"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "yml/.eslintrc.yml");
 
             assertConfig(config, {
@@ -1929,14 +2018,20 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a YML file and apply extensions", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from a YML file and apply extensions", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "extends/.eslintrc.yml": "extends: ../package-json/package.json\nrules:\n    booya: 2",
                     "package-json/package.json": "{ \"eslintConfig\": { \"env\": { \"es6\": true } } }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "extends/.eslintrc.yml");
 
             assertConfig(config, {
@@ -1945,24 +2040,22 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from `extends` chain.", async() => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
-                    "extends-chain": {
-                        "node_modules/eslint-config-a": {
-                            "node_modules/eslint-config-b": {
-                                "node_modules/eslint-config-c": {
-                                    "index.js": "module.exports = { rules: { c: 2 } };"
-                                },
-                                "index.js": "module.exports = { extends: 'c', rules: { b: 2 } };"
-                            },
-                            "index.js": "module.exports = { extends: 'b', rules: { a: 2 } };"
-                        },
-                        ".eslintrc.json": "{ \"extends\": \"a\" }"
-                    }
+                    "extends-chain/node_modules/eslint-config-a/node_modules/eslint-config-b/node_modules/eslint-config-c/index.js": "module.exports = { rules: { c: 2 } };",
+                    "extends-chain/node_modules/eslint-config-a/node_modules/eslint-config-b/index.js": "module.exports = { extends: 'c', rules: { b: 2 } };",
+                    "extends-chain/node_modules/eslint-config-a/index.js": "module.exports = { extends: 'b', rules: { a: 2 } };",
+                    "extends-chain/.eslintrc.json": "{ \"extends\": \"a\" }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "extends-chain/.eslintrc.json");
 
             assertConfig(config, {
@@ -1974,17 +2067,21 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from `extends` chain with relative path.", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
-                    "extends-chain-2": {
-                        "node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
-                        "node_modules/eslint-config-a/relative.js": "module.exports = { rules: { relative: 2 } };",
-                        ".eslintrc.json": "{ \"extends\": \"a\" }"
-                    }
+                    "extends-chain-2/node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
+                    "extends-chain-2/node_modules/eslint-config-a/relative.js": "module.exports = { rules: { relative: 2 } };",
+                    "extends-chain-2/.eslintrc.json": "{ \"extends\": \"a\" }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "extends-chain-2/.eslintrc.json");
 
             assertConfig(config, {
@@ -1995,17 +2092,21 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain in .eslintrc with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from `extends` chain in .eslintrc with relative path.", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
-                    "extends-chain-2": {
-                        "node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
-                        "node_modules/eslint-config-a/relative.js": "module.exports = { rules: { relative: 2 } };",
-                        "relative.eslintrc.json": "{ \"extends\": \"./node_modules/eslint-config-a/index.js\" }"
-                    }
+                        "extends-chain-2/node_modules/eslint-config-a/index.js": "module.exports = { extends: './relative.js', rules: { a: 2 } };",
+                        "extends-chain-2/node_modules/eslint-config-a/relative.js": "module.exports = { rules: { relative: 2 } };",
+                        "extends-chain-2/relative.eslintrc.json": "{ \"extends\": \"./node_modules/eslint-config-a/index.js\" }"
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "extends-chain-2/relative.eslintrc.json");
 
             assertConfig(config, {
@@ -2016,16 +2117,20 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `parser` in .eslintrc with relative path.", () => {
-            const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load information from `parser` in .eslintrc with relative path.", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
-                    "extends-chain-2": {
-                        "parser.eslintrc.json": "{ \"parser\": \"./parser.js\" }",
-                        "parser.js": ""
-                    }
+                        "extends-chain-2/parser.eslintrc.json": "{ \"parser\": \"./parser.js\" }",
+                        "extends-chain-2/parser.js": ""
                 }
             });
-            const factory = new ConfigArrayFactory();
+
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
             const config = load(factory, "extends-chain-2/parser.eslintrc.json");
 
             assertConfig(config, {
@@ -2035,7 +2140,8 @@ describe("ConfigArrayFactory", () => {
 
         describe("Plugins", () => {
             it("should load information from a YML file and load plugins", () => {
-                const { ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem({
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: tempDir,
                     files: {
                         "node_modules/eslint-plugin-test/index.js": `
                             module.exports = {
