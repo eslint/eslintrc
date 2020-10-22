@@ -10,6 +10,7 @@
 
 const os = require("os");
 const path = require("path");
+const fs = require("fs");
 const { assert } = require("chai");
 const { spy } = require("sinon");
 const {
@@ -21,7 +22,6 @@ const {
     }
 } = require("../../lib/");
 const { createCustomTeardown } = require("../_utils");
-const { after, before } = require("lodash");
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -1656,7 +1656,7 @@ describe("ConfigArrayFactory", () => {
     });
 
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
-    describe.only("loading config files should work properly.", () => {
+    describe("loading config files should work properly.", () => {
 
         let cleanup;
 
@@ -1802,7 +1802,7 @@ describe("ConfigArrayFactory", () => {
             const config = load(factory, "js/.eslintrc.parser.js");
 
             assertConfig(config, {
-                parser: path.resolve("js/node_modules/foo/index.js"),
+                parser: path.resolve(teardown.getPath(), "js/node_modules/foo/index.js"),
                 rules: {
                     semi: [2, "always"]
                 }
@@ -1829,7 +1829,7 @@ describe("ConfigArrayFactory", () => {
             const config = load(factory, "js/.eslintrc.parser2.js");
 
             assertConfig(config, {
-                parser: path.resolve("js/not-a-config.js"),
+                parser: path.resolve(teardown.getPath(), "js/not-a-config.js"),
                 rules: {
                     semi: [2, "always"]
                 }
@@ -1885,8 +1885,9 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load fresh information from a JSON file", () => {
-            const { fs, ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem();
-            const factory = new ConfigArrayFactory();
+            const factory = new ConfigArrayFactory({cwd: tempDir });
+            const filename = "fresh-test.json";
+            const filePath = path.resolve(tempDir, filename);
             const initialConfig = {
                 rules: {
                     quotes: [2, "double"]
@@ -1899,13 +1900,17 @@ describe("ConfigArrayFactory", () => {
             };
             let config;
 
-            fs.writeFileSync("fresh-test.json", JSON.stringify(initialConfig));
-            config = load(factory, "fresh-test.json");
+            fs.mkdirSync(tempDir);
+            fs.writeFileSync(filePath, JSON.stringify(initialConfig));
+            config = load(factory, filename);
             assertConfig(config, initialConfig);
 
-            fs.writeFileSync("fresh-test.json", JSON.stringify(updatedConfig));
-            config = load(factory, "fresh-test.json");
+            fs.writeFileSync(filePath, JSON.stringify(updatedConfig));
+            config = load(factory, filename);
             assertConfig(config, updatedConfig);
+
+            fs.unlinkSync(filePath);
+            fs.rmdirSync(tempDir);
         });
 
         it("should load information from a package.json file", async () => {
@@ -1952,8 +1957,10 @@ describe("ConfigArrayFactory", () => {
         });
 
         it("should load fresh information from a package.json file", () => {
-            const { fs, ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem();
-            const factory = new ConfigArrayFactory();
+            const factory = new ConfigArrayFactory({ cwd: tempDir });
+            const filename = "package.json";
+            const filePath = path.resolve(tempDir, filename);
+
             const initialConfig = {
                 eslintConfig: {
                     rules: {
@@ -1970,18 +1977,23 @@ describe("ConfigArrayFactory", () => {
             };
             let config;
 
-            fs.writeFileSync("package.json", JSON.stringify(initialConfig));
-            config = load(factory, "package.json");
+            fs.mkdirSync(tempDir);
+            fs.writeFileSync(filePath, JSON.stringify(initialConfig));
+            config = load(factory, filename);
             assertConfig(config, initialConfig.eslintConfig);
 
-            fs.writeFileSync("package.json", JSON.stringify(updatedConfig));
-            config = load(factory, "package.json");
+            fs.writeFileSync(filePath, JSON.stringify(updatedConfig));
+            config = load(factory, filename);
             assertConfig(config, updatedConfig.eslintConfig);
+
+            fs.unlinkSync(filePath);
+            fs.rmdirSync(tempDir);
         });
 
         it("should load fresh information from a .eslintrc.js file", () => {
-            const { fs, ConfigArrayFactory } = defineConfigArrayFactoryWithInMemoryFileSystem();
-            const factory = new ConfigArrayFactory();
+            const factory = new ConfigArrayFactory({ cwd: tempDir });
+            const filename = ".eslintrc.js";
+            const filePath = path.resolve(tempDir, filename);
             const initialConfig = {
                 rules: {
                     quotes: [2, "double"]
@@ -1994,13 +2006,17 @@ describe("ConfigArrayFactory", () => {
             };
             let config;
 
-            fs.writeFileSync(".eslintrc.js", `module.exports = ${JSON.stringify(initialConfig)}`);
-            config = load(factory, ".eslintrc.js");
+            fs.mkdirSync(tempDir);
+            fs.writeFileSync(filePath, `module.exports = ${JSON.stringify(initialConfig)}`);
+            config = load(factory, filePath);
             assertConfig(config, initialConfig);
 
-            fs.writeFileSync(".eslintrc.js", `module.exports = ${JSON.stringify(updatedConfig)}`);
-            config = load(factory, ".eslintrc.js");
+            fs.writeFileSync(filePath, `module.exports = ${JSON.stringify(updatedConfig)}`);
+            config = load(factory, filePath);
             assertConfig(config, updatedConfig);
+
+            fs.unlinkSync(filePath);
+            fs.rmdirSync(tempDir);
         });
 
         it("should load information from a YAML file", async () => {
@@ -2164,8 +2180,8 @@ describe("ConfigArrayFactory", () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
-                        "extends-chain-2/parser.eslintrc.json": "{ \"parser\": \"./parser.js\" }",
-                        "extends-chain-2/parser.js": ""
+                    "extends-chain-2/parser.eslintrc.json": "{ \"parser\": \"./parser.js\" }",
+                    "extends-chain-2/parser.js": ""
                 }
             });
 
@@ -2177,13 +2193,13 @@ describe("ConfigArrayFactory", () => {
             const config = load(factory, "extends-chain-2/parser.eslintrc.json");
 
             assertConfig(config, {
-                parser: path.resolve("extends-chain-2/parser.js")
+                parser: path.resolve(teardown.getPath(), "extends-chain-2/parser.js")
             });
         });
 
         describe("Plugins", () => {
-            it("should load information from a YML file and load plugins", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
+            it("should load information from a YML file and load plugins", async () => {
+                const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
                         "node_modules/eslint-plugin-test/index.js": `
@@ -2203,7 +2219,11 @@ describe("ConfigArrayFactory", () => {
                         `
                     }
                 });
-                const factory = new ConfigArrayFactory();
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
                 const config = load(factory, "plugins/.eslintrc.yml");
 
                 assertConfig(config, {
@@ -2215,8 +2235,9 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should load two separate configs from a plugin", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
+            it("should load two separate configs from a plugin", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
                     files: {
                         "node_modules/eslint-plugin-test/index.js": `
                             module.exports = {
@@ -2233,7 +2254,10 @@ describe("ConfigArrayFactory", () => {
                         `
                     }
                 });
-                const factory = new ConfigArrayFactory();
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
                 const config = load(factory, "plugins/.eslintrc.yml");
 
                 assertConfig(config, {
@@ -2247,13 +2271,18 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("even if config files have Unicode BOM,", () => {
-            it("should read the JSON config file correctly.", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
+            it("should read the JSON config file correctly.", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
                     files: {
                         "bom/.eslintrc.json": "\uFEFF{ \"rules\": { \"semi\": \"error\" } }"
                     }
                 });
-                const factory = new ConfigArrayFactory();
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
                 const config = load(factory, "bom/.eslintrc.json");
 
                 assertConfig(config, {
@@ -2263,13 +2292,19 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should read the YAML config file correctly.", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
+            it("should read the YAML config file correctly.", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
                     files: {
                         "bom/.eslintrc.yaml": "\uFEFFrules:\n  semi: error"
                     }
                 });
-                const factory = new ConfigArrayFactory();
+
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
                 const config = load(factory, "bom/.eslintrc.yaml");
 
                 assertConfig(config, {
@@ -2279,13 +2314,18 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should read the config in package.json correctly.", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
+            it("should read the config in package.json correctly.", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
                     files: {
                         "bom/package.json": "\uFEFF{ \"eslintConfig\": { \"rules\": { \"semi\": \"error\" } } }"
                     }
                 });
-                const factory = new ConfigArrayFactory();
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
                 const config = load(factory, "bom/package.json");
 
                 assertConfig(config, {
@@ -2296,13 +2336,17 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("throws an error including the config file name if the config file is invalid", () => {
-            const { prepare, cleanup, getPath } = createCustomTeardown({
+        it("throws an error including the config file name if the config file is invalid", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
                 files: {
                     "invalid/invalid-top-level-property.yml": "invalidProperty: 3"
                 }
             });
-            const factory = new ConfigArrayFactory();
+            cleanup = teardown.cleanup;
+
+            await teardown.prepare();
+            const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
 
             try {
                 load(factory, "invalid/invalid-top-level-property.yml");
@@ -2315,7 +2359,7 @@ describe("ConfigArrayFactory", () => {
     });
 
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
-    describe("'extends' property should resolve the location of configs properly.", () => {
+    describe("'extends' property should resolve the location of configs properly.", async () => {
         const { prepare, cleanup, getPath } = createCustomTeardown({
             cwd: tempDir,
             files: {
@@ -2331,6 +2375,8 @@ describe("ConfigArrayFactory", () => {
                 ".eslintrc": ""
             }
         });
+
+        let factory;
 
         beforeEach(async () => {
             await prepare();
@@ -2412,6 +2458,8 @@ describe("ConfigArrayFactory", () => {
             }
         });
 
+        let factory;
+
         beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
@@ -2449,15 +2497,19 @@ describe("ConfigArrayFactory", () => {
             );
         });
 
-        it("should load a plugin when referenced by short name, even when using a custom loadPluginsRelativeTo value", () => {
-            const { ConfigArrayFactory: FactoryWithPluginsInSubdir } = defineConfigArrayFactoryWithInMemoryFileSystem({
+        it("should load a plugin when referenced by short name, even when using a custom loadPluginsRelativeTo value", async () => {
+            const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
                     "subdir/node_modules/eslint-plugin-example/index.js": "exports.configs = { name: 'eslint-plugin-example' };"
                 }
             });
 
-            const factoryWithCustomPluginPath = new FactoryWithPluginsInSubdir({ resolvePluginsRelativeTo: "subdir" });
+            await teardown.prepare();
+            const factoryWithCustomPluginPath = new ConfigArrayFactory({
+                cwd: teardown.getPath(),
+                resolvePluginsRelativeTo: "subdir"
+            });
 
             const loadedPlugins = load("example", factoryWithCustomPluginPath);
 
@@ -2465,6 +2517,8 @@ describe("ConfigArrayFactory", () => {
                 loadedPlugins.get("example"),
                 { configs: { name: "eslint-plugin-example" } }
             );
+
+            await teardown.cleanup();
         });
 
         it("should load a plugin when referenced by long name", () => {
@@ -2545,6 +2599,8 @@ describe("ConfigArrayFactory", () => {
                 "node_modules/eslint-plugin-example2/index.js": "exports.configs = { name: 'eslint-plugin-example2' };"
             }
         });
+
+        let factory;
 
         beforeEach(async () => {
             await prepare();
