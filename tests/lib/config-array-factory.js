@@ -801,36 +801,42 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'extends' details", () => {
-            const { prepare, cleanup, getPath } = createCustomTeardown({
-                cwd: tempDir,
-                files: {
-                    "node_modules/eslint-config-foo/index.js": "exports.env = { browser: true }",
-                    "node_modules/eslint-config-one/index.js": "module.exports = { extends: 'two', env: { browser: true } }",
-                    "node_modules/eslint-config-two/index.js": "module.exports = { env: { node: true } }",
-                    "node_modules/eslint-config-override/index.js": `
-                        module.exports = {
-                            rules: { regular: 1 },
-                            overrides: [
-                                { files: '*.xxx', rules: { override: 1 } },
-                                { files: '*.yyy', rules: { override: 2 } }
-                            ]
-                        }
-                    `,
-                    "node_modules/eslint-plugin-foo/index.js": "exports.configs = { bar: { env: { es6: true } } }",
-                    "node_modules/eslint-plugin-invalid-config/index.js": "exports.configs = { foo: {} }",
-                    "node_modules/eslint-plugin-error/index.js": "throw new Error('xxx error')",
-                    "base.js": "module.exports = { rules: { semi: [2, 'always'] } };"
-                }
+
+            let prepare, cleanup, getPath;
+
+            before(() => {
+
+                ({ prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: tempDir,
+                    files: {
+                        "node_modules/eslint-config-foo/index.js": "exports.env = { browser: true }",
+                        "node_modules/eslint-config-one/index.js": "module.exports = { extends: 'two', env: { browser: true } }",
+                        "node_modules/eslint-config-two/index.js": "module.exports = { env: { node: true } }",
+                        "node_modules/eslint-config-override/index.js": `
+                            module.exports = {
+                                rules: { regular: 1 },
+                                overrides: [
+                                    { files: '*.xxx', rules: { override: 1 } },
+                                    { files: '*.yyy', rules: { override: 2 } }
+                                ]
+                            }
+                        `,
+                        "node_modules/eslint-plugin-foo/index.js": "exports.configs = { bar: { env: { es6: true } } }",
+                        "node_modules/eslint-plugin-invalid-config/index.js": "exports.configs = { foo: {} }",
+                        "node_modules/eslint-plugin-error/index.js": "throw new Error('xxx error')",
+                        "base.js": "module.exports = { rules: { semi: [2, 'always'] } };"
+                    }
+                }));
+    
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    eslintAllPath,
+                    eslintRecommendedPath
+                });
             });
 
-            factory = new ConfigArrayFactory({
-                cwd: getPath(),
-                eslintAllPath,
-                eslintRecommendedPath
-            });
-
-            beforeEach(prepare);
-            afterEach(cleanup);
+            beforeEach(() => prepare());
+            afterEach(() => cleanup());
 
             it("should throw an error when extends config module is not found", () => {
                 assert.throws(() => {
@@ -2239,7 +2245,7 @@ describe("ConfigArrayFactory", () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
-                        "node_modules/eslint-plugin-test/index.js": `
+                        "node_modules/eslint-plugin-test2/index.js": `
                             module.exports = {
                                 configs: {
                                     foo: { rules: { semi: 2, quotes: 1 } },
@@ -2249,8 +2255,8 @@ describe("ConfigArrayFactory", () => {
                         `,
                         "plugins/.eslintrc.yml": `
                             extends:
-                                - plugin:test/foo
-                                - plugin:test/bar
+                                - plugin:test2/foo
+                                - plugin:test2/bar
                         `
                     }
                 });
