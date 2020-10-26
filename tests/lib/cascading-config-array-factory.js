@@ -4,15 +4,30 @@
  */
 "use strict";
 
+//-----------------------------------------------------------------------------
+// Requirements
+//-----------------------------------------------------------------------------
+
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { assert } = require("chai");
 const sh = require("shelljs");
 const sinon = require("sinon");
-const { ConfigArrayFactory } = require("../../../lib/cli-engine/config-array-factory");
-const { ExtractedConfig } = require("../../../lib/cli-engine/config-array/extracted-config");
-const { defineCascadingConfigArrayFactoryWithInMemoryFileSystem } = require("../../_utils");
+
+const {
+    Legacy: {
+        ConfigArray,
+        ConfigArrayFactory,
+        createConfigArrayFactoryContext: createContext,
+        ExtractedConfig
+    }
+} = require("../../lib/");
+const { createCustomTeardown } = require("../_utils");
+
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
 
 /** @typedef {InstanceType<ReturnType<defineCascadingConfigArrayFactoryWithInMemoryFileSystem>["CascadingConfigArrayFactory"]>} CascadingConfigArrayFactory */
 /** @typedef {ReturnType<CascadingConfigArrayFactory["getConfigArrayForFile"]>} ConfigArray */
@@ -22,27 +37,36 @@ const cwdIgnorePatterns = new ConfigArrayFactory()
     .ignorePattern
     .patterns;
 
+//-----------------------------------------------------------------------------
+// Tests
+//-----------------------------------------------------------------------------
+
 describe("CascadingConfigArrayFactory", () => {
+
+    before(function() {
+        /*
+         * GitHub Actions Windows and macOS runners occasionally exhibit
+         * extremely slow filesystem operations, during which copying fixtures
+         * exceeds the default test timeout, so raise it just for this hook.
+         * Mocha uses `this` to set timeouts on an individual hook level.
+         */
+        this.timeout(60 * 1000); // eslint-disable-line no-invalid-this
+    });
+
     describe("'getConfigArrayForFile(filePath)' method should retrieve the proper configuration.", () => {
-        describe("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
+        describe.only("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
             const root = path.join(os.tmpdir(), "eslint/cli-engine/cascading-config-array-factory");
             const files = {
                 /* eslint-disable quote-props */
-                "lib": {
-                    "nested": {
-                        "one.js": "",
-                        "two.js": "",
-                        "parser.js": "",
-                        ".eslintrc.yml": "parser: './parser'"
-                    },
-                    "one.js": "",
-                    "two.js": ""
-                },
-                "test": {
-                    "one.js": "",
-                    "two.js": "",
-                    ".eslintrc.yml": "env: { mocha: true }"
-                },
+                "lib/nested/one.js": "",
+                "lib/nested/two.js": "",
+                "lib/nested/parser.js": "",
+                "lib/nested/.eslintrc.yml": "parser: './parser'",
+                "lib/one.js": "",
+                "libtwo.js": "",
+                "test/one.js": "",
+                "test/two.js": "",
+                "test/.eslintrc.yml": "env: { mocha: true }",
                 ".eslintignore": "/lib/nested/parser.js",
                 ".eslintrc.json": JSON.stringify({
                     rules: {
@@ -52,14 +76,26 @@ describe("CascadingConfigArrayFactory", () => {
                 })
                 /* eslint-enable quote-props */
             };
-            const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({ cwd: () => root, files });
 
             /** @type {CascadingConfigArrayFactory} */
             let factory;
 
-            beforeEach(() => {
-                factory = new CascadingConfigArrayFactory();
+            let prepare, cleanup, getPath;
+
+            before(async () => {
+                ({ prepare, cleanup, getPath} = createCustomTeardown({
+                    cwd: root,
+                    files
+                }));
+
+                await prepare();
             });
+
+            beforeEach(() => {
+                factory = new CascadingConfigArrayFactory({ cwd: getPath() });
+            });
+
+            after(() => cleanup());
 
             it("should retrieve the config '.eslintrc.json' if 'lib/one.js' was given.", () => {
                 const config = factory.getConfigArrayForFile("lib/one.js");
@@ -136,27 +172,32 @@ describe("CascadingConfigArrayFactory", () => {
                 process.removeListener("warning", onWarning);
             });
 
-            describe("when '~/.eslintrc.json' exists and CWD is `~/`", () => {
-                beforeEach(() => {
+            describe.only("when '~/.eslintrc.json' exists and CWD is `~/`", () => {
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: cwd,
+                    files: {
+
+                        // ~/.eslintrc.json
+                        ".eslintrc.json": JSON.stringify({ rules: { eqeqeq: "error" } }),
+
+                        // other files
+                        "exist-with-root/test.js": "",
+                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                        "exist/test.js": "",
+                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                        "not-exist/test.js": ""
+                    }
+                });
+
+                
+                beforeEach(async () => {
+                    await prepare();
                     cwd = homeDir;
-                    const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
-                        cwd: () => cwd,
-                        files: {
-
-                            // ~/.eslintrc.json
-                            ".eslintrc.json": JSON.stringify({ rules: { eqeqeq: "error" } }),
-
-                            // other files
-                            "exist-with-root/test.js": "",
-                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                            "exist/test.js": "",
-                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                            "not-exist/test.js": ""
-                        }
-                    });
-
+                    
                     factory = new CascadingConfigArrayFactory({ cwd });
                 });
+
+                afterEach(cleanup);
 
                 // no warning.
                 describe("when it lints 'subdir/exist-with-root/test.js'", () => {
@@ -219,8 +260,8 @@ describe("CascadingConfigArrayFactory", () => {
             describe("when '~/.eslintrc.json' exists and CWD is `~/subdir`", () => {
                 beforeEach(() => {
                     cwd = path.join(homeDir, "subdir");
-                    const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
-                        cwd: () => cwd,
+                    const { prepare, cleanup, getPath } = createCustomTeardown({
+                        cwd,
                         files: {
 
                             // ~/.eslintrc.json
@@ -305,26 +346,30 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' exists and CWD is `~/../another`", () => {
-                beforeEach(() => {
-                    cwd = path.join(homeDir, "../another");
-                    const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
-                        cwd: () => cwd,
-                        files: {
 
-                            // ~/.eslintrc.json
-                            [`../${uniqueHomeDirName}/.eslintrc.json`]: JSON.stringify({ rules: { eqeqeq: "error" } }),
+                cwd = path.join(homeDir, "../another");
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd,
+                    files: {
 
-                            // other files
-                            "exist-with-root/test.js": "",
-                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                            "exist/test.js": "",
-                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                            "not-exist/test.js": ""
-                        }
-                    });
+                        // ~/.eslintrc.json
+                        [`../${uniqueHomeDirName}/.eslintrc.json`]: JSON.stringify({ rules: { eqeqeq: "error" } }),
 
-                    factory = new CascadingConfigArrayFactory({ cwd });
+                        // other files
+                        "exist-with-root/test.js": "",
+                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                        "exist/test.js": "",
+                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                        "not-exist/test.js": ""
+                    }
                 });
+
+                beforeEach(async () => {
+                    await prepare();
+                    factory = new CascadingConfigArrayFactory({ cwd: getPath() });
+                });
+                
+                afterEach(cleanup);
 
                 // Project's config file has `root:true`, then no warning.
                 describe("when it lints 'exist-with-root/test.js'", () => {
@@ -390,21 +435,24 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/subdir`", () => {
-                beforeEach(() => {
-                    cwd = path.join(homeDir, "subdir");
-                    const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
-                        cwd: () => cwd,
-                        files: {
-                            "exist-with-root/test.js": "",
-                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                            "exist/test.js": "",
-                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                            "not-exist/test.js": ""
-                        }
-                    });
-
-                    factory = new CascadingConfigArrayFactory({ cwd });
+                cwd = path.join(homeDir, "subdir");
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd,
+                    files: {
+                        "exist-with-root/test.js": "",
+                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                        "exist/test.js": "",
+                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                        "not-exist/test.js": ""
+                    }
                 });
+
+                beforeEach(async () => {
+                    await prepare();
+                    factory = new CascadingConfigArrayFactory({ cwd: getPath() });
+                });
+
+                afterEach(cleanup);
 
                 describe("when it lints 'subdir/exist/test.js'", () => {
                     beforeEach(async () => {
@@ -419,21 +467,24 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/../another`", () => {
-                beforeEach(() => {
-                    cwd = path.join(homeDir, "../another");
-                    const { CascadingConfigArrayFactory } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
-                        cwd: () => cwd,
-                        files: {
-                            "exist-with-root/test.js": "",
-                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                            "exist/test.js": "",
-                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                            "not-exist/test.js": ""
-                        }
-                    });
-
-                    factory = new CascadingConfigArrayFactory({ cwd });
+                cwd = path.join(homeDir, "../another");
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd,
+                    files: {
+                        "exist-with-root/test.js": "",
+                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                        "exist/test.js": "",
+                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                        "not-exist/test.js": ""
+                    }
                 });
+
+                beforeEach(async () => {
+                    await prepare();
+                    factory = new CascadingConfigArrayFactory({ cwd: getPath() });
+                });
+
+                afterEach(cleanup);
 
                 describe("when it lints 'not-exist/test.js'", () => {
                     beforeEach(async () => {
@@ -450,10 +501,10 @@ describe("CascadingConfigArrayFactory", () => {
 
         // This group moved from 'tests/lib/config.js' when refactoring to keep the cumulated test cases.
         describe("with 'tests/fixtures/config-hierarchy' files", () => {
-            const { CascadingConfigArrayFactory } = require("../../../lib/cli-engine/cascading-config-array-factory");
+            const { CascadingConfigArrayFactory } = require("../../lib/cascading-config-array-factory");
             let fixtureDir;
 
-            const DIRECTORY_CONFIG_HIERARCHY = require("../../fixtures/config-hierarchy/file-structure.json");
+            const DIRECTORY_CONFIG_HIERARCHY = require("../fixtures/config-hierarchy/file-structure.json");
 
             /**
              * Returns the path inside of the fixture directory.
@@ -1050,13 +1101,18 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("personal config file within home directory", () => {
-                const {
-                    CascadingConfigArrayFactory: StubbedCascadingConfigArrayFactory
-                } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
+
+                const root = path.join(os.tmpdir(), "eslint/cli-engine/cascading-config-array-factory/personal-config");
+
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: root,
                     files: {
                         "eslint/fixtures/config-hierarchy": DIRECTORY_CONFIG_HIERARCHY
                     }
                 });
+
+                before(prepare);
+                after(cleanup);
 
                 /**
                  * Returns the path inside of the fixture directory.
@@ -1065,14 +1121,14 @@ describe("CascadingConfigArrayFactory", () => {
                  * @private
                  */
                 function getFakeFixturePath(...args) {
-                    return path.join(process.cwd(), "eslint", "fixtures", "config-hierarchy", ...args);
+                    return path.join(getPath(), "eslint", "fixtures", "config-hierarchy", ...args);
                 }
 
                 it("should load the personal config if no local config was found", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "home-folder");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath });
 
                     mockOsHomedir(homePath);
 
@@ -1090,7 +1146,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "home-folder", "project");
                     const homePath = getFakeFixturePath("personal-config", "home-folder");
                     const filePath = getFakeFixturePath("personal-config", "home-folder", "project", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath });
 
                     mockOsHomedir(homePath);
 
@@ -1109,7 +1165,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "home-folder");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
                         specificConfigPath: configPath
                     });
@@ -1129,7 +1185,7 @@ describe("CascadingConfigArrayFactory", () => {
                 it("should still load the project config if the current working directory is the same as the home folder", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-with-config");
                     const filePath = getFakeFixturePath("personal-config", "project-with-config", "subfolder", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath });
 
                     mockOsHomedir(projectPath);
 
@@ -1146,13 +1202,18 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when no local or personal config is found", () => {
-                const {
-                    CascadingConfigArrayFactory: StubbedCascadingConfigArrayFactory
-                } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
+
+                const root = path.join(os.tmpdir(), "eslint/cli-engine/cascading-config-array-factory/personal-config");
+
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: root,
                     files: {
                         "eslint/fixtures/config-hierarchy": DIRECTORY_CONFIG_HIERARCHY
                     }
                 });
+
+                before(prepare);
+                after(cleanup);
 
                 /**
                  * Returns the path inside of the fixture directory.
@@ -1161,14 +1222,14 @@ describe("CascadingConfigArrayFactory", () => {
                  * @private
                  */
                 function getFakeFixturePath(...args) {
-                    return path.join(process.cwd(), "eslint", "fixtures", "config-hierarchy", ...args);
+                    return path.join(getPath(), "eslint", "fixtures", "config-hierarchy", ...args);
                 }
 
                 it("should throw an error if no local config and no personal config was found", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "folder-does-not-exist");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath });
 
                     mockOsHomedir(homePath);
 
@@ -1181,7 +1242,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "home-folder-with-packagejson");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath });
 
                     mockOsHomedir(homePath);
 
@@ -1194,7 +1255,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "folder-does-not-exist");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ cwd: projectPath, useEslintrc: false });
+                    const factory = new CascadingConfigArrayFactory({ cwd: projectPath, useEslintrc: false });
 
                     mockOsHomedir(homePath);
 
@@ -1205,7 +1266,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "folder-does-not-exist");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cliConfig: {
                             rules: { quotes: [2, "single"] }
                         },
@@ -1221,7 +1282,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const projectPath = getFakeFixturePath("personal-config", "project-without-config");
                     const homePath = getFakeFixturePath("personal-config", "folder-does-not-exist");
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({ baseConfig: {}, cwd: projectPath });
+                    const factory = new CascadingConfigArrayFactory({ baseConfig: {}, cwd: projectPath });
 
                     mockOsHomedir(homePath);
 
@@ -1230,9 +1291,11 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("with overrides", () => {
-                const {
-                    CascadingConfigArrayFactory: StubbedCascadingConfigArrayFactory
-                } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({
+
+                const root = path.join(os.tmpdir(), "eslint/cli-engine/cascading-config-array-factory/personal-config");
+
+                const { prepare, cleanup, getPath } = createCustomTeardown({
+                    cwd: root,
                     files: {
                         "eslint/fixtures/config-hierarchy": DIRECTORY_CONFIG_HIERARCHY
                     }
@@ -1245,11 +1308,11 @@ describe("CascadingConfigArrayFactory", () => {
                  * @private
                  */
                 function getFakeFixturePath(...pathSegments) {
-                    return path.join(process.cwd(), "eslint", "fixtures", "config-hierarchy", ...pathSegments);
+                    return path.join(getPath(), "eslint", "fixtures", "config-hierarchy", ...pathSegments);
                 }
 
                 it("should merge override config when the pattern matches the file name", () => {
-                    const factory = new StubbedCascadingConfigArrayFactory({});
+                    const factory = new CascadingConfigArrayFactory({});
                     const targetPath = getFakeFixturePath("overrides", "foo.js");
                     const expected = {
                         rules: {
@@ -1265,7 +1328,7 @@ describe("CascadingConfigArrayFactory", () => {
                 });
 
                 it("should merge override config when the pattern matches the file path relative to the config file", () => {
-                    const factory = new StubbedCascadingConfigArrayFactory({});
+                    const factory = new CascadingConfigArrayFactory({});
                     const targetPath = getFakeFixturePath("overrides", "child", "child-one.js");
                     const expected = {
                         rules: {
@@ -1284,7 +1347,7 @@ describe("CascadingConfigArrayFactory", () => {
                 it("should not merge override config when the pattern matches the absolute file path", () => {
                     const resolvedPath = path.resolve(__dirname, "../../fixtures/config-hierarchy/overrides/bar.js");
 
-                    assert.throws(() => new StubbedCascadingConfigArrayFactory({
+                    assert.throws(() => new CascadingConfigArrayFactory({
                         baseConfig: {
                             overrides: [{
                                 files: resolvedPath,
@@ -1300,7 +1363,7 @@ describe("CascadingConfigArrayFactory", () => {
                 it("should not merge override config when the pattern traverses up the directory tree", () => {
                     const parentPath = "overrides/../**/*.js";
 
-                    assert.throws(() => new StubbedCascadingConfigArrayFactory({
+                    assert.throws(() => new CascadingConfigArrayFactory({
                         baseConfig: {
                             overrides: [{
                                 files: parentPath,
@@ -1314,7 +1377,7 @@ describe("CascadingConfigArrayFactory", () => {
                 });
 
                 it("should merge all local configs (override and non-override) before non-local configs", () => {
-                    const factory = new StubbedCascadingConfigArrayFactory({});
+                    const factory = new CascadingConfigArrayFactory({});
                     const targetPath = getFakeFixturePath("overrides", "two", "child-two.js");
                     const expected = {
                         rules: {
@@ -1332,7 +1395,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should apply overrides in parent .eslintrc over non-override rules in child .eslintrc", () => {
                     const targetPath = getFakeFixturePath("overrides", "three", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [
@@ -1358,7 +1421,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should apply overrides if all glob patterns match", () => {
                     const targetPath = getFakeFixturePath("overrides", "one", "child-one.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [{
@@ -1382,7 +1445,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should apply overrides even if some glob patterns do not match", () => {
                     const targetPath = getFakeFixturePath("overrides", "one", "child-one.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [{
@@ -1406,7 +1469,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should not apply overrides if any excluded glob patterns match", () => {
                     const targetPath = getFakeFixturePath("overrides", "one", "child-one.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [{
@@ -1429,7 +1492,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should apply overrides if all excluded glob patterns fail to match", () => {
                     const targetPath = getFakeFixturePath("overrides", "one", "child-one.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [{
@@ -1454,7 +1517,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should cascade", () => {
                     const targetPath = getFakeFixturePath("overrides", "foo.js");
-                    const factory = new StubbedCascadingConfigArrayFactory({
+                    const factory = new CascadingConfigArrayFactory({
                         cwd: getFakeFixturePath("overrides"),
                         baseConfig: {
                             overrides: [
@@ -1537,9 +1600,7 @@ describe("CascadingConfigArrayFactory", () => {
             const files = {
                 ".eslintrc.js": ""
             };
-            const {
-                CascadingConfigArrayFactory
-            } = defineCascadingConfigArrayFactoryWithInMemoryFileSystem({ cwd: () => root, files });
+            const { prepare, cleanup, getPath } = createCustomTeardown({ cwd: root, files });
 
             /** @type {Map<string, Object>} */
             let additionalPluginPool;
@@ -1547,13 +1608,17 @@ describe("CascadingConfigArrayFactory", () => {
             /** @type {CascadingConfigArrayFactory} */
             let factory;
 
-            beforeEach(() => {
+            beforeEach(async () => {
+                await prepare();
                 additionalPluginPool = new Map();
                 factory = new CascadingConfigArrayFactory({
+                    cwd: getPath(),
                     additionalPluginPool,
                     cliConfig: { plugins: ["test"] }
                 });
             });
+
+            afterEach(cleanup);
 
             it("should use cached instance.", () => {
                 const one = factory.getConfigArrayForFile("a.js");
