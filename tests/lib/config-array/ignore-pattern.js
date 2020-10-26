@@ -7,7 +7,7 @@
 const assert = require("assert");
 const path = require("path");
 const sinon = require("sinon");
-const { IgnorePattern } = require("../../../../lib/cli-engine/config-array/ignore-pattern");
+const { IgnorePattern } = require("../../../lib/config-array/ignore-pattern");
 
 describe("IgnorePattern", () => {
     describe("constructor(patterns, basePath)", () => {

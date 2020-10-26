@@ -6,7 +6,7 @@
 
 const path = require("path");
 const { assert } = require("chai");
-const { ConfigArray, OverrideTester, getUsedExtractedConfigs } = require("../../../../lib/cli-engine/config-array");
+const { ConfigArray, OverrideTester, getUsedExtractedConfigs } = require("../../../lib/config-array");
 
 describe("ConfigArray", () => {
     it("should be a sub class of Array.", () => {
