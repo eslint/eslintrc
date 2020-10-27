@@ -536,6 +536,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("'parser' details", () => {
+            
             const { prepare, cleanup, getPath } = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -544,8 +545,10 @@ describe("ConfigArrayFactory", () => {
                     "parser.js": "exports.name = './parser.js';"
                 }
             });
-
-            factory = new ConfigArrayFactory({ cwd: getPath() });
+            
+            before(() => {
+                factory = new ConfigArrayFactory({ cwd: getPath() });
+            });
 
             beforeEach(prepare);
             afterEach(cleanup);
