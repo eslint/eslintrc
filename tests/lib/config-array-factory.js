@@ -546,12 +546,14 @@ describe("ConfigArrayFactory", () => {
                 }
             });
             
-            before(() => {
+            before(async () => {
+                await prepare();
                 factory = new ConfigArrayFactory({ cwd: getPath() });
+                console.log("tempDir", tempDir);
+                console.log("getPath()", getPath());
             });
 
-            beforeEach(prepare);
-            afterEach(cleanup);
+            after(cleanup);
 
             describe("if the 'parser' property was a valid package, the first config array element", () => {
                 let element;
@@ -658,7 +660,9 @@ describe("ConfigArrayFactory", () => {
                 }
             });
 
-            factory = new ConfigArrayFactory({ cwd: getPath() });
+            before(() => {
+                factory = new ConfigArrayFactory({ cwd: getPath() });
+            });
 
             beforeEach(prepare);
             afterEach(cleanup);
