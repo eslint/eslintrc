@@ -22,6 +22,7 @@ const {
     }
 } = require("../../lib/");
 const { createCustomTeardown } = require("../_utils");
+const systemTempDir = require("temp-dir");
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -29,7 +30,7 @@ const { createCustomTeardown } = require("../_utils");
 
 const eslintAllPath = path.resolve(__dirname, "../fixtures/eslint-all.js");
 const eslintRecommendedPath = path.resolve(__dirname, "../fixtures/eslint-recommended.js");
-const tempDir = path.join(os.tmpdir(), "eslintrc/config-array-factory");
+const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
 
 /**
  * Assert a config array element.
@@ -570,7 +571,7 @@ describe("ConfigArrayFactory", () => {
                     assert.deepStrictEqual(element.parser.definition, { name: "xxx-parser" });
                 });
 
-                it.only("should have the path to the package at 'parser.filePath' property.", () => {
+                it("should have the path to the package at 'parser.filePath' property.", () => {
                     assert.strictEqual(element.parser.filePath, path.join(getPath(), "node_modules/xxx-parser/index.js"));
                 });
             });
