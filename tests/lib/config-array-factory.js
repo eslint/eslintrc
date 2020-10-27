@@ -104,6 +104,12 @@ function assertPluginDefinition(actual, providedExpected) {
 }
 
 describe("ConfigArrayFactory", () => {
+
+    // Need extra time for all the file i/o operations
+    before(function () {
+        this.timeout = 60 * 1000;
+    });
+
     describe("'create(configData, options)' method should normalize the config data.", () => {
         const { prepare, cleanup, getPath } = createCustomTeardown({
             cwd: tempDir
