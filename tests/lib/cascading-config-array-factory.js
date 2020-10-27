@@ -19,7 +19,7 @@ const {
     Legacy: {
         ConfigArray,
         ConfigArrayFactory,
-        createConfigArrayFactoryContext: createContext,
+        CascadingConfigArrayFactory,
         ExtractedConfig
     }
 } = require("../../lib/");
@@ -36,6 +36,9 @@ const cwdIgnorePatterns = new ConfigArrayFactory()
     .loadDefaultESLintIgnore()[0]
     .ignorePattern
     .patterns;
+
+const eslintAllPath = path.resolve(__dirname, "../fixtures/eslint-all.js");
+const eslintRecommendedPath = path.resolve(__dirname, "../fixtures/eslint-recommended.js");
 
 //-----------------------------------------------------------------------------
 // Tests
@@ -54,7 +57,7 @@ describe("CascadingConfigArrayFactory", () => {
     });
 
     describe("'getConfigArrayForFile(filePath)' method should retrieve the proper configuration.", () => {
-        describe.only("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
+        describe("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
             const root = path.join(os.tmpdir(), "eslint/cli-engine/cascading-config-array-factory");
             const files = {
                 /* eslint-disable quote-props */
@@ -172,32 +175,35 @@ describe("CascadingConfigArrayFactory", () => {
                 process.removeListener("warning", onWarning);
             });
 
-            describe.only("when '~/.eslintrc.json' exists and CWD is `~/`", () => {
-                const { prepare, cleanup, getPath } = createCustomTeardown({
-                    cwd: cwd,
-                    files: {
+            describe("when '~/.eslintrc.json' exists and CWD is `~/`", () => {
 
-                        // ~/.eslintrc.json
-                        ".eslintrc.json": JSON.stringify({ rules: { eqeqeq: "error" } }),
-
-                        // other files
-                        "exist-with-root/test.js": "",
-                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                        "exist/test.js": "",
-                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                        "not-exist/test.js": ""
-                    }
-                });
-
+                let prepare, cleanup, getPath;
                 
                 beforeEach(async () => {
+
+                    ({ prepare, cleanup, getPath } = createCustomTeardown({
+                        cwd: homeDir,
+                        files: {
+
+                            // ~/.eslintrc.json
+                            ".eslintrc.json": JSON.stringify({ rules: { eqeqeq: "error" } }),
+
+                            // other files
+                            "exist-with-root/test.js": "",
+                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                            "exist/test.js": "",
+                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                            "not-exist/test.js": ""
+                        }
+                    }));
+
                     await prepare();
                     cwd = homeDir;
                     
-                    factory = new CascadingConfigArrayFactory({ cwd });
+                    factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(cleanup);
+                afterEach(() => cleanup());
 
                 // no warning.
                 describe("when it lints 'subdir/exist-with-root/test.js'", () => {
@@ -500,8 +506,7 @@ describe("CascadingConfigArrayFactory", () => {
         });
 
         // This group moved from 'tests/lib/config.js' when refactoring to keep the cumulated test cases.
-        describe("with 'tests/fixtures/config-hierarchy' files", () => {
-            const { CascadingConfigArrayFactory } = require("../../lib/cascading-config-array-factory");
+        describe.only("with 'tests/fixtures/config-hierarchy' files", () => {
             let fixtureDir;
 
             const DIRECTORY_CONFIG_HIERARCHY = require("../fixtures/config-hierarchy/file-structure.json");
@@ -589,7 +594,13 @@ describe("CascadingConfigArrayFactory", () => {
                 const customBaseConfig = {
                     extends: path.resolve(__dirname, "../../fixtures/config-extends/array/.eslintrc")
                 };
-                const factory = new CascadingConfigArrayFactory({ baseConfig: customBaseConfig, useEslintrc: false });
+                const factory = new CascadingConfigArrayFactory({
+                    cwd: fixtureDir,
+                    baseConfig: customBaseConfig,
+                    useEslintrc: false,
+                    eslintAllPath,
+                    eslintRecommendedPath
+                });
                 const config = getConfig(factory);
 
                 assert.deepStrictEqual(config.env, {
