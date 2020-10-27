@@ -570,7 +570,7 @@ describe("ConfigArrayFactory", () => {
                     assert.deepStrictEqual(element.parser.definition, { name: "xxx-parser" });
                 });
 
-                it("should have the path to the package at 'parser.filePath' property.", () => {
+                it.only("should have the path to the package at 'parser.filePath' property.", () => {
                     assert.strictEqual(element.parser.filePath, path.join(getPath(), "node_modules/xxx-parser/index.js"));
                 });
             });
