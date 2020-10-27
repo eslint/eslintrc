@@ -560,7 +560,7 @@ describe("ConfigArrayFactory", () => {
                 });
 
                 it("should have the path to the package at 'parser.filePath' property.", () => {
-                    assert.strictEqual(element.parser.filePath, path.join(tempDir, "node_modules/xxx-parser/index.js"));
+                    assert.strictEqual(element.parser.filePath, path.join(getPath(), "node_modules/xxx-parser/index.js"));
                 });
             });
 
@@ -596,7 +596,7 @@ describe("ConfigArrayFactory", () => {
                 });
 
                 it("should have the absolute path to the file at 'parser.filePath' property.", () => {
-                    assert.strictEqual(element.parser.filePath, path.join(tempDir, "./parser.js"));
+                    assert.strictEqual(element.parser.filePath, path.join(getPath(), "./parser.js"));
                 });
             });
 
@@ -622,7 +622,7 @@ describe("ConfigArrayFactory", () => {
                 beforeEach(() => {
                     element = create(
                         { parser: "xxx-parser" },
-                        { filePath: path.join(tempDir, "subdir/.eslintrc") }
+                        { filePath: path.join(getPath(), "subdir/.eslintrc") }
                     )[0];
                 });
 
@@ -631,7 +631,7 @@ describe("ConfigArrayFactory", () => {
                         element.parser.filePath,
 
                         // rather than "xxx-parser" at the project root.
-                        path.join(tempDir, "subdir/node_modules/xxx-parser/index.js")
+                        path.join(getPath(), "subdir/node_modules/xxx-parser/index.js")
                     );
                 });
             });
@@ -683,7 +683,7 @@ describe("ConfigArrayFactory", () => {
                 });
 
                 it("should have the path to the package at 'plugins[id].filePath' property.", () => {
-                    assert.strictEqual(element.plugins.xxx.filePath, path.join(tempDir, "node_modules/eslint-plugin-xxx/index.js"));
+                    assert.strictEqual(element.plugins.xxx.filePath, path.join(getPath(), "node_modules/eslint-plugin-xxx/index.js"));
                 });
             });
 
@@ -752,8 +752,8 @@ describe("ConfigArrayFactory", () => {
                     });
 
                     it("should have 'criteria' property which matches '.abc'.", () => {
-                        assert.strictEqual(element.criteria.test(path.join(tempDir, "1234.abc")), true);
-                        assert.strictEqual(element.criteria.test(path.join(tempDir, "1234.xyz")), false);
+                        assert.strictEqual(element.criteria.test(path.join(getPath(), "1234.abc")), true);
+                        assert.strictEqual(element.criteria.test(path.join(getPath(), "1234.xyz")), false);
                     });
                 });
 
@@ -777,8 +777,8 @@ describe("ConfigArrayFactory", () => {
                     });
 
                     it("should have 'criteria' property which matches '.xyz'.", () => {
-                        assert.strictEqual(element.criteria.test(path.join(tempDir, "1234.abc")), false);
-                        assert.strictEqual(element.criteria.test(path.join(tempDir, "1234.xyz")), true);
+                        assert.strictEqual(element.criteria.test(path.join(getPath(), "1234.abc")), false);
+                        assert.strictEqual(element.criteria.test(path.join(getPath(), "1234.xyz")), true);
                     });
                 });
 
@@ -960,7 +960,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint-config-foo' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint-config-foo",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-foo/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-foo/index.js"),
                         env: { browser: true }
                     });
                 });
@@ -990,7 +990,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'plugin:foo/bar' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » plugin:foo/bar",
-                        filePath: path.join(tempDir, "node_modules/eslint-plugin-foo/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-plugin-foo/index.js"),
                         env: { es6: true }
                     });
                 });
@@ -1020,7 +1020,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of './base' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » ./base",
-                        filePath: path.join(tempDir, "base.js"),
+                        filePath: path.join(getPath(), "base.js"),
                         rules: { semi: [2, "always"] }
                     });
                 });
@@ -1050,7 +1050,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint-config-two' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint-config-one » eslint-config-two",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-two/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-two/index.js"),
                         env: { node: true }
                     });
                 });
@@ -1058,7 +1058,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint-config-one' at the second element.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: ".eslintrc » eslint-config-one",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-one/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-one/index.js"),
                         env: { browser: true }
                     });
                 });
@@ -1088,7 +1088,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint-config-override' at the first element.", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint-config-override",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-override/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-override/index.js"),
                         rules: { regular: 1 }
                     });
                 });
@@ -1096,8 +1096,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the 'overrides[0]' config data of 'eslint-config-override' at the second element.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: ".eslintrc » eslint-config-override#overrides[0]",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-override/index.js"),
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-override/index.js"),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { override: 1 }
                     });
                 });
@@ -1105,7 +1105,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the 'overrides[1]' config data of 'eslint-config-override' at the third element.", () => {
                     assertConfigArrayElement(configArray[2], {
                         name: ".eslintrc » eslint-config-override#overrides[1]",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-override/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-override/index.js"),
                         criteria: OverrideTester.create(["*.yyy"], [], tempDir),
                         rules: { override: 2 }
                     });
@@ -1223,8 +1223,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0] » eslint-config-foo' at the second element.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: "#overrides[0] » eslint-config-foo",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-foo/index.js"),
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-foo/index.js"),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { eqeqeq: "error" }
                     });
                 });
@@ -1232,7 +1232,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0]' at the third element.", () => {
                     assertConfigArrayElement(configArray[2], {
                         name: "#overrides[0]",
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { override: 1 }
                     });
                 });
@@ -1267,8 +1267,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0] » eslint-config-has-overrides' at the second element.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: "#overrides[0] » eslint-config-has-overrides",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-has-overrides/index.js"),
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-has-overrides/index.js"),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { eqeqeq: "error" }
                     });
                 });
@@ -1276,10 +1276,10 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0] » eslint-config-has-overrides#overrides[0]' at the third element.", () => {
                     assertConfigArrayElement(configArray[2], {
                         name: "#overrides[0] » eslint-config-has-overrides#overrides[0]",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-has-overrides/index.js"),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-has-overrides/index.js"),
                         criteria: OverrideTester.and(
-                            OverrideTester.create(["*.xxx"], [], tempDir),
-                            OverrideTester.create(["**/foo/**/*.js"], [], tempDir)
+                            OverrideTester.create(["*.xxx"], [], getPath()),
+                            OverrideTester.create(["**/foo/**/*.js"], [], getPath())
                         ),
                         rules: { eqeqeq: "off" }
                     });
@@ -1288,7 +1288,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0]' at the fourth element.", () => {
                     assertConfigArrayElement(configArray[3], {
                         name: "#overrides[0]",
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { override: 1 }
                     });
                 });
@@ -1328,7 +1328,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0]' at the second element.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: "#overrides[0]",
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { override: 1 }
                     });
                 });
@@ -1337,8 +1337,8 @@ describe("ConfigArrayFactory", () => {
                     assertConfigArrayElement(configArray[2], {
                         name: "#overrides[0]#overrides[0]",
                         criteria: OverrideTester.and(
-                            OverrideTester.create(["*.xxx"], [], tempDir),
-                            OverrideTester.create(["*.yyy"], [], tempDir)
+                            OverrideTester.create(["*.xxx"], [], getPath()),
+                            OverrideTester.create(["*.yyy"], [], getPath())
                         ),
                         rules: { override: 2 }
                     });
@@ -1374,8 +1374,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0] » eslint-config-root' at the second element; it doesn't have 'root' property.", () => {
                     assertConfigArrayElement(configArray[1], {
                         name: "#overrides[0] » eslint-config-root",
-                        filePath: path.join(tempDir, "node_modules/eslint-config-root/index.js"),
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        filePath: path.join(getPath(), "node_modules/eslint-config-root/index.js"),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { eqeqeq: "error" }
                     });
                 });
@@ -1383,7 +1383,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'overrides[0]' at the third element.", () => {
                     assertConfigArrayElement(configArray[2], {
                         name: "#overrides[0]",
-                        criteria: OverrideTester.create(["*.xxx"], [], tempDir),
+                        criteria: OverrideTester.create(["*.xxx"], [], getPath()),
                         rules: { override: 1 }
                     });
                 });
