@@ -506,7 +506,7 @@ describe("CascadingConfigArrayFactory", () => {
         });
 
         // This group moved from 'tests/lib/config.js' when refactoring to keep the cumulated test cases.
-        describe.only("with 'tests/fixtures/config-hierarchy' files", () => {
+        describe("with 'tests/fixtures/config-hierarchy' files", () => {
             let fixtureDir;
 
             // hack to avoid needing to hand-rewrite file-structure.json
