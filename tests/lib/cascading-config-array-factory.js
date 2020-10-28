@@ -29,7 +29,6 @@ const { createCustomTeardown } = require("../_utils");
 // Helpers
 //-----------------------------------------------------------------------------
 
-/** @typedef {InstanceType<ReturnType<defineCascadingConfigArrayFactoryWithInMemoryFileSystem>["CascadingConfigArrayFactory"]>} CascadingConfigArrayFactory */
 /** @typedef {ReturnType<CascadingConfigArrayFactory["getConfigArrayForFile"]>} ConfigArray */
 
 const cwdIgnorePatterns = new ConfigArrayFactory()
