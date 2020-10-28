@@ -8,7 +8,7 @@ const assert = require("assert");
 const { Console } = require("console");
 const path = require("path");
 const { Writable } = require("stream");
-const { OverrideTester } = require("../../../../lib/cli-engine/config-array/override-tester");
+const { OverrideTester } = require("../../../lib/config-array/override-tester");
 
 describe("OverrideTester", () => {
     describe("'create(files, excludedFiles, basePath)' should create a tester.", () => {

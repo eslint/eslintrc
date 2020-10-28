@@ -5,7 +5,7 @@
 "use strict";
 
 const assert = require("assert");
-const { ExtractedConfig } = require("../../../../lib/cli-engine/config-array/extracted-config");
+const { ExtractedConfig } = require("../../../lib/config-array/extracted-config");
 
 describe("'ExtractedConfig' class", () => {
     describe("'constructor()' should create an instance.", () => {

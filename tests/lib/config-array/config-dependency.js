@@ -7,7 +7,7 @@
 const assert = require("assert");
 const { Console } = require("console");
 const { Writable } = require("stream");
-const { ConfigDependency } = require("../../../../lib/cli-engine/config-array/config-dependency");
+const { ConfigDependency } = require("../../../lib/config-array/config-dependency");
 
 describe("ConfigDependency", () => {
     describe("'constructor(data)' should initialize properties.", () => {
