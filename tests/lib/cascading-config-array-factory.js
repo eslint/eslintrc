@@ -198,9 +198,9 @@ describe("CascadingConfigArrayFactory", () => {
                     }));
 
                     await prepare();
-                    cwd = homeDir;
+                    cwd = getPath();
                     
-                    factory = new CascadingConfigArrayFactory({ cwd: getPath() });
+                    factory = new CascadingConfigArrayFactory({ cwd });
                 });
 
                 afterEach(() => cleanup());
@@ -1486,6 +1486,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should merge override config when the pattern matches the file name", () => {
                     const factory = new CascadingConfigArrayFactory({
+                        cwd: getPath(),
                         eslintAllPath,
                         eslintRecommendedPath
                     });
@@ -1505,6 +1506,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should merge override config when the pattern matches the file path relative to the config file", () => {
                     const factory = new CascadingConfigArrayFactory({
+                        cwd: getPath(),
                         eslintAllPath,
                         eslintRecommendedPath
                     });
@@ -1527,6 +1529,7 @@ describe("CascadingConfigArrayFactory", () => {
                     const resolvedPath = path.resolve(__dirname, "../fixtures/config-hierarchy/overrides/bar.js");
 
                     assert.throws(() => new CascadingConfigArrayFactory({
+                        cwd: getPath(),
                         baseConfig: {
                             overrides: [{
                                 files: resolvedPath,
@@ -1561,6 +1564,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 it("should merge all local configs (override and non-override) before non-local configs", () => {
                     const factory = new CascadingConfigArrayFactory({
+                        cwd: getPath(),
                         eslintAllPath,
                         eslintRecommendedPath
                     });
