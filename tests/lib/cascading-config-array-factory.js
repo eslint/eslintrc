@@ -264,9 +264,12 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' exists and CWD is `~/subdir`", () => {
-                beforeEach(() => {
-                    cwd = path.join(homeDir, "subdir");
-                    const { prepare, cleanup, getPath } = createCustomTeardown({
+                let prepare, cleanup, getPath;
+
+                beforeEach(async () => {
+                    cwd = path.resolve(homeDir, "subdir");
+
+                    ({ prepare, cleanup, getPath } = createCustomTeardown({
                         cwd,
                         files: {
 
@@ -280,9 +283,20 @@ describe("CascadingConfigArrayFactory", () => {
                             "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
                             "not-exist/test.js": ""
                         }
-                    });
+                    }));
+
+                    await prepare();
+                    cwd = getPath();
 
                     factory = new CascadingConfigArrayFactory({ cwd });
+                });
+
+                afterEach(async () => {
+                    await cleanup();
+                    const configFilePath = path.resolve(getPath(), "../.eslintrc.json");
+                    if (fs.existsSync(configFilePath)) {
+                        fs.unlinkSync(configFilePath);
+                    }
                 });
 
                 // Project's config file has `root:true`, then no warning.
@@ -315,7 +329,7 @@ describe("CascadingConfigArrayFactory", () => {
                         assert.deepStrictEqual(warnings, [
                             {
                                 code: "ESLINT_PERSONAL_CONFIG_SUPPRESS",
-                                message: `'~/.eslintrc.*' config files have been deprecated. Please remove it or add 'root:true' to the config files in your projects in order to avoid loading '~/.eslintrc.*' accidentally. (found in "${uniqueHomeDirName}${path.sep}.eslintrc.json")`
+                                message: `'~/.eslintrc.*' config files have been deprecated. Please remove it or add 'root:true' to the config files in your projects in order to avoid loading '~/.eslintrc.*' accidentally. (found in "..${path.sep}${uniqueHomeDirName}${path.sep}.eslintrc.json")`
                             }
                         ]);
                     });
@@ -353,29 +367,42 @@ describe("CascadingConfigArrayFactory", () => {
 
             describe("when '~/.eslintrc.json' exists and CWD is `~/../another`", () => {
 
-                cwd = path.join(homeDir, "../another");
-                const { prepare, cleanup, getPath } = createCustomTeardown({
-                    cwd,
-                    files: {
-
-                        // ~/.eslintrc.json
-                        [`../${uniqueHomeDirName}/.eslintrc.json`]: JSON.stringify({ rules: { eqeqeq: "error" } }),
-
-                        // other files
-                        "exist-with-root/test.js": "",
-                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                        "exist/test.js": "",
-                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                        "not-exist/test.js": ""
-                    }
-                });
-
+                let prepare, cleanup, getPath;
+                let configFilePath;
+                
                 beforeEach(async () => {
+                    
+                    cwd = path.join(homeDir, "../another");
+                    configFilePath = `../${uniqueHomeDirName}/.eslintrc.json`;
+    
+                    ({ prepare, cleanup, getPath } = createCustomTeardown({
+                        cwd,
+                        files: {
+
+                            // ~/.eslintrc.json
+                            [configFilePath]: JSON.stringify({ rules: { eqeqeq: "error" } }),
+
+                            // other files
+                            "exist-with-root/test.js": "",
+                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                            "exist/test.js": "",
+                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                            "not-exist/test.js": ""
+                        }
+                    }));
+  
+                    
                     await prepare();
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
                 
-                afterEach(cleanup);
+                afterEach(async () => {
+                    await cleanup();
+                    const fullConfigFilePath = path.resolve(getPath(), configFilePath);
+                    if (fs.existsSync(fullConfigFilePath)) {
+                        fs.unlinkSync(fullConfigFilePath);
+                    }
+                });
 
                 // Project's config file has `root:true`, then no warning.
                 describe("when it lints 'exist-with-root/test.js'", () => {
@@ -426,7 +453,7 @@ describe("CascadingConfigArrayFactory", () => {
                         assert.deepStrictEqual(warnings, [
                             {
                                 code: "ESLINT_PERSONAL_CONFIG_LOAD",
-                                message: `'~/.eslintrc.*' config files have been deprecated. Please use a config file per project or the '--config' option. (found in "${uniqueHomeDirName}${path.sep}.eslintrc.json")`
+                                message: `'~/.eslintrc.*' config files have been deprecated. Please use a config file per project or the '--config' option. (found in "..${path.sep}${uniqueHomeDirName}${path.sep}.eslintrc.json")`
                             }
                         ]);
                     });
@@ -441,24 +468,28 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/subdir`", () => {
-                cwd = path.join(homeDir, "subdir");
-                const { prepare, cleanup, getPath } = createCustomTeardown({
-                    cwd,
-                    files: {
-                        "exist-with-root/test.js": "",
-                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                        "exist/test.js": "",
-                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                        "not-exist/test.js": ""
-                    }
-                });
-
+                
+                let prepare, cleanup, getPath;
+                
                 beforeEach(async () => {
+                    cwd = path.join(homeDir, "subdir");
+
+                    ({ prepare, cleanup, getPath } = createCustomTeardown({
+                        cwd,
+                        files: {
+                            "exist-with-root/test.js": "",
+                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                            "exist/test.js": "",
+                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                            "not-exist/test.js": ""
+                        }
+                    }));
+
                     await prepare();
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(cleanup);
+                afterEach(() => cleanup());
 
                 describe("when it lints 'subdir/exist/test.js'", () => {
                     beforeEach(async () => {
@@ -473,24 +504,27 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/../another`", () => {
-                cwd = path.join(homeDir, "../another");
-                const { prepare, cleanup, getPath } = createCustomTeardown({
-                    cwd,
-                    files: {
-                        "exist-with-root/test.js": "",
-                        "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
-                        "exist/test.js": "",
-                        "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
-                        "not-exist/test.js": ""
-                    }
-                });
-
+                let prepare, cleanup, getPath;
+                
                 beforeEach(async () => {
+                    cwd = path.join(homeDir, "../another");
+                    
+                    ({ prepare, cleanup, getPath } = createCustomTeardown({
+                        cwd,
+                        files: {
+                            "exist-with-root/test.js": "",
+                            "exist-with-root/.eslintrc.json": JSON.stringify({ root: true, rules: { yoda: "error" } }),
+                            "exist/test.js": "",
+                            "exist/.eslintrc.json": JSON.stringify({ rules: { yoda: "error" } }),
+                            "not-exist/test.js": ""
+                        }
+                    }));
+
                     await prepare();
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(cleanup);
+                afterEach(() => cleanup());
 
                 describe("when it lints 'not-exist/test.js'", () => {
                     beforeEach(async () => {
