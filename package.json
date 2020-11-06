@@ -13,7 +13,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "DEBUG=eslintrc:* mocha -R progress -c tests/lib/**/*.js",
+    "test": "cross-env DEBUG=eslintrc:* mocha -R progress -c tests/lib/**/*.js",
     "generate-release": "eslint-generate-release",
     "generate-alpharelease": "eslint-generate-prerelease alpha",
     "generate-betarelease": "eslint-generate-prerelease beta",
@@ -34,6 +34,7 @@
   "homepage": "https://github.com/eslint/eslintrc#readme",
   "devDependencies": {
     "chai": "^4.2.0",
+    "cross-env": "^7.0.2",
     "eslint": "^7.7.0",
     "eslint-config-eslint": "^6.0.0",
     "eslint-plugin-jsdoc": "^22.1.0",
