@@ -891,7 +891,7 @@ describe("CascadingConfigArrayFactory", () => {
                 assertConfigsEqual(actual, expected);
             });
 
-            it.only("should return a modified config without plugin rules enabled when baseConfig is set to an object with plugin and no .eslintrc", () => {
+            it("should return a modified config without plugin rules enabled when baseConfig is set to an object with plugin and no .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     baseConfig: {
                         env: {
