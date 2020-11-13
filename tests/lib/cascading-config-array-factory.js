@@ -46,16 +46,6 @@ const eslintRecommendedPath = path.resolve(__dirname, "../fixtures/eslint-recomm
 
 describe("CascadingConfigArrayFactory", () => {
 
-    before(function() {
-        /*
-         * GitHub Actions Windows and macOS runners occasionally exhibit
-         * extremely slow filesystem operations, during which copying fixtures
-         * exceeds the default test timeout, so raise it just for this hook.
-         * Mocha uses `this` to set timeouts on an individual hook level.
-         */
-        this.timeout(60 * 1000); // eslint-disable-line no-invalid-this
-    });
-
     describe("'getConfigArrayForFile(filePath)' method should retrieve the proper configuration.", () => {
         describe("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
             const root = path.join(systemTempDir, "eslint/cli-engine/cascading-config-array-factory");
@@ -293,10 +283,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 afterEach(async () => {
                     await cleanup();
-                    const configFilePath = path.resolve(getPath(), "../.eslintrc.json");
-                    if (fs.existsSync(configFilePath)) {
-                        fs.unlinkSync(configFilePath);
-                    }
+                    sh.rm("-rf", homeDir);
                 });
 
                 // Project's config file has `root:true`, then no warning.
@@ -398,11 +385,9 @@ describe("CascadingConfigArrayFactory", () => {
                 
                 afterEach(async () => {
                     await cleanup();
-                    const fullConfigFilePath = path.resolve(getPath(), configFilePath);
-                    if (fs.existsSync(fullConfigFilePath)) {
-                        fs.unlinkSync(fullConfigFilePath);
-                    }
+                    sh.rm("-rf", homeDir);
                 });
+
 
                 // Project's config file has `root:true`, then no warning.
                 describe("when it lints 'exist-with-root/test.js'", () => {
@@ -489,7 +474,10 @@ describe("CascadingConfigArrayFactory", () => {
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(() => cleanup());
+                afterEach(async () => {
+                    await cleanup();
+                    sh.rm("-rf", homeDir);
+                });
 
                 describe("when it lints 'subdir/exist/test.js'", () => {
                     beforeEach(async () => {
