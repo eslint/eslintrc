@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for DotCompat class.
- * @author Toru Nagashima <https://github.com/mysticatea>
+ * @author Nicholas C. Zakas
  */
 "use strict";
 
@@ -8,14 +8,9 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-const os = require("os");
 const path = require("path");
-const fs = require("fs");
 const { assert } = require("chai");
-const { spy } = require("sinon");
-const { createCustomTeardown } = require("../_utils");
-const systemTempDir = require("temp-dir");
-const { DotCompat } = require("../../lib/dot-compat");
+const { DotCompat } = require("../../lib/");
 const environments = require("../../conf/environments");
 
 //-----------------------------------------------------------------------------
@@ -23,6 +18,22 @@ const environments = require("../../conf/environments");
 //-----------------------------------------------------------------------------
 
 const FIXTURES_BASE_PATH = path.resolve(__dirname, "../fixtures/dot-compat/");
+
+/**
+ * Normalizes a plugin object to have all available keys. This matches what
+ * ConfigArrayFactory does.
+ * @param {Object} plugin The plugin object to normalize.
+ * @returns {Object} The normalized plugin object.
+ */
+function normalizePlugin(plugin) {
+    return {
+        configs: {},
+        rules: {},
+        environments: {},
+        processors: {},
+        ...plugin
+    };
+}
 
 /**
  * Returns the full directory path for a fixture directory.
@@ -42,104 +53,38 @@ describe("DotCompat", () => {
     describe("config()", () => {
 
         let compat;
+        const baseDirectory = getFixturePath("config");
+        const pluginFixture1 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1")));
+        const pluginFixture2 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2")));
+        const pluginFixture3 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3")));
 
         beforeEach(() => {
             compat = new DotCompat({
-                baseDirectory: getFixturePath("config")
+                baseDirectory
             });
-        })
+        });
 
         describe("top-level", () => {
 
             it("should translate ignorePatterns string into ignores array", () => {
                 const result = compat.config({
-                    ignorePatterns: "*.jsx"
+                    ignorePatterns: "**/*.jsx"
                 });
 
-                assert.equal(result.length, 2);
-                assert.deepEqual(result[0], {
-                    ignores: ["*.jsx"]
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
+                    ignores: ["**/*.jsx"]
                 });
             });
 
             it("should translate ignorePatterns array into ignores array", () => {
                 const result = compat.config({
-                    ignorePatterns: ["*.jsx"]
+                    ignorePatterns: ["**/*.jsx"]
                 });
 
-                assert.equal(result.length, 2);
-                assert.deepEqual(result[0], {
-                    ignores: ["*.jsx"]
-                });
-            });
-
-            it("should translate files string into files array", () => {
-                const result = compat.config({
-                    files: "*.jsx"
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: ["*.jsx"]
-                });
-            });
-
-            it("should translate files array into files array", () => {
-                const result = compat.config({
-                    files: ["*.jsx"]
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: ["*.jsx"]
-                });
-            });
-            
-            it("should translate excludedFiles string without files into files array", () => {
-                const result = compat.config({
-                    excludedFiles: "*.jsx"
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: [["!*.jsx"]]
-                });
-            });
-
-            it("should translate excludedFiles array without files into files array", () => {
-                const result = compat.config({
-                    excludedFiles: ["*.jsx"]
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: [["!*.jsx"]]
-                });
-            });
-
-            it("should translate excludedFiles string with files into files and ignores array", () => {
-                const result = compat.config({
-                    files: ["**/*.js"],
-                    excludedFiles: "*.jsx"
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: ["**/*.js"],
-                    ignores: ["*.jsx"]
-                });
-            });
-
-            it("should translate excludedFiles array with files into files and ignores array", () => {
-                const result = compat.config({
-                    files: ["**/*.js"],
-                    excludedFiles: ["*.jsx"]
-                });
-
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
-                    files: ["**/*.js"],
-                    ignores: ["*.jsx"]
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
+                    ignores: ["**/*.jsx"]
                 });
             });
 
@@ -151,8 +96,8 @@ describe("DotCompat", () => {
                     }
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     settings: {
                         foo: true,
                         bar: false
@@ -165,10 +110,10 @@ describe("DotCompat", () => {
                     plugins: ["fixture1"]
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     plugins: {
-                        fixture1: require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                        fixture1: pluginFixture1
                     }
                 });
             });
@@ -178,16 +123,14 @@ describe("DotCompat", () => {
                     plugins: ["fixture2"]
                 });
 
-                const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
-
-                assert.equal(result.length, 2);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
                     files: ["**/*.md"],
-                    processor: plugin.processors[".md"]
+                    processor: pluginFixture2.processors[".md"]
                 });
-                assert.deepEqual(result[1], {
+                assert.deepStrictEqual(result[1], {
                     plugins: {
-                        fixture2: plugin
+                        fixture2: pluginFixture2
                     }
                 });
             });
@@ -197,17 +140,15 @@ describe("DotCompat", () => {
                     plugins: ["fixture1", "fixture2"]
                 });
 
-                const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
-
-                assert.equal(result.length, 2);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
                     files: ["**/*.md"],
-                    processor: plugin.processors[".md"]
+                    processor: pluginFixture2.processors[".md"]
                 });
-                assert.deepEqual(result[1], {
+                assert.deepStrictEqual(result[1], {
                     plugins: {
-                        fixture1: require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1")),
-                        fixture2: plugin
+                        fixture1: pluginFixture1,
+                        fixture2: pluginFixture2
                     }
                 });
             });
@@ -217,30 +158,28 @@ describe("DotCompat", () => {
                     plugins: ["fixture3"],
                     env: {
                         "fixture3/a": true,
-                        "fixture3/b": true,
+                        "fixture3/b": true
                     }
                 });
 
-                const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture3"));
-
-                assert.equal(result.length, 3);
-                assert.deepEqual(result[0], {
-                    plugins: {
-                        fixture3: plugin
-                    }
-                });
-                assert.deepEqual(result[1], {
+                assert.strictEqual(result.length, 3);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
                             foo: true
                         }
                     }
                 });
-                assert.deepEqual(result[2], {
+                assert.deepStrictEqual(result[1], {
                     languageOptions: {
                         globals: {
                             bar: false
                         }
+                    }
+                });
+                assert.deepStrictEqual(result[2], {
+                    plugins: {
+                        fixture3: pluginFixture3
                     }
                 });
             });
@@ -249,14 +188,14 @@ describe("DotCompat", () => {
 
         describe("linterOptions", () => {
 
-            ["noInlineConfig", "reportUnusedDisableDirectives"].forEach(propertyName =>{
+            ["noInlineConfig", "reportUnusedDisableDirectives"].forEach(propertyName => {
                 it(`should translate ${propertyName} into linterOptions.${propertyName}`, () => {
                     const result = compat.config({
                         [propertyName]: true
                     });
 
-                    assert.equal(result.length, 1);
-                    assert.deepEqual(result[0], {
+                    assert.strictEqual(result.length, 1);
+                    assert.deepStrictEqual(result[0], {
                         linterOptions: {
                             [propertyName]: true
                         }
@@ -271,8 +210,8 @@ describe("DotCompat", () => {
                     reportUnusedDisableDirectives: false
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     linterOptions: {
                         noInlineConfig: true,
                         reportUnusedDisableDirectives: false
@@ -292,8 +231,8 @@ describe("DotCompat", () => {
                     }
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
                             foo: true,
@@ -310,8 +249,8 @@ describe("DotCompat", () => {
                     }
                 });
 
-                assert.equal(result.length, 2);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         ...environments.get("amd")
                     }
@@ -326,8 +265,8 @@ describe("DotCompat", () => {
                     }
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         parserOptions: {
                             foo: true,
@@ -342,8 +281,8 @@ describe("DotCompat", () => {
                     parser: "my-parser"
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         parser: require(getFixturePath("config/node_modules/my-parser"))
                     }
@@ -352,11 +291,13 @@ describe("DotCompat", () => {
 
             it("should translate sourceType", () => {
                 const result = compat.config({
-                    sourceType: "module"
+                    parserOptions: {
+                        sourceType: "module"
+                    }
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         sourceType: "module"
                     }
@@ -365,15 +306,17 @@ describe("DotCompat", () => {
 
             it("should translate multiple options", () => {
                 const result = compat.config({
-                    sourceType: "module",
+                    parserOptions: {
+                        sourceType: "module"
+                    },
                     globals: {
                         foo: true,
                         bar: false
                     }
                 });
 
-                assert.equal(result.length, 1);
-                assert.deepEqual(result[0], {
+                assert.strictEqual(result.length, 1);
+                assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         sourceType: "module",
                         globals: {
@@ -394,17 +337,17 @@ describe("DotCompat", () => {
 
         beforeEach(() => {
             compat = new DotCompat();
-        })
+        });
 
         it("should translate env into globals", () => {
             const result = compat.env({
                 amd: true
             });
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 languageOptions: {
-                    ...environments.get("amd")       
+                    ...environments.get("amd")
                 }
             });
         });
@@ -415,10 +358,10 @@ describe("DotCompat", () => {
                 node: false
             });
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 languageOptions: {
-                    ...environments.get("amd")       
+                    ...environments.get("amd")
                 }
             });
         });
@@ -428,8 +371,8 @@ describe("DotCompat", () => {
                 es6: true
             });
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 languageOptions: {
                     ecmaVersion: 6,
                     globals: {
@@ -444,8 +387,8 @@ describe("DotCompat", () => {
                 node: true
             });
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 languageOptions: {
                     parserOptions: environments.get("node").parserOptions,
                     globals: {
@@ -460,8 +403,8 @@ describe("DotCompat", () => {
                 es2021: true
             });
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 languageOptions: {
                     ecmaVersion: 12,
                     globals: {
@@ -481,15 +424,21 @@ describe("DotCompat", () => {
             compat = new DotCompat({
                 baseDirectory: getFixturePath("config")
             });
-        })
+        });
 
         it("should translate plugins without processors", () => {
             const result = compat.plugins("fixture1");
 
-            assert.equal(result.length, 1);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
                 plugins: {
-                    fixture1: require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                    fixture1: {
+                        configs: {},
+                        rules: {},
+                        environments: {},
+                        processors: {},
+                        ...require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                    }
                 }
             });
         });
@@ -498,14 +447,20 @@ describe("DotCompat", () => {
             const result = compat.plugins("fixture2");
             const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 2);
+            assert.deepStrictEqual(result[0], {
                 files: ["**/*.md"],
                 processor: plugin.processors[".md"]
             });
-            assert.deepEqual(result[1], {
+            assert.deepStrictEqual(result[1], {
                 plugins: {
-                    fixture2: plugin
+                    fixture2: {
+                        configs: {},
+                        rules: {},
+                        environments: {},
+                        processors: {},
+                        ...plugin
+                    }
                 }
             });
         });
@@ -514,15 +469,27 @@ describe("DotCompat", () => {
             const result = compat.plugins("fixture1", "fixture2");
             const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
 
-            assert.equal(result.length, 2);
-            assert.deepEqual(result[0], {
+            assert.strictEqual(result.length, 2);
+            assert.deepStrictEqual(result[0], {
                 files: ["**/*.md"],
                 processor: plugin.processors[".md"]
             });
-            assert.deepEqual(result[1], {
+            assert.deepStrictEqual(result[1], {
                 plugins: {
-                    fixture1: require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1")),
-                    fixture2: plugin
+                    fixture1: {
+                        configs: {},
+                        rules: {},
+                        environments: {},
+                        processors: {},
+                        ...require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                    },
+                    fixture2: {
+                        configs: {},
+                        rules: {},
+                        environments: {},
+                        processors: {},
+                        ...plugin
+                    }
                 }
             });
         });
