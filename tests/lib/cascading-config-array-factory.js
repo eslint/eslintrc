@@ -66,7 +66,7 @@ describe("CascadingConfigArrayFactory", () => {
                 "lib/nested/parser.js": "",
                 "lib/nested/.eslintrc.yml": "parser: './parser'",
                 "lib/one.js": "",
-                "libtwo.js": "",
+                "lib/two.js": "",
                 "test/one.js": "",
                 "test/two.js": "",
                 "test/.eslintrc.yml": "env: { mocha: true }",
