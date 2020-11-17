@@ -550,8 +550,6 @@ describe("ConfigArrayFactory", () => {
             before(async () => {
                 await prepare();
                 factory = new ConfigArrayFactory({ cwd: getPath() });
-                console.log("tempDir", tempDir);
-                console.log("getPath()", getPath());
             });
 
             after(cleanup);

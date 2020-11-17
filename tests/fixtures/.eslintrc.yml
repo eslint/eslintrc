@@ -1,0 +1,2 @@
+# Prevent tests from going above this directory
+root: true
