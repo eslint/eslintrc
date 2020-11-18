@@ -622,6 +622,15 @@ describe("CascadingConfigArrayFactory", () => {
 
             // copy into clean area so as not to get "infected" by this project's .eslintrc files
             before(() => {
+
+                /*
+                 * GitHub Actions Windows and macOS runners occasionally exhibit
+                 * extremely slow filesystem operations, during which copying fixtures
+                 * exceeds the default test timeout, so raise it just for this hook.
+                 * Mocha uses `this` to set timeouts on an individual hook level.
+                 */
+                this.timeout(60 * 1000); // eslint-disable-line no-invalid-this
+
                 fixtureDir = `${systemTempDir}/eslint/fixtures`;
                 sh.mkdir("-p", fixtureDir);
                 sh.cp("-r", "./tests/fixtures/config-hierarchy", fixtureDir);
