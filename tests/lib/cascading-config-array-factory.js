@@ -621,7 +621,7 @@ describe("CascadingConfigArrayFactory", () => {
             }
 
             // copy into clean area so as not to get "infected" by this project's .eslintrc files
-            before(() => {
+            before(function() {
 
                 /*
                  * GitHub Actions Windows and macOS runners occasionally exhibit
