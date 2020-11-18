@@ -19,12 +19,6 @@ module.exports = {
         }
     },
 
-    // TODO: remove when linting problems gets fixed
-    ignorePatterns: ["/tests/", "/conf/eslint-all.js"],
-    rules: {
-        "class-methods-use-this": "off"
-    },
-
     overrides: [
         {
             files: ["tests/**/*"],

@@ -12,7 +12,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --report-unused-disable-directives",
+    "fix": "npm run lint -- --fix",
     "test": "mocha -R progress -c 'tests/lib/**/*.js'",
     "generate-release": "eslint-generate-release",
     "generate-alpharelease": "eslint-generate-prerelease alpha",
@@ -34,7 +35,7 @@
   "homepage": "https://github.com/eslint/eslintrc#readme",
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^7.7.0",
+    "eslint": "^7.13.0",
     "eslint-config-eslint": "^6.0.0",
     "eslint-plugin-jsdoc": "^22.1.0",
     "eslint-plugin-node": "^11.1.0",
