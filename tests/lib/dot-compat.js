@@ -186,6 +186,189 @@ describe("DotCompat", () => {
 
         });
 
+        describe.only("extends", () => {
+            it("should translate extends string into a config object", () => {
+                const result = compat.config({
+                    extends: "fixture1",
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    languageOptions: {
+                        globals: {
+                            foobar: true
+                        }
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends eslint:all into a string", () => {
+                const result = compat.config({
+                    extends: "eslint:all",
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+                
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], "eslint:all");
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends [eslint:all] into a string", () => {
+                const result = compat.config({
+                    extends: ["eslint:all"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+                
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], "eslint:all");
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends eslint:recommended into a string", () => {
+                const result = compat.config({
+                    extends: "eslint:recommended",
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], "eslint:recommended");
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends [eslint:recommended] into a string", () => {
+                const result = compat.config({
+                    extends: ["eslint:recommended"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], "eslint:recommended");
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends array into a config object", () => {
+                const result = compat.config({
+                    extends: ["fixture1"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    languageOptions: {
+                        globals: {
+                            foobar: true
+                        }
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate extends array with multiple configs into config objects", () => {
+                const result = compat.config({
+                    extends: ["fixture1", "eslint:all", "fixture2"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+
+                assert.strictEqual(result.length, 4);
+                assert.deepStrictEqual(result[0], {
+                    languageOptions: {
+                        globals: {
+                            foobar: true
+                        }
+                    }
+                });
+                assert.deepStrictEqual(result[1], "eslint:all");
+                assert.deepStrictEqual(result[2], {
+                    languageOptions: {
+                        globals: {
+                            foobar: false
+                        }
+                    },
+                    rules: {
+                        foobar: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[3], {
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+        });
+
+        describe("overrides", () => {
+            it("should translate ignorePatterns string into ignores array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: "**/*.jsx",
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+                
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+        });
+
         describe("linterOptions", () => {
 
             ["noInlineConfig", "reportUnusedDisableDirectives"].forEach(propertyName => {
