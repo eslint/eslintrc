@@ -186,7 +186,7 @@ describe("DotCompat", () => {
 
         });
 
-        describe.only("extends", () => {
+        describe("extends", () => {
             it("should translate extends string into a config object", () => {
                 const result = compat.config({
                     extends: "fixture1",
@@ -338,7 +338,7 @@ describe("DotCompat", () => {
         });
 
         describe("overrides", () => {
-            it("should translate ignorePatterns string into ignores array", () => {
+            it("should translate files string into files array", () => {
                 const result = compat.config({
                     rules: {
                         foo: "error"
@@ -363,6 +363,203 @@ describe("DotCompat", () => {
                     files: ["**/*.jsx"],
                     rules: {
                         foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate files array into files array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: ["**/*.jsx"],
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+                
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate files array with multiple patterns into files array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: ["**/*.jsx", "**/*.js"],
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+                
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*.jsx", "**/*.js"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate files/excludedFiles strings into files/ignores array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: "**/*",
+                            excludedFiles: "**/*.jsx",
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*"],
+                    ignores: ["**/*.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate files/excludedFiles arrays into files/ignores array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: ["**/*"],
+                            excludedFiles: ["**/*.jsx"],
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*"],
+                    ignores: ["**/*.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate files/excludedFiles arrays with multiple items into files/ignores array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: ["**/*.js", "**/*.jsx"],
+                            excludedFiles: ["**/*.test.js", "**/*test.jsx"],
+                            rules: {
+                                foo: "warn"
+                            }
+                        }
+                    ]
+                });
+
+                assert.strictEqual(result.length, 2);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*.js", "**/*.jsx"],
+                    ignores: ["**/*.test.js", "**/*test.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+            });
+
+            it("should translate multiple files/excludedFiles arrays with multiple items into files/ignores array", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: ["**/*.js", "**/*.jsx"],
+                            excludedFiles: ["**/*.test.js", "**/*test.jsx"],
+                            rules: {
+                                foo: "warn"
+                            }
+                        },
+                        {
+                            files: ["**/*.md", "**/*.mdx"],
+                            excludedFiles: ["**/*.test.md", "**/*test.mdx"],
+                            rules: {
+                                bar: "error"
+                            }
+                        }
+
+                    ]
+                });
+
+                assert.strictEqual(result.length, 3);
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+                assert.deepStrictEqual(result[1], {
+                    files: ["**/*.js", "**/*.jsx"],
+                    ignores: ["**/*.test.js", "**/*test.jsx"],
+                    rules: {
+                        foo: "warn"
+                    }
+                });
+                assert.deepStrictEqual(result[2], {
+                    files: ["**/*.md", "**/*.mdx"],
+                    ignores: ["**/*.test.md", "**/*test.mdx"],
+                    rules: {
+                        bar: "error"
                     }
                 });
             });
@@ -598,6 +795,70 @@ describe("DotCompat", () => {
         });
 
     });
+
+    describe("extends()", () => {
+
+        let compat;
+
+        beforeEach(() => {
+            compat = new DotCompat({
+                baseDirectory: getFixturePath("config")
+            });
+        });
+
+        it("should translate extends string into a config object", () => {
+            const result = compat.extends("fixture1");
+
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], {
+                languageOptions: {
+                    globals: {
+                        foobar: true
+                    }
+                }
+            });
+        });
+
+        it("should translate extends eslint:all into a string", () => {
+            const result = compat.extends("eslint:all");
+
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], "eslint:all");
+        });
+
+        it("should translate extends eslint:recommended into a string", () => {
+            const result = compat.extends("eslint:recommended");
+
+            assert.strictEqual(result.length, 1);
+            assert.deepStrictEqual(result[0], "eslint:recommended");
+        });
+
+        it("should translate extends array with multiple configs into config objects", () => {
+            const result = compat.extends("fixture1", "eslint:all", "fixture2");
+        
+            assert.strictEqual(result.length, 3);
+            assert.deepStrictEqual(result[0], {
+                languageOptions: {
+                    globals: {
+                        foobar: true
+                    }
+                }
+            });
+            assert.deepStrictEqual(result[1], "eslint:all");
+            assert.deepStrictEqual(result[2], {
+                languageOptions: {
+                    globals: {
+                        foobar: false
+                    },
+                },
+                rules: {
+                    foobar: "error"
+                }
+            });
+        });
+
+    });
+
 
     describe("plugins()", () => {
 
