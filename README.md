@@ -37,7 +37,7 @@ export default [
     }),
 
     // mimic plugins
-    compat.plugins("airbnb", "react");
+    compat.plugins("airbnb", "react"),
 
     // translate an entire config
     compat.config({
