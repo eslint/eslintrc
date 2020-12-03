@@ -1893,4 +1893,22 @@ describe("CascadingConfigArrayFactory", () => {
             });
         });
     });
+
+    describe("bug fixes", () => {
+        /*
+         * Clearing cache would previously error on 'createBaseConfigArray()' call
+         * with 'TypeError: loadRules is not a function'
+         * https://github.com/eslint/eslintrc/pull/19
+         */
+        it("should not error when 'clearCache()' is called with `rulePaths` and 'loadRules' options provided.", () => {
+            const factory = new CascadingConfigArrayFactory({
+                rulePaths: ["./rules"],
+                loadRules() {
+                    return [];
+                },
+            });
+
+            factory.clearCache();
+        });
+    });
 });
