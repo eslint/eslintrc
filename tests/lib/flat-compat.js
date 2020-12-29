@@ -356,7 +356,7 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: "**/*.jsx",
+                            files: "*.jsx",
                             rules: {
                                 foo: "warn"
                             }
@@ -370,11 +370,11 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -385,7 +385,7 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: ["**/*.jsx"],
+                            files: ["*.jsx"],
                             rules: {
                                 foo: "warn"
                             }
@@ -399,11 +399,11 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -414,7 +414,7 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: ["**/*.jsx", "**/*.js"],
+                            files: ["*.jsx", "*.js"],
                             rules: {
                                 foo: "warn"
                             }
@@ -428,11 +428,12 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*.jsx", "**/*.js"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsm"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -443,8 +444,8 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: "**/*",
-                            excludedFiles: "**/*.jsx",
+                            files: "*",
+                            excludedFiles: "*.jsx",
                             rules: {
                                 foo: "warn"
                             }
@@ -458,12 +459,11 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*"],
-                    ignores: ["**/*.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -474,8 +474,8 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: ["**/*"],
-                            excludedFiles: ["**/*.jsx"],
+                            files: ["*"],
+                            excludedFiles: ["*.jsx"],
                             rules: {
                                 foo: "warn"
                             }
@@ -489,12 +489,11 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*"],
-                    ignores: ["**/*.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -505,8 +504,8 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: ["**/*.js", "**/*.jsx"],
-                            excludedFiles: ["**/*.test.js", "**/*test.jsx"],
+                            files: ["*.js", "*.jsx"],
+                            excludedFiles: ["*.test.js", "*test.jsx"],
                             rules: {
                                 foo: "warn"
                             }
@@ -520,12 +519,13 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*.js", "**/*.jsx"],
-                    ignores: ["**/*.test.js", "**/*test.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
             });
 
@@ -536,15 +536,15 @@ describe("FlatCompat", () => {
                     },
                     overrides: [
                         {
-                            files: ["**/*.js", "**/*.jsx"],
-                            excludedFiles: ["**/*.test.js", "**/*test.jsx"],
+                            files: ["*.js", "*.jsx"],
+                            excludedFiles: ["*.test.js", "*test.jsx"],
                             rules: {
                                 foo: "warn"
                             }
                         },
                         {
-                            files: ["**/*.md", "**/*.mdx"],
-                            excludedFiles: ["**/*.test.md", "**/*test.mdx"],
+                            files: ["*.md", "*.mdx"],
+                            excludedFiles: ["*.test.md", "*test.mdx"],
                             rules: {
                                 bar: "error"
                             }
@@ -559,19 +559,24 @@ describe("FlatCompat", () => {
                         foo: "error"
                     }
                 });
-                assert.deepStrictEqual(result[1], {
-                    files: ["**/*.js", "**/*.jsx"],
-                    ignores: ["**/*.test.js", "**/*test.jsx"],
-                    rules: {
-                        foo: "warn"
-                    }
+
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.js"));
+                assert.deepStrictEqual(result[1].rules, {
+                    foo: "warn"
                 });
-                assert.deepStrictEqual(result[2], {
-                    files: ["**/*.md", "**/*.mdx"],
-                    ignores: ["**/*.test.md", "**/*test.mdx"],
-                    rules: {
-                        bar: "error"
-                    }
+
+
+                assert.typeOf(result[2].files[0], "function");
+                assert.isTrue(result[2].files[0]("/usr/eslint/foo.mdx"));
+                assert.isTrue(result[2].files[0]("/usr/eslint/foo.md"));
+                assert.isFalse(result[2].files[0]("/usr/eslint/foo.test.mdx"));
+                assert.isFalse(result[2].files[0]("/usr/eslint/foo.test.md"));
+                assert.deepStrictEqual(result[2].rules, {
+                    bar: "error"
                 });
             });
 
