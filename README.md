@@ -18,12 +18,12 @@ yarn add @eslint/eslintrc -D
 
 ## Usage
 
-The primary class in this package is `DotCompat`, which is a utility to translate ESLintRC-style configs into dot configs. Here's how you use it inside of your `eslint.config.js` file:
+The primary class in this package is `FlatCompat`, which is a utility to translate ESLintRC-style configs into flat configs. Here's how you use it inside of your `eslint.config.js` file:
 
 ```js
-import { DotCompat } from "@eslint/eslintrc";
+import { FlatCompat } from "@eslint/eslintrc";
 
-const compat = new DotCompat();
+const compat = new FlatCompat();
 
 export default [
 

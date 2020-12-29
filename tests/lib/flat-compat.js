@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tests for DotCompat class.
+ * @fileoverview Tests for FlatCompat class.
  * @author Nicholas C. Zakas
  */
 "use strict";
@@ -10,14 +10,14 @@
 
 const path = require("path");
 const { assert } = require("chai");
-const { DotCompat } = require("../../lib/");
+const { FlatCompat } = require("../../lib");
 const environments = require("../../conf/environments");
 
 //-----------------------------------------------------------------------------
 // Helpers
 //-----------------------------------------------------------------------------
 
-const FIXTURES_BASE_PATH = path.resolve(__dirname, "../fixtures/dot-compat/");
+const FIXTURES_BASE_PATH = path.resolve(__dirname, "../fixtures/flat-compat/");
 
 /**
  * Normalizes a plugin object to have all available keys. This matches what
@@ -48,7 +48,7 @@ function getFixturePath(dirName) {
 // Tests
 //-----------------------------------------------------------------------------
 
-describe("DotCompat", () => {
+describe("FlatCompat", () => {
 
     describe("config()", () => {
 
@@ -59,7 +59,7 @@ describe("DotCompat", () => {
         const pluginFixture3 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3")));
 
         beforeEach(() => {
-            compat = new DotCompat({
+            compat = new FlatCompat({
                 baseDirectory
             });
         });
@@ -716,7 +716,7 @@ describe("DotCompat", () => {
         let compat;
 
         beforeEach(() => {
-            compat = new DotCompat();
+            compat = new FlatCompat();
         });
 
         it("should translate env into globals", () => {
@@ -801,7 +801,7 @@ describe("DotCompat", () => {
         let compat;
 
         beforeEach(() => {
-            compat = new DotCompat({
+            compat = new FlatCompat({
                 baseDirectory: getFixturePath("config")
             });
         });
@@ -865,7 +865,7 @@ describe("DotCompat", () => {
         let compat;
 
         beforeEach(() => {
-            compat = new DotCompat({
+            compat = new FlatCompat({
                 baseDirectory: getFixturePath("config")
             });
         });
