@@ -68,24 +68,35 @@ describe("FlatCompat", () => {
 
             it("should translate ignorePatterns string into ignores array", () => {
                 const result = compat.config({
-                    ignorePatterns: "**/*.jsx"
+                    ignorePatterns: "*.jsx"
                 });
 
                 assert.strictEqual(result.length, 1);
-                assert.deepStrictEqual(result[0], {
-                    ignores: ["**/*.jsx"]
-                });
+                assert.typeOf(result[0].ignores[0], "function");
+                assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js"));
             });
 
             it("should translate ignorePatterns array into ignores array", () => {
                 const result = compat.config({
-                    ignorePatterns: ["**/*.jsx"]
+                    ignorePatterns: ["*.jsx"]
                 });
 
                 assert.strictEqual(result.length, 1);
-                assert.deepStrictEqual(result[0], {
-                    ignores: ["**/*.jsx"]
+                assert.typeOf(result[0].ignores[0], "function");
+                assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js"));
+            });
+
+            it("should ignore second argument of ignore function from ignorePatterns", () => {
+                const result = compat.config({
+                    ignorePatterns: ["*.jsx"]
                 });
+
+                assert.strictEqual(result.length, 1);
+                assert.typeOf(result[0].ignores[0], "function");
+                assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx", {}));
+                assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js", ""));
             });
 
             it("should translate settings", () => {
