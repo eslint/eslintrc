@@ -654,11 +654,13 @@ describe("FlatCompat", () => {
             });
 
             it("should translate parserOptions", () => {
+                const parserOptions = {
+                    foo: true,
+                    bar: false
+                };
+
                 const result = compat.config({
-                    parserOptions: {
-                        foo: true,
-                        bar: false
-                    }
+                    parserOptions
                 });
 
                 assert.strictEqual(result.length, 1);
@@ -670,6 +672,9 @@ describe("FlatCompat", () => {
                         }
                     }
                 });
+
+                // the object should be a clone, not the original
+                assert.notEqual(result[0].languageOptions.parserOptions, parserOptions);
             });
 
             it("should translate parser string into an object", () => {
