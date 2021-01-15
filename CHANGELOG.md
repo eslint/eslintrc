@@ -1,3 +1,8 @@
+v0.3.0 - January 15, 2021
+
+* [`5184490`](https://github.com/eslint/eslintrc/commit/51844902bc4132f264f05a0614f2cdeb89290f68) Upgrade: lodash@4.17.20 (#24) (Milos Djermanovic)
+* [`f1179c5`](https://github.com/eslint/eslintrc/commit/f1179c587ae09fabb5c3402598363cfcec2494f7) Update: Implement missing functionality from ESLint port (fixes #12) (#23) (Nicholas C. Zakas)
+
 v0.2.2 - December 5, 2020
 
 * [`1746840`](https://github.com/eslint/eslintrc/commit/17468407c1baf05747cb261c91f7f7b7c2a82422) Fix: include loadRules in internalSlotsMap cache (#19) (Henry Q. Dineen)
