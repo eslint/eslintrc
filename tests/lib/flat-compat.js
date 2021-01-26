@@ -690,6 +690,15 @@ describe("FlatCompat", () => {
                 });
             });
 
+            it("should throw an error when the parser can't be found", () => {
+                
+                assert.throws(() => {
+                    compat.config({
+                        parser: "missing-parser"
+                    });
+                }, /Failed to load parser 'missing-parser'/);
+            });
+
             it("should translate sourceType", () => {
                 const result = compat.config({
                     parserOptions: {
@@ -906,6 +915,12 @@ describe("FlatCompat", () => {
                     }
                 }
             });
+        });
+
+        it("should throw an error when a plugin is missing", () => {
+            assert.throws(() => {
+                compat.plugins("missing");
+            }, /Failed to load plugin 'missing'/);
         });
 
         it("should translate plugins with processors", () => {
