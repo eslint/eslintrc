@@ -16,7 +16,9 @@ npm install @eslint/eslintrc --save-dev
 yarn add @eslint/eslintrc -D
 ```
 
-## Usage
+## Future Usage
+
+**Note:** This package is not intended for public use at this time. The following is an example of how it will be used in the future.
 
 The primary class in this package is `FlatCompat`, which is a utility to translate ESLintRC-style configs into flat configs. Here's how you use it inside of your `eslint.config.js` file:
 
