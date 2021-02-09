@@ -74,8 +74,8 @@ describe("FlatCompat", () => {
 
                     assert.strictEqual(result.length, 1);
                     assert.typeOf(result[0].ignores[0], "function");
-                    assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx"));
-                    assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js"));
+                    assert.isTrue(result[0].ignores[0](path.join(baseDirectory, "foo.jsx")));
+                    assert.isFalse(result[0].ignores[0](path.join(baseDirectory, "foo.js")));
                 });
 
                 it("should translate ignorePatterns array into ignores array", () => {
@@ -85,8 +85,8 @@ describe("FlatCompat", () => {
 
                     assert.strictEqual(result.length, 1);
                     assert.typeOf(result[0].ignores[0], "function");
-                    assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx"));
-                    assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js"));
+                    assert.isTrue(result[0].ignores[0](path.join(baseDirectory, "foo.jsx")));
+                    assert.isFalse(result[0].ignores[0](path.join(baseDirectory, "foo.js")));
                 });
 
                 it("should ignore second argument of ignore function from ignorePatterns", () => {
@@ -96,8 +96,8 @@ describe("FlatCompat", () => {
 
                     assert.strictEqual(result.length, 1);
                     assert.typeOf(result[0].ignores[0], "function");
-                    assert.isTrue(result[0].ignores[0]("/usr/eslint/foo.jsx", {}));
-                    assert.isFalse(result[0].ignores[0]("/usr/eslint/foo.js", ""));
+                    assert.isTrue(result[0].ignores[0](path.join(baseDirectory, "foo.jsx"), {}));
+                    assert.isFalse(result[0].ignores[0](path.join(baseDirectory, "foo.js"), ""));
                 });
 
                 it("should combine ignorePatterns from extended configs", () => {
@@ -108,8 +108,8 @@ describe("FlatCompat", () => {
 
                     assert.strictEqual(result.length, 1);
                     assert.typeOf(result[0].ignores[0], "function");
-                    assert.isTrue(result[0].ignores[0]("/usr/eslint/foo/baz.js"));
-                    assert.isFalse(result[0].ignores[0]("/usr/eslint/foo/bar/baz.js"));
+                    assert.isTrue(result[0].ignores[0](path.join(baseDirectory, "foo/baz.js")));
+                    assert.isFalse(result[0].ignores[0](path.join(baseDirectory, "foo/bar/baz.js")));
                 });
 
 
