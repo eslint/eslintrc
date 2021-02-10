@@ -72,7 +72,7 @@ describe("CascadingConfigArrayFactory", () => {
 
             let prepare, cleanup, getPath;
 
-            before(async() => {
+            before(async () => {
                 ({ prepare, cleanup, getPath } = createCustomTeardown({
                     cwd: root,
                     files
@@ -166,7 +166,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 let prepare, cleanup, getPath;
 
-                beforeEach(async() => {
+                beforeEach(async () => {
 
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
                         cwd: homeDir,
@@ -194,7 +194,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // no warning.
                 describe("when it lints 'subdir/exist-with-root/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist-with-root/test.js");
                         await delay();
                     });
@@ -213,7 +213,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // no warning.
                 describe("when it lints 'subdir/exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist/test.js");
                         await delay();
                     });
@@ -232,7 +232,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // no warning
                 describe("when it lints 'subdir/not-exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("not-exist/test.js");
                         await delay();
                     });
@@ -253,7 +253,7 @@ describe("CascadingConfigArrayFactory", () => {
             describe("when '~/.eslintrc.json' exists and CWD is `~/subdir`", () => {
                 let prepare, cleanup, getPath;
 
-                beforeEach(async() => {
+                beforeEach(async () => {
                     cwd = path.resolve(homeDir, "subdir");
 
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
@@ -278,14 +278,14 @@ describe("CascadingConfigArrayFactory", () => {
                     factory = new CascadingConfigArrayFactory({ cwd });
                 });
 
-                afterEach(async() => {
+                afterEach(async () => {
                     await cleanup();
                     sh.rm("-rf", homeDir);
                 });
 
                 // Project's config file has `root:true`, then no warning.
                 describe("when it lints 'subdir/exist-with-root/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist-with-root/test.js");
                         await delay();
                     });
@@ -304,7 +304,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // Project's config file doesn't have `root:true` and home is ancestor, then ESLINT_PERSONAL_CONFIG_SUPPRESS.
                 describe("when it lints 'subdir/exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist/test.js");
                         await delay();
                     });
@@ -331,7 +331,7 @@ describe("CascadingConfigArrayFactory", () => {
                  * In this case, ESLint will continue to use `~/.eslintrc.json` even if personal config file feature is removed.
                  */
                 describe("when it lints 'subdir/not-exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("not-exist/test.js");
                         await delay();
                     });
@@ -354,7 +354,7 @@ describe("CascadingConfigArrayFactory", () => {
                 let prepare, cleanup, getPath;
                 let configFilePath;
 
-                beforeEach(async() => {
+                beforeEach(async () => {
 
                     cwd = path.join(homeDir, "../another");
                     configFilePath = `../${uniqueHomeDirName}/.eslintrc.json`;
@@ -380,7 +380,7 @@ describe("CascadingConfigArrayFactory", () => {
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(async() => {
+                afterEach(async () => {
                     await cleanup();
                     sh.rm("-rf", homeDir);
                 });
@@ -388,7 +388,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // Project's config file has `root:true`, then no warning.
                 describe("when it lints 'exist-with-root/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist-with-root/test.js");
                         await delay();
                     });
@@ -407,7 +407,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // Project's config file doesn't have `root:true` but home is not ancestor, then no warning.
                 describe("when it lints 'exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist/test.js");
                         await delay();
                     });
@@ -426,7 +426,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 // Project's config file doesn't exist and home is not ancestor, then ESLINT_PERSONAL_CONFIG_LOAD.
                 describe("when it lints 'not-exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("not-exist/test.js");
                         await delay();
                     });
@@ -453,7 +453,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                 let prepare, cleanup, getPath;
 
-                beforeEach(async() => {
+                beforeEach(async () => {
                     cwd = path.join(homeDir, "subdir");
 
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
@@ -471,13 +471,13 @@ describe("CascadingConfigArrayFactory", () => {
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
 
-                afterEach(async() => {
+                afterEach(async () => {
                     await cleanup();
                     sh.rm("-rf", homeDir);
                 });
 
                 describe("when it lints 'subdir/exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("exist/test.js");
                         await delay();
                     });
@@ -491,7 +491,7 @@ describe("CascadingConfigArrayFactory", () => {
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/../another`", () => {
                 let prepare, cleanup, getPath;
 
-                beforeEach(async() => {
+                beforeEach(async () => {
                     cwd = path.join(homeDir, "../another");
 
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
@@ -512,7 +512,7 @@ describe("CascadingConfigArrayFactory", () => {
                 afterEach(() => cleanup());
 
                 describe("when it lints 'not-exist/test.js'", () => {
-                    beforeEach(async() => {
+                    beforeEach(async () => {
                         config = factory.getConfigArrayForFile("not-exist/test.js", { ignoreNotFoundError: true });
                         await delay();
                     });
@@ -1820,7 +1820,7 @@ describe("CascadingConfigArrayFactory", () => {
                     process.removeListener("warning", onWarning);
                 });
 
-                it("should emit a deprecation warning if 'ecmaFeatures' is given.", async() => {
+                it("should emit a deprecation warning if 'ecmaFeatures' is given.", async () => {
                     getConfig(factory, "ecma-features/test.js");
 
                     // Wait for "warning" event.
@@ -1850,7 +1850,7 @@ describe("CascadingConfigArrayFactory", () => {
             /** @type {CascadingConfigArrayFactory} */
             let factory;
 
-            beforeEach(async() => {
+            beforeEach(async () => {
                 await prepare();
                 additionalPluginPool = new Map();
                 factory = new CascadingConfigArrayFactory({
@@ -1909,6 +1909,7 @@ describe("CascadingConfigArrayFactory", () => {
     });
 
     describe("bug fixes", () => {
+
         /*
          * Clearing cache would previously error on 'createBaseConfigArray()' call
          * with 'TypeError: loadRules is not a function'
@@ -1919,7 +1920,7 @@ describe("CascadingConfigArrayFactory", () => {
                 rulePaths: ["./rules"],
                 loadRules() {
                     return [];
-                },
+                }
             });
 
             factory.clearCache();
