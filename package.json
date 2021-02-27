@@ -1,6 +1,6 @@
 {
   "name": "@eslint/eslintrc",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The legacy ESLintRC config file format for ESLint",
   "main": "lib/index.js",
   "files": [
