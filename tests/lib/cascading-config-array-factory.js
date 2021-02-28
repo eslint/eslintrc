@@ -18,7 +18,6 @@ const systemTempDir = require("temp-dir");
 
 const {
     Legacy: {
-        ConfigArray,
         ConfigArrayFactory,
         CascadingConfigArrayFactory,
         ExtractedConfig
@@ -50,7 +49,6 @@ describe("CascadingConfigArrayFactory", () => {
         describe("with three directories ('lib', 'lib/nested', 'test') that contains 'one.js' and 'two.js'", () => {
             const root = path.join(systemTempDir, "eslint/cli-engine/cascading-config-array-factory");
             const files = {
-                /* eslint-disable quote-props */
                 "lib/nested/one.js": "",
                 "lib/nested/two.js": "",
                 "lib/nested/parser.js": "",
@@ -67,7 +65,6 @@ describe("CascadingConfigArrayFactory", () => {
                         "no-unused-vars": "error"
                     }
                 })
-                /* eslint-enable quote-props */
             };
 
             /** @type {CascadingConfigArrayFactory} */
@@ -76,7 +73,7 @@ describe("CascadingConfigArrayFactory", () => {
             let prepare, cleanup, getPath;
 
             before(async () => {
-                ({ prepare, cleanup, getPath} = createCustomTeardown({
+                ({ prepare, cleanup, getPath } = createCustomTeardown({
                     cwd: root,
                     files
                 }));
@@ -168,7 +165,7 @@ describe("CascadingConfigArrayFactory", () => {
             describe("when '~/.eslintrc.json' exists and CWD is `~/`", () => {
 
                 let prepare, cleanup, getPath;
-                
+
                 beforeEach(async () => {
 
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
@@ -189,7 +186,7 @@ describe("CascadingConfigArrayFactory", () => {
 
                     await prepare();
                     cwd = getPath();
-                    
+
                     factory = new CascadingConfigArrayFactory({ cwd });
                 });
 
@@ -356,12 +353,12 @@ describe("CascadingConfigArrayFactory", () => {
 
                 let prepare, cleanup, getPath;
                 let configFilePath;
-                
+
                 beforeEach(async () => {
-                    
+
                     cwd = path.join(homeDir, "../another");
                     configFilePath = `../${uniqueHomeDirName}/.eslintrc.json`;
-    
+
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
                         cwd,
                         files: {
@@ -377,12 +374,12 @@ describe("CascadingConfigArrayFactory", () => {
                             "not-exist/test.js": ""
                         }
                     }));
-  
-                    
+
+
                     await prepare();
                     factory = new CascadingConfigArrayFactory({ cwd: getPath() });
                 });
-                
+
                 afterEach(async () => {
                     await cleanup();
                     sh.rm("-rf", homeDir);
@@ -453,9 +450,9 @@ describe("CascadingConfigArrayFactory", () => {
             });
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/subdir`", () => {
-                
+
                 let prepare, cleanup, getPath;
-                
+
                 beforeEach(async () => {
                     cwd = path.join(homeDir, "subdir");
 
@@ -493,10 +490,10 @@ describe("CascadingConfigArrayFactory", () => {
 
             describe("when '~/.eslintrc.json' doesn't exist and CWD is `~/../another`", () => {
                 let prepare, cleanup, getPath;
-                
+
                 beforeEach(async () => {
                     cwd = path.join(homeDir, "../another");
-                    
+
                     ({ prepare, cleanup, getPath } = createCustomTeardown({
                         cwd,
                         files: {
@@ -534,11 +531,19 @@ describe("CascadingConfigArrayFactory", () => {
             // hack to avoid needing to hand-rewrite file-structure.json
             const DIRECTORY_CONFIG_HIERARCHY = (() => {
                 const rawData = require("../fixtures/config-hierarchy/file-structure.json");
+
+                // key is path, value is file content (string)
                 const flattened = {};
 
+                /** Recursively joins path segments and populates `flattened` object
+                 * @param {Object} object key is path segment, value is file content (string) or another object of the same kind
+                 * @param {string} prefix parent directory
+                 * @returns {void}
+                 */
                 function flatten(object, prefix = "") {
                     for (const key of Object.keys(object)) {
                         const newPrefix = path.join(prefix, key);
+
                         if (typeof object[key] === "string") {
                             flattened[newPrefix] = object[key];
                         } else {
@@ -608,7 +613,7 @@ describe("CascadingConfigArrayFactory", () => {
             function getConfig(factory, filePath = "a.js") {
                 const { cwd } = factory;
                 const absolutePath = path.resolve(cwd, filePath);
-                
+
                 return factory
                     .getConfigArrayForFile(absolutePath)
                     .extractConfig(absolutePath)
@@ -616,7 +621,16 @@ describe("CascadingConfigArrayFactory", () => {
             }
 
             // copy into clean area so as not to get "infected" by this project's .eslintrc files
-            before(() => {
+            before(function() {
+
+                /*
+                 * GitHub Actions Windows and macOS runners occasionally exhibit
+                 * extremely slow filesystem operations, during which copying fixtures
+                 * exceeds the default test timeout, so raise it just for this hook.
+                 * Mocha uses `this` to set timeouts on an individual hook level.
+                 */
+                this.timeout(60 * 1000); // eslint-disable-line no-invalid-this
+
                 fixtureDir = `${systemTempDir}/eslint/fixtures`;
                 sh.mkdir("-p", fixtureDir);
                 sh.cp("-r", "./tests/fixtures/config-hierarchy", fixtureDir);
@@ -1895,6 +1909,7 @@ describe("CascadingConfigArrayFactory", () => {
     });
 
     describe("bug fixes", () => {
+
         /*
          * Clearing cache would previously error on 'createBaseConfigArray()' call
          * with 'TypeError: loadRules is not a function'
@@ -1905,7 +1920,7 @@ describe("CascadingConfigArrayFactory", () => {
                 rulePaths: ["./rules"],
                 loadRules() {
                     return [];
-                },
+                }
             });
 
             factory.clearCache();

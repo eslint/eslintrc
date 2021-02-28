@@ -113,7 +113,7 @@ describe("ConfigArrayFactory", () => {
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });
@@ -183,7 +183,7 @@ describe("ConfigArrayFactory", () => {
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });
@@ -276,7 +276,7 @@ describe("ConfigArrayFactory", () => {
         /** @type {ConfigArrayFactory} */
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });
@@ -541,7 +541,7 @@ describe("ConfigArrayFactory", () => {
                 }
             });
 
-            before(async() => {
+            before(async () => {
                 await prepare();
                 factory = new ConfigArrayFactory({ cwd: getPath() });
             });
@@ -1401,7 +1401,7 @@ describe("ConfigArrayFactory", () => {
                 cwd: tempDir
             });
 
-            beforeEach(async() => {
+            beforeEach(async () => {
                 await prepare();
                 factory = new ConfigArrayFactory({
                     cwd: getPath(),
@@ -1473,7 +1473,7 @@ describe("ConfigArrayFactory", () => {
         const { prepare, cleanup, getPath } = createCustomTeardown({ cwd: tempDir, files });
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({
                 cwd: getPath(),
@@ -1708,7 +1708,7 @@ describe("ConfigArrayFactory", () => {
                 .toCompatibleObjectAsConfigFileContent();
         }
 
-        it("should throw error if file doesn't exist", async() => {
+        it("should throw error if file doesn't exist", async () => {
             const teardown = createCustomTeardown({ cwd: tempDir });
 
             cleanup = teardown.cleanup;
@@ -1726,7 +1726,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a legacy file", async() => {
+        it("should load information from a legacy file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1748,7 +1748,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JavaScript file", async() => {
+        it("should load information from a JavaScript file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1771,7 +1771,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JavaScript file with a .cjs extension", async() => {
+        it("should load information from a JavaScript file with a .cjs extension", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1794,7 +1794,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should throw error when loading invalid JavaScript file", async() => {
+        it("should throw error when loading invalid JavaScript file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1812,7 +1812,7 @@ describe("ConfigArrayFactory", () => {
             }, /Cannot read config file/u);
         });
 
-        it("should interpret parser module name when present in a JavaScript file", async() => {
+        it("should interpret parser module name when present in a JavaScript file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1840,7 +1840,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should interpret parser path when present in a JavaScript file", async() => {
+        it("should interpret parser path when present in a JavaScript file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1867,7 +1867,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should interpret parser module name or path when parser is set to default parser in a JavaScript file", async() => {
+        it("should interpret parser module name or path when parser is set to default parser in a JavaScript file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1893,7 +1893,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a JSON file", async() => {
+        it("should load information from a JSON file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1944,7 +1944,7 @@ describe("ConfigArrayFactory", () => {
             fs.rmdirSync(tempDir);
         });
 
-        it("should load information from a package.json file", async() => {
+        it("should load information from a package.json file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -1964,7 +1964,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should throw error when loading invalid package.json file", async() => {
+        it("should throw error when loading invalid package.json file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2050,7 +2050,7 @@ describe("ConfigArrayFactory", () => {
             fs.rmdirSync(tempDir);
         });
 
-        it("should load information from a YAML file", async() => {
+        it("should load information from a YAML file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2070,7 +2070,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from an empty YAML file", async() => {
+        it("should load information from an empty YAML file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2088,7 +2088,7 @@ describe("ConfigArrayFactory", () => {
             assertConfig(config, {});
         });
 
-        it("should load information from a YML file", async() => {
+        it("should load information from a YML file", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2108,7 +2108,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from a YML file and apply extensions", async() => {
+        it("should load information from a YML file and apply extensions", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2130,7 +2130,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain.", async() => {
+        it("should load information from `extends` chain.", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2157,7 +2157,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain with relative path.", async() => {
+        it("should load information from `extends` chain with relative path.", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2182,7 +2182,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `extends` chain in .eslintrc with relative path.", async() => {
+        it("should load information from `extends` chain in .eslintrc with relative path.", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2207,7 +2207,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("should load information from `parser` in .eslintrc with relative path.", async() => {
+        it("should load information from `parser` in .eslintrc with relative path.", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2229,7 +2229,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("Plugins", () => {
-            it("should load information from a YML file and load plugins", async() => {
+            it("should load information from a YML file and load plugins", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
@@ -2267,7 +2267,7 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should load two separate configs from a plugin", async() => {
+            it("should load two separate configs from a plugin", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
@@ -2304,7 +2304,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         describe("even if config files have Unicode BOM,", () => {
-            it("should read the JSON config file correctly.", async() => {
+            it("should read the JSON config file correctly.", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
@@ -2326,7 +2326,7 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should read the YAML config file correctly.", async() => {
+            it("should read the YAML config file correctly.", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
@@ -2348,7 +2348,7 @@ describe("ConfigArrayFactory", () => {
                 });
             });
 
-            it("should read the config in package.json correctly.", async() => {
+            it("should read the config in package.json correctly.", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
                     files: {
@@ -2371,7 +2371,7 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
-        it("throws an error including the config file name if the config file is invalid", async() => {
+        it("throws an error including the config file name if the config file is invalid", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2395,7 +2395,7 @@ describe("ConfigArrayFactory", () => {
     });
 
     // This group moved from 'tests/lib/config/config-file.js' when refactoring to keep the cumulated test cases.
-    describe("'extends' property should resolve the location of configs properly.", async() => {
+    describe("'extends' property should resolve the location of configs properly.", async () => {
         const { prepare, cleanup, getPath } = createCustomTeardown({
             cwd: tempDir,
             files: {
@@ -2414,7 +2414,7 @@ describe("ConfigArrayFactory", () => {
 
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });
@@ -2496,7 +2496,7 @@ describe("ConfigArrayFactory", () => {
 
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });
@@ -2533,7 +2533,7 @@ describe("ConfigArrayFactory", () => {
             );
         });
 
-        it("should load a plugin when referenced by short name, even when using a custom loadPluginsRelativeTo value", async() => {
+        it("should load a plugin when referenced by short name, even when using a custom loadPluginsRelativeTo value", async () => {
             const teardown = createCustomTeardown({
                 cwd: tempDir,
                 files: {
@@ -2638,7 +2638,7 @@ describe("ConfigArrayFactory", () => {
 
         let factory;
 
-        beforeEach(async() => {
+        beforeEach(async () => {
             await prepare();
             factory = new ConfigArrayFactory({ cwd: getPath() });
         });

@@ -244,7 +244,7 @@ describe("FlatCompat", () => {
                         foo: "warn"
                     }
                 });
-                
+
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:all");
                 assert.deepStrictEqual(result[1], {
@@ -261,7 +261,7 @@ describe("FlatCompat", () => {
                         foo: "warn"
                     }
                 });
-                
+
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:all");
                 assert.deepStrictEqual(result[1], {
@@ -379,7 +379,7 @@ describe("FlatCompat", () => {
                         }
                     ]
                 });
-                
+
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
@@ -408,7 +408,7 @@ describe("FlatCompat", () => {
                         }
                     ]
                 });
-                
+
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
@@ -437,7 +437,7 @@ describe("FlatCompat", () => {
                         }
                     ]
                 });
-                
+
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
@@ -690,7 +690,7 @@ describe("FlatCompat", () => {
                 });
 
                 // the object should be a clone, not the original
-                assert.notEqual(result[0].languageOptions.parserOptions, parserOptions);
+                assert.notStrictEqual(result[0].languageOptions.parserOptions, parserOptions);
             });
 
             it("should translate parser string into an object", () => {
@@ -707,12 +707,12 @@ describe("FlatCompat", () => {
             });
 
             it("should throw an error when the parser can't be found", () => {
-                
+
                 assert.throws(() => {
                     compat.config({
                         parser: "missing-parser"
                     });
-                }, /Failed to load parser 'missing-parser'/);
+                }, /Failed to load parser 'missing-parser'/u);
             });
 
             it("should translate sourceType", () => {
@@ -881,7 +881,7 @@ describe("FlatCompat", () => {
 
         it("should translate extends array with multiple configs into config objects", () => {
             const result = compat.extends("fixture1", "eslint:all", "fixture2");
-        
+
             assert.strictEqual(result.length, 3);
             assert.deepStrictEqual(result[0], {
                 languageOptions: {
@@ -895,7 +895,7 @@ describe("FlatCompat", () => {
                 languageOptions: {
                     globals: {
                         foobar: false
-                    },
+                    }
                 },
                 rules: {
                     foobar: "error"
@@ -936,7 +936,7 @@ describe("FlatCompat", () => {
         it("should throw an error when a plugin is missing", () => {
             assert.throws(() => {
                 compat.plugins("missing");
-            }, /Failed to load plugin 'missing'/);
+            }, /Failed to load plugin 'missing'/u);
         });
 
         it("should translate plugins with processors", () => {
