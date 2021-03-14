@@ -1834,6 +1834,101 @@ describe("CascadingConfigArrayFactory", () => {
                 });
             });
         });
+
+        describe("when there is an invalid option for a bult-in rule", () => {
+
+            const root = path.join(systemTempDir, "eslint/cli-engine/cascading-config-array-factory");
+            const filePath = path.join(root, "foo.js");
+
+            /** @type {Map<string, Rule>} */
+            const builtInRules = new Map();
+
+            builtInRules.set("dot-location", {
+                meta: {
+                    schema: [
+                        {
+                            enum: ["object", "property"]
+                        }
+                    ]
+                },
+                create() {
+                    return {};
+                }
+            });
+
+            describe("in '.eslintrc.json' file", () => {
+                const files = {
+                    ".eslintrc.json": JSON.stringify({
+                        root: true,
+                        rules: {
+                            "dot-location": ["error", "foo"]
+                        }
+                    })
+                };
+                const { prepare, cleanup } = createCustomTeardown({ cwd: root, files });
+
+                beforeEach(prepare);
+                afterEach(cleanup);
+
+                it("should throw a configuration error", () => {
+                    const factory = new CascadingConfigArrayFactory({
+                        cwd: root,
+                        builtInRules
+                    });
+
+                    assert.throws(
+                        () => factory.getConfigArrayForFile(filePath),
+                        /Configuration for rule "dot-location" is invalid/u
+                    );
+                });
+            });
+
+            describe("in 'baseConfig'", () => {
+                const baseConfig = {
+                    rules: {
+                        "dot-location": ["error", {}]
+                    }
+                };
+
+                it("should throw a configuration error", () => {
+
+                    const factory = new CascadingConfigArrayFactory({
+                        cwd: root,
+                        builtInRules,
+                        useEslintrc: false,
+                        baseConfig
+                    });
+
+                    assert.throws(
+                        () => factory.getConfigArrayForFile(filePath),
+                        /Configuration for rule "dot-location" is invalid/u
+                    );
+                });
+            });
+
+            describe("in 'cliConfig'", () => {
+                const cliConfig = {
+                    rules: {
+                        "dot-location": ["error", "object", "extra"]
+                    }
+                };
+
+                it("should throw a configuration error", () => {
+
+                    const factory = new CascadingConfigArrayFactory({
+                        cwd: root,
+                        builtInRules,
+                        useEslintrc: false,
+                        cliConfig
+                    });
+
+                    assert.throws(
+                        () => factory.getConfigArrayForFile(filePath),
+                        /Configuration for rule "dot-location" is invalid/u
+                    );
+                });
+            });
+        });
     });
 
     describe("'clearCache()' method should clear cache.", () => {
