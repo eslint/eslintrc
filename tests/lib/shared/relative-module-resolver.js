@@ -5,7 +5,9 @@
 
 const {
     Legacy: {
-        resolve
+        ModuleResolver: {
+            resolve
+        }
     }
 } = require("../../..");
 const { assert } = require("chai");
