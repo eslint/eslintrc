@@ -1,3 +1,7 @@
+v0.4.2 - June 4, 2021
+
+* [`cc79a4d`](https://github.com/eslint/eslintrc/commit/cc79a4db45a2ca0236a846ed8eba28eea07d4db5) Upgrade: update globals to version 13.6 (#32) (Rouven Weßling)
+
 v0.4.1 - May 7, 2021
 
 * [`aa38ef4`](https://github.com/eslint/eslintrc/commit/aa38ef40c3123f8f534c7f9b0b7c306f5f011dce) Fix: Properly export module resolver (#34) (Richie Bendall)
