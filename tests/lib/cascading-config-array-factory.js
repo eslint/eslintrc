@@ -38,7 +38,7 @@ const cwdIgnorePatterns = new ConfigArrayFactory()
     .ignorePattern
     .patterns;
 
-const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.js");
+const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
 const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 
 //-----------------------------------------------------------------------------
@@ -1566,7 +1566,7 @@ describe("CascadingConfigArrayFactory", () => {
                 });
 
                 it("should not merge override config when the pattern matches the absolute file path", () => {
-                    const resolvedPath = path.resolve(dirname, "../fixtures/config-hierarchy/overrides/bar.js");
+                    const resolvedPath = path.resolve(dirname, "../fixtures/config-hierarchy/overrides/bar.cjs");
 
                     assert.throws(() => new CascadingConfigArrayFactory({
                         cwd: getPath(),
