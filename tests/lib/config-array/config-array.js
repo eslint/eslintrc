@@ -2,11 +2,14 @@
  * @fileoverview Tests for ConfigArray class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
-const path = require("path");
-const { assert } = require("chai");
-const { ConfigArray, OverrideTester, getUsedExtractedConfigs } = require("../../../lib/config-array");
+import path from "path";
+import { fileURLToPath } from "url";
+import { assert } from "chai";
+import { ConfigArray, OverrideTester, getUsedExtractedConfigs } from "../../../lib/config-array/index.js";
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 describe("ConfigArray", () => {
     it("should be a sub class of Array.", () => {
@@ -227,7 +230,7 @@ describe("ConfigArray", () => {
                     {
                         parser: { error: new Error("Failed to load a parser.") }
                     }
-                ).extractConfig(__filename);
+                ).extractConfig(filename);
             }, "Failed to load a parser.");
         });
 
@@ -240,7 +243,7 @@ describe("ConfigArray", () => {
                 {
                     parser
                 }
-            ).extractConfig(__filename);
+            ).extractConfig(filename);
 
             assert.strictEqual(config.parser, parser);
         });
@@ -251,7 +254,7 @@ describe("ConfigArray", () => {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
                     parser: { error: new Error("Failed to load a parser.") }
                 }
-            ).extractConfig(__filename);
+            ).extractConfig(filename);
 
             assert.strictEqual(config.parser, null);
         });
@@ -264,7 +267,7 @@ describe("ConfigArray", () => {
                             foo: { error: new Error("Failed to load a plugin.") }
                         }
                     }
-                ).extractConfig(__filename);
+                ).extractConfig(filename);
             }, "Failed to load a plugin.");
         });
 
@@ -276,7 +279,7 @@ describe("ConfigArray", () => {
                         foo: { error: new Error("Failed to load a plugin.") }
                     }
                 }
-            ).extractConfig(__filename);
+            ).extractConfig(filename);
 
             assert.deepStrictEqual(config.plugins, {});
         });
@@ -295,7 +298,7 @@ describe("ConfigArray", () => {
                     }
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(__filename)], process.cwd()),
+                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
                     rules: {
                         "no-use-before-define": "error"
                     }
@@ -306,7 +309,7 @@ describe("ConfigArray", () => {
                         "no-unused-vars": "error"
                     }
                 }
-            ).extractConfig(__filename);
+            ).extractConfig(filename);
 
             assert.deepStrictEqual(config.rules, {
                 "no-redeclare": ["error"],
@@ -328,7 +331,7 @@ describe("ConfigArray", () => {
                     }
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(__filename)], process.cwd()),
+                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
                     rules: {
                         "no-use-before-define": "error"
                     }
@@ -342,8 +345,8 @@ describe("ConfigArray", () => {
             );
 
             assert.strictEqual(
-                configArray.extractConfig(path.join(__dirname, "a.js")),
-                configArray.extractConfig(path.join(__dirname, "b.js"))
+                configArray.extractConfig(path.join(dirname, "a.js")),
+                configArray.extractConfig(path.join(dirname, "b.js"))
             );
         });
 
@@ -362,7 +365,7 @@ describe("ConfigArray", () => {
          * @returns {Object} The merged config data.
          */
         function merge(target, source) {
-            return new ConfigArray(target, source).extractConfig(__filename);
+            return new ConfigArray(target, source).extractConfig(filename);
         }
 
         it("should combine two objects when passed two objects with different top-level properties", () => {
@@ -676,7 +679,7 @@ describe("ConfigArray", () => {
                     }
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(__filename)], process.cwd()),
+                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
                     rules: {
                         "no-use-before-define": "error"
                     }
@@ -695,9 +698,9 @@ describe("ConfigArray", () => {
         });
 
         for (const { filePaths } of [
-            { filePaths: [__filename] },
-            { filePaths: [__filename, `${__filename}.ts`] },
-            { filePaths: [__filename, `${__filename}.ts`, path.join(__dirname, "foo.js")] }
+            { filePaths: [filename] },
+            { filePaths: [filename, `${filename}.ts`] },
+            { filePaths: [filename, `${filename}.ts`, path.join(dirname, "foo.js")] }
         ]) {
             describe(`after it called 'extractConfig(filePath)' ${filePaths.length} time(s) with ${JSON.stringify(filePaths, null, 4)}, the returned array`, () => { // eslint-disable-line no-loop-func
                 let configs;
@@ -723,13 +726,13 @@ describe("ConfigArray", () => {
         it("should not contain duplicate values.", () => {
 
             // Call some times, including with the same arguments.
-            configArray.extractConfig(__filename);
-            configArray.extractConfig(`${__filename}.ts`);
-            configArray.extractConfig(path.join(__dirname, "foo.js"));
-            configArray.extractConfig(__filename);
-            configArray.extractConfig(path.join(__dirname, "foo.js"));
-            configArray.extractConfig(path.join(__dirname, "bar.js"));
-            configArray.extractConfig(path.join(__dirname, "baz.js"));
+            configArray.extractConfig(filename);
+            configArray.extractConfig(`${filename}.ts`);
+            configArray.extractConfig(path.join(dirname, "foo.js"));
+            configArray.extractConfig(filename);
+            configArray.extractConfig(path.join(dirname, "foo.js"));
+            configArray.extractConfig(path.join(dirname, "bar.js"));
+            configArray.extractConfig(path.join(dirname, "baz.js"));
 
             const usedConfigs = getUsedExtractedConfigs(configArray);
 

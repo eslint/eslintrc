@@ -2,15 +2,16 @@
  * @fileoverview Tests for ConfigOps
  * @author Nicholas C. Zakas
  */
-"use strict";
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const assert = require("chai").assert,
-    util = require("util"),
-    ConfigOps = require("../../../lib/shared/config-ops");
+import { assert } from "chai";
+
+import util from "util";
+
+import * as ConfigOps from "../../../lib/shared/config-ops.js";
 
 //------------------------------------------------------------------------------
 // Tests
