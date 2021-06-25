@@ -39,7 +39,7 @@ const cwdIgnorePatterns = new ConfigArrayFactory()
     .patterns;
 
 const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.js");
-const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.js");
+const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 
 //-----------------------------------------------------------------------------
 // Tests
@@ -790,7 +790,7 @@ describe("CascadingConfigArrayFactory", () => {
                 });
                 const config = getConfig(factory, configPath);
 
-                assert.strictEqual(config.parser, path.resolve(path.dirname(configPath), "./custom.js"));
+                assert.strictEqual(config.parser, path.resolve(path.dirname(configPath), "./custom.cjs"));
             });
 
             /*

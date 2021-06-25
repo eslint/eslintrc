@@ -34,8 +34,8 @@ const {
 // Helpers
 //-----------------------------------------------------------------------------
 
-const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.js");
-const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.js");
+const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
+const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
 
 /**
