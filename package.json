@@ -14,7 +14,8 @@
   "files": [
     "lib",
     "conf",
-    "LICENSE"
+    "LICENSE",
+    "dist/eslintrc.cjs"
   ],
   "publishConfig": {
     "access": "public"
