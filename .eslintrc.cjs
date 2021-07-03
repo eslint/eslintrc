@@ -21,19 +21,6 @@ module.exports = {
 
     overrides: [
         {
-            files: ["*.cjs", "conf/**"],
-            env: {
-                node: true
-            },
-            globals: {
-                require: true,
-                module: true
-            },
-            parserOptions: {
-                sourceType: "script"
-            }
-        },
-        {
             files: ["tests/**/*"],
             env: { mocha: true },
             rules: {
