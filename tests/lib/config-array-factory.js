@@ -8,7 +8,7 @@
 //-----------------------------------------------------------------------------
 
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 import fs from "fs";
 import { createRequire } from "module";
 import { assert } from "chai";
@@ -921,7 +921,7 @@ describe("ConfigArrayFactory", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
                         filePath: eslintAllPath,
-                        ...(await import(eslintAllPath)).default
+                        ...(await import(pathToFileURL(eslintAllPath))).default
                     });
                 });
 
@@ -951,7 +951,7 @@ describe("ConfigArrayFactory", () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:recommended",
                         filePath: eslintRecommendedPath,
-                        ...(await import(eslintRecommendedPath)).default
+                        ...(await import(pathToFileURL(eslintRecommendedPath))).default
                     });
                 });
 
