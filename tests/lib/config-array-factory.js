@@ -2241,12 +2241,12 @@ describe("ConfigArrayFactory", () => {
                             }
                         `,
                         "plugins/.eslintrc.yml": `
-                            plugins:
-                                - test
-                            rules:
-                                test/foo: 2
-                            env:
-                                test/bar: true
+plugins:
+    - test
+rules:
+    test/foo: 2
+env:
+    test/bar: true
                         `
                     }
                 });
