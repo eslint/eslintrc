@@ -269,7 +269,8 @@ describe("ConfigArrayFactory", () => {
             files: {
                 ...basicFiles,
                 "invalid-property/.eslintrc.json": "{ \"files\": \"*.js\" }",
-                "package-json-no-config/package.json": "{ \"name\": \"foo\" }"
+                "package-json-no-config/package.json": "{ \"name\": \"foo\" }",
+                "package-json-dir/package.json/something": "{}"
             }
         });
 
@@ -299,6 +300,12 @@ describe("ConfigArrayFactory", () => {
             assert.throws(() => {
                 factory.loadInDirectory("invalid-property");
             }, /Unexpected top-level property "files"/u);
+        });
+
+        it("should ignore directories that have the same name as a config file,", () => {
+            const configArray = factory.loadInDirectory("package-json-dir");
+
+            assert.strictEqual(configArray.length, 0);
         });
 
         for (const filePath of Object.keys(basicFiles)) {
