@@ -1,14 +1,14 @@
 /**
  * @fileoverview Tests for naming util
  */
-"use strict";
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const assert = require("chai").assert,
-    naming = require("../../../lib/shared/naming");
+import { assert } from "chai";
+
+import * as naming from "../../../lib/shared/naming.js";
 
 //------------------------------------------------------------------------------
 // Tests

@@ -2,13 +2,12 @@
  * @fileoverview Tests for OverrideTester class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
-const assert = require("assert");
-const { Console } = require("console");
-const path = require("path");
-const { Writable } = require("stream");
-const { OverrideTester } = require("../../../lib/config-array/override-tester");
+import assert from "assert";
+import { Console } from "console";
+import path from "path";
+import { Writable } from "stream";
+import { OverrideTester } from "../../../lib/config-array/override-tester.js";
 
 describe("OverrideTester", () => {
     describe("'create(files, excludedFiles, basePath)' should create a tester.", () => {

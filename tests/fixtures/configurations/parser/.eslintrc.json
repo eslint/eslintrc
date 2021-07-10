@@ -1,6 +1,6 @@
 {
     "root": true,
-    "parser": "./custom.js",
+    "parser": "./custom.cjs",
     "rules": {
         "quotes": ["error", "double"]
     }
