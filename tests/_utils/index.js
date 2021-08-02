@@ -6,7 +6,9 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-import { createTeardown, addFile } from "fs-teardown";
+import fsTeardown from "fs-teardown";
+
+const { createTeardown, addFile } = fsTeardown;
 
 //-----------------------------------------------------------------------------
 // Helpers
