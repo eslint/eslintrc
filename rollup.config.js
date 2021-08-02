@@ -2,7 +2,8 @@ export default {
     input: "./lib/index.js",
     external: [
         "module", "util", "os", "path", "debug", "fs", "import-fresh",
-        "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv"
+        "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv",
+        "globals"
     ],
     treeshake: false,
     output: {
