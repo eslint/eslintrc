@@ -2,13 +2,13 @@
  * @fileoverview Utilities used in tests
  */
 
-"use strict";
-
 //-----------------------------------------------------------------------------
 // Requirements
 //-----------------------------------------------------------------------------
 
-const { createTeardown, addFile } = require("fs-teardown");
+import fsTeardown from "fs-teardown";
+
+const { createTeardown, addFile } = fsTeardown;
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -52,7 +52,7 @@ function createCustomTeardown({ cwd, files = {} }) {
 // Exports
 //-----------------------------------------------------------------------------
 
-module.exports = {
+export {
     unIndent,
     createCustomTeardown
 };

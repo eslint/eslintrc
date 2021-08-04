@@ -2,12 +2,11 @@
  * @fileoverview Tests for IgnorePattern class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
-const assert = require("assert");
-const path = require("path");
-const sinon = require("sinon");
-const { IgnorePattern } = require("../../../lib/config-array/ignore-pattern");
+import assert from "assert";
+import path from "path";
+import sinon from "sinon";
+import { IgnorePattern } from "../../../lib/config-array/ignore-pattern.js";
 
 describe("IgnorePattern", () => {
     describe("constructor(patterns, basePath)", () => {

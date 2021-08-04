@@ -2,12 +2,11 @@
  * @fileoverview Tests for ConfigDependency class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
-const assert = require("assert");
-const { Console } = require("console");
-const { Writable } = require("stream");
-const { ConfigDependency } = require("../../../lib/config-array/config-dependency");
+import assert from "assert";
+import { Console } from "console";
+import { Writable } from "stream";
+import { ConfigDependency } from "../../../lib/config-array/config-dependency.js";
 
 describe("ConfigDependency", () => {
     describe("'constructor(data)' should initialize properties.", () => {

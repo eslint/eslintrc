@@ -2,33 +2,40 @@
  * @fileoverview Tests for ConfigArrayFactory class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
 //-----------------------------------------------------------------------------
 // Requirements
 //-----------------------------------------------------------------------------
 
-const path = require("path");
-const fs = require("fs");
-const { assert } = require("chai");
-const { spy } = require("sinon");
+import path from "path";
+import { fileURLToPath, pathToFileURL } from "url";
+import fs from "fs";
+import { createRequire } from "module";
+import { assert } from "chai";
+import sinon from "sinon";
+import { Legacy } from "../../lib/index.js";
+import { createCustomTeardown } from "../_utils/index.js";
+import systemTempDir from "temp-dir";
+
+const require = createRequire(import.meta.url);
+
+const fileName = fileURLToPath(import.meta.url);
+const dirname = path.dirname(fileName);
+const { spy } = sinon;
+
 const {
-    Legacy: {
-        ConfigArray,
-        ConfigArrayFactory,
-        OverrideTester,
-        createConfigArrayFactoryContext: createContext
-    }
-} = require("../../lib/");
-const { createCustomTeardown } = require("../_utils");
-const systemTempDir = require("temp-dir");
+    ConfigArray,
+    ConfigArrayFactory,
+    OverrideTester,
+    createConfigArrayFactoryContext: createContext
+} = Legacy;
 
 //-----------------------------------------------------------------------------
 // Helpers
 //-----------------------------------------------------------------------------
 
-const eslintAllPath = path.resolve(__dirname, "../fixtures/eslint-all.js");
-const eslintRecommendedPath = path.resolve(__dirname, "../fixtures/eslint-recommended.js");
+const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
+const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
 
 /**
@@ -133,7 +140,7 @@ describe("ConfigArrayFactory", () => {
         it("should call '_normalizeConfigData(configData, ctx)' with given arguments.", () => {
             const configData = {};
             const basePath = tempDir;
-            const filePath = __filename;
+            const filePath = fileName;
             const name = "example";
             const normalizeConfigData = spy(factory, "_normalizeConfigData");
 
@@ -910,11 +917,11 @@ describe("ConfigArrayFactory", () => {
                     assert.strictEqual(configArray.length, 2);
                 });
 
-                it("should have the config data of 'eslint:all' at the first element.", () => {
+                it("should have the config data of 'eslint:all' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
                         filePath: eslintAllPath,
-                        ...require(eslintAllPath)
+                        ...(await import(pathToFileURL(eslintAllPath))).default
                     });
                 });
 
@@ -940,11 +947,11 @@ describe("ConfigArrayFactory", () => {
                     assert.strictEqual(configArray.length, 2);
                 });
 
-                it("should have the config data of 'eslint:recommended' at the first element.", () => {
+                it("should have the config data of 'eslint:recommended' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:recommended",
                         filePath: eslintRecommendedPath,
-                        ...require(eslintRecommendedPath)
+                        ...(await import(pathToFileURL(eslintRecommendedPath))).default
                     });
                 });
 
@@ -1552,10 +1559,12 @@ describe("ConfigArrayFactory", () => {
             }, /Failed to load parser 'nonexistent-parser' declared in 'whatever » plugin:invalid-parser\/foo'/u);
         });
 
-        it("should fall back to default parser when a parser called 'espree' is not found", () => {
+        it("should fall back to default parser when a parser called 'espree' is not found", async () => {
             const config = applyExtends({ parser: "espree" });
 
             assertConfig(config, {
+
+                // parser: await import.meta.resolve("espree")
                 parser: require.resolve("espree")
             });
         });
@@ -1893,6 +1902,8 @@ describe("ConfigArrayFactory", () => {
             const config = load(factory, "js/.eslintrc.parser3.js");
 
             assertConfig(config, {
+
+                // parser: await import.meta.resolve("espree"),
                 parser: require.resolve("espree"),
                 rules: {
                     semi: [2, "always"]

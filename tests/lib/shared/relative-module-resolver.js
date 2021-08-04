@@ -1,15 +1,15 @@
 /**
  * @fileoverview Tests for relative module resolver.
  */
-"use strict";
+
+import { assert } from "chai";
+import path from "path";
+
+import { Legacy } from "../../../lib/index.js";
 
 const {
-    Legacy: {
-        ModuleResolver
-    }
-} = require("../../..");
-const { assert } = require("chai");
-const path = require("path");
+    ModuleResolver
+} = Legacy;
 
 describe("ModuleResolver", () => {
     describe("resolve()", () => {
