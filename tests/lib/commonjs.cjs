@@ -25,6 +25,7 @@ describe("commonjs", () => {
     it("has exports", () => {
         assert.strictEqual(typeof eslintrc.FlatCompat, "function");
         assert.strictEqual(typeof eslintrc.Legacy, "object");
+        assert.strictEqual(typeof eslintrc.Legacy.environments, "object");
 
         [
             "ConfigArray",
