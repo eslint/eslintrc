@@ -2,10 +2,9 @@
  * @fileoverview Tests for ExtractedConfig class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
-"use strict";
 
-const assert = require("assert");
-const { ExtractedConfig } = require("../../../lib/config-array/extracted-config");
+import assert from "assert";
+import { ExtractedConfig } from "../../../lib/config-array/extracted-config.js";
 
 describe("'ExtractedConfig' class", () => {
     describe("'constructor()' should create an instance.", () => {

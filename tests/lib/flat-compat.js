@@ -2,22 +2,24 @@
  * @fileoverview Tests for FlatCompat class.
  * @author Nicholas C. Zakas
  */
-"use strict";
 
 //-----------------------------------------------------------------------------
 // Requirements
 //-----------------------------------------------------------------------------
 
-const path = require("path");
-const { assert } = require("chai");
-const { FlatCompat } = require("../../lib");
-const environments = require("../../conf/environments");
+import path from "path";
+import { fileURLToPath, pathToFileURL } from "url";
+import { assert } from "chai";
+import { FlatCompat } from "../../lib/index.js";
+import environments from "../../conf/environments.js";
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 //-----------------------------------------------------------------------------
 // Helpers
 //-----------------------------------------------------------------------------
 
-const FIXTURES_BASE_PATH = path.resolve(__dirname, "../fixtures/flat-compat/");
+const FIXTURES_BASE_PATH = path.resolve(dirname, "../fixtures/flat-compat/");
 
 /**
  * Normalizes a plugin object to have all available keys. This matches what
@@ -50,13 +52,13 @@ function getFixturePath(dirName) {
 
 describe("FlatCompat", () => {
 
-    describe("config()", () => {
+    describe("config()", async () => {
 
         let compat;
         const baseDirectory = getFixturePath("config");
-        const pluginFixture1 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1")));
-        const pluginFixture2 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2")));
-        const pluginFixture3 = normalizePlugin(require(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3")));
+        const pluginFixture1 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default);
+        const pluginFixture2 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default);
+        const pluginFixture3 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3.js")))).default);
 
         beforeEach(() => {
             compat = new FlatCompat({
@@ -693,7 +695,7 @@ describe("FlatCompat", () => {
                 assert.notStrictEqual(result[0].languageOptions.parserOptions, parserOptions);
             });
 
-            it("should translate parser string into an object", () => {
+            it("should translate parser string into an object", async () => {
                 const result = compat.config({
                     parser: "my-parser"
                 });
@@ -701,7 +703,7 @@ describe("FlatCompat", () => {
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
-                        parser: require(getFixturePath("config/node_modules/my-parser"))
+                        parser: (await import(pathToFileURL(getFixturePath("config/node_modules/my-parser.js")))).default
                     }
                 });
             });
@@ -916,7 +918,7 @@ describe("FlatCompat", () => {
             });
         });
 
-        it("should translate plugins without processors", () => {
+        it("should translate plugins without processors", async () => {
             const result = compat.plugins("fixture1");
 
             assert.strictEqual(result.length, 1);
@@ -927,7 +929,7 @@ describe("FlatCompat", () => {
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
                     }
                 }
             });
@@ -939,9 +941,9 @@ describe("FlatCompat", () => {
             }, /Failed to load plugin 'missing'/u);
         });
 
-        it("should translate plugins with processors", () => {
+        it("should translate plugins with processors", async () => {
             const result = compat.plugins("fixture2");
-            const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
+            const plugin = (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default;
 
             assert.strictEqual(result.length, 2);
             assert.deepStrictEqual(result[0], {
@@ -961,9 +963,9 @@ describe("FlatCompat", () => {
             });
         });
 
-        it("should translate multiple plugins", () => {
+        it("should translate multiple plugins", async () => {
             const result = compat.plugins("fixture1", "fixture2");
-            const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2"));
+            const plugin = (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default;
 
             assert.strictEqual(result.length, 2);
             assert.deepStrictEqual(result[0], {
@@ -977,7 +979,7 @@ describe("FlatCompat", () => {
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1"))
+                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
                     },
                     fixture2: {
                         configs: {},
