@@ -56,12 +56,12 @@ describe("eslintrc CommonJS", () => {
 
 describe("eslintrc CommonJS Universal", () => {
     it("is an object", () => {
-        assert.strictEqual(typeof eslintrc, "object");
+        assert.strictEqual(typeof universal, "object");
     });
 
     it("has exports", () => {
-        assert.strictEqual(typeof eslintrc.Legacy, "object");
-        assert.strictEqual(typeof eslintrc.Legacy.ConfigValidator, "function");
+        assert.strictEqual(typeof universal.Legacy, "object");
+        assert.strictEqual(typeof universal.Legacy.ConfigValidator, "function");
 
         // shared
         [
@@ -69,7 +69,7 @@ describe("eslintrc CommonJS Universal", () => {
             "ConfigOps",
             "naming"
         ].forEach(prop => {
-            assert.strictEqual(typeof eslintrc.Legacy[prop], "object");
+            assert.strictEqual(typeof universal.Legacy[prop], "object");
         });
     });
 });
