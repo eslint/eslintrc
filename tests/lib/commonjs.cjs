@@ -11,13 +11,14 @@
 
 const assert = require("assert");
 const eslintrc = require("../../dist/eslintrc.cjs");
+const universal = require("../../dist/eslintrc-universal.cjs");
 
 
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
-describe("commonjs", () => {
+describe("eslintrc CommonJS", () => {
     it("is an object", () => {
         assert.strictEqual(typeof eslintrc, "object");
     });
@@ -25,7 +26,6 @@ describe("commonjs", () => {
     it("has exports", () => {
         assert.strictEqual(typeof eslintrc.FlatCompat, "function");
         assert.strictEqual(typeof eslintrc.Legacy, "object");
-        assert.strictEqual(typeof eslintrc.Legacy.environments, "object");
 
         [
             "ConfigArray",
@@ -44,8 +44,29 @@ describe("commonjs", () => {
 
         // shared
         [
+            "environments",
             "ConfigOps",
             "ModuleResolver",
+            "naming"
+        ].forEach(prop => {
+            assert.strictEqual(typeof eslintrc.Legacy[prop], "object");
+        });
+    });
+});
+
+describe("eslintrc CommonJS Universal", () => {
+    it("is an object", () => {
+        assert.strictEqual(typeof eslintrc, "object");
+    });
+
+    it("has exports", () => {
+        assert.strictEqual(typeof eslintrc.Legacy, "object");
+        assert.strictEqual(typeof eslintrc.Legacy.ConfigValidator, "function");
+
+        // shared
+        [
+            "environments",
+            "ConfigOps",
             "naming"
         ].forEach(prop => {
             assert.strictEqual(typeof eslintrc.Legacy[prop], "object");
