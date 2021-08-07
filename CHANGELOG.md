@@ -1,3 +1,13 @@
+v1.0.0 - August 6, 2021
+
+* [`aaf282e`](https://github.com/eslint/eslintrc/commit/aaf282e3b58636e9b66a58c2355fff671a8a9067) Update: Add /universal entrypoint (fixes #50) (#51) (Nicholas C. Zakas)
+* [`3c6cfe6`](https://github.com/eslint/eslintrc/commit/3c6cfe6e1b749389c722eefb7fd25c93da3bb669) Upgrade: debug@4.3.2 (#52) (Milos Djermanovic)
+* [`3983fde`](https://github.com/eslint/eslintrc/commit/3983fde4443b4d144c7ff6ff6231172cf28bb283) Upgrade: Espree (fixes #41) (#49) (Nicholas C. Zakas)
+* [`7e5e4e5`](https://github.com/eslint/eslintrc/commit/7e5e4e5391ba7aea4f8fb61db27f4d679e517bd8) Update: Export environments (#46) (Nicholas C. Zakas)
+* [`348e889`](https://github.com/eslint/eslintrc/commit/348e889240e94259c90eadf3256fda66b8ba2f6d) Chore: Use actions/setup-node@v2 (#47) (薛定谔的猫)
+* [`bbcef88`](https://github.com/eslint/eslintrc/commit/bbcef88391972f6761d21bbe7d3524232cecbac7) Breaking: drop node v10/v13/v15 (refs eslint/eslint#14023) (#37) (薛定谔的猫)
+* [`bdce01a`](https://github.com/eslint/eslintrc/commit/bdce01aad747393d13cd1ae17d8280e54c9c5191) Breaking: Switch to ESM (fixes #35) (#39) (Brett Zamir)
+
 v0.4.3 - July 17, 2021
 
 * [`ce78027`](https://github.com/eslint/eslintrc/commit/ce78027f6a319a29fdf0b78ac1e7071373acffc4) Fix: ensure config files are files (#42) (Tom Jenkinson)
