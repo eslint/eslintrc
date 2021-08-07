@@ -9,13 +9,17 @@
       "import": "./lib/index.js",
       "require": "./dist/eslintrc.cjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./universal": {
+      "import": "./lib/index-universal.js",
+      "require": "./dist/eslintrc-universal.cjs"
+    }
   },
   "files": [
     "lib",
     "conf",
     "LICENSE",
-    "dist/eslintrc.cjs"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
