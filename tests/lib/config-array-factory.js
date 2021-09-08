@@ -544,6 +544,109 @@ describe("ConfigArrayFactory", () => {
             });
         });
 
+        describe("custom 'resolver' details", () => {
+
+            const { prepare, cleanup, getPath } = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "node_modules/custom-xxx-parser/index.js": "exports.name = 'xxx-parser';",
+                    "node_modules/custom-eslint-plugin-xxx/index.js": "exports.configs = { name: 'eslint-plugin-xxx' };",
+                    "node_modules/custom-eslint-config-foo/index.js": "exports.env = { browser: true }"
+                }
+            });
+
+            before(async () => {
+                await prepare();
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    resolver: {
+                        resolve(find, relativeTo) {
+                            return path.join(path.dirname(relativeTo), `node_modules/custom-${find}/index.js`);
+                        }
+                    }
+                });
+            });
+
+            after(cleanup);
+
+            describe("if the 'parser' property was a valid package, the first config array element", () => {
+                let element;
+
+                beforeEach(() => {
+                    element = create({ parser: "xxx-parser" })[0];
+                });
+
+                it("should have the package ID at 'parser.id' property.", () => {
+                    assert.strictEqual(element.parser.id, "xxx-parser");
+                });
+
+                it("should have the package object at 'parser.definition' property.", () => {
+                    assert.deepStrictEqual(element.parser.definition, { name: "xxx-parser" });
+                });
+
+                it("should have the path to the package at 'parser.filePath' property.", () => {
+                    assert.strictEqual(element.parser.filePath, path.join(getPath(), "node_modules/custom-xxx-parser/index.js"));
+                });
+            });
+
+            describe("if the 'plugins' property was a valid package, the first config array element", () => {
+                let element;
+
+                beforeEach(() => {
+                    element = create({ plugins: ["xxx"] })[0];
+                });
+
+                it("should have 'plugins[id]' property.", () => {
+                    assert.notStrictEqual(element.plugins.xxx, void 0);
+                });
+
+                it("should have the package ID at 'plugins[id].id' property.", () => {
+                    assert.strictEqual(element.plugins.xxx.id, "xxx");
+                });
+
+                it("should have the package object at 'plugins[id].definition' property.", () => {
+                    assertPluginDefinition(
+                        element.plugins.xxx.definition,
+                        { configs: { name: "eslint-plugin-xxx" } }
+                    );
+                });
+
+                it("should have the path to the package at 'plugins[id].filePath' property.", () => {
+                    assert.strictEqual(element.plugins.xxx.filePath, path.join(getPath(), "node_modules/custom-eslint-plugin-xxx/index.js"));
+                });
+            });
+
+            describe("if 'extends' property was 'foo', the returned value", () => {
+                let configArray;
+
+                beforeEach(() => {
+                    configArray = create(
+                        { extends: "foo", rules: { eqeqeq: 1 } },
+                        { name: ".eslintrc" }
+                    );
+                });
+
+                it("should have two elements.", () => {
+                    assert.strictEqual(configArray.length, 2);
+                });
+
+                it("should have the config data of 'eslint-config-foo' at the first element.", () => {
+                    assertConfigArrayElement(configArray[0], {
+                        name: ".eslintrc » eslint-config-foo",
+                        filePath: path.join(getPath(), "node_modules/custom-eslint-config-foo/index.js"),
+                        env: { browser: true }
+                    });
+                });
+
+                it("should have the given config data at the second element.", () => {
+                    assertConfigArrayElement(configArray[1], {
+                        name: ".eslintrc",
+                        rules: { eqeqeq: 1 }
+                    });
+                });
+            });
+        });
+
         describe("'parser' details", () => {
 
             const { prepare, cleanup, getPath } = createCustomTeardown({
