@@ -1,3 +1,8 @@
+v1.0.1 - September 10, 2021
+
+* [`f2e2c33`](https://github.com/eslint/eslintrc/commit/f2e2c3374a810967d233b1ccd7b2e65cf27bc1e0) Upgrade: espree@9.0.0 (#54) (Milos Djermanovic)
+* [`c5d4919`](https://github.com/eslint/eslintrc/commit/c5d49193a30b97e8c6bb2ad6306ee816afe8b3cc) Fix: ConfigArrayFactory was ignoring the resolver option in some places (#53) (Stéphane Goetz)
+
 v1.0.0 - August 6, 2021
 
 * [`aaf282e`](https://github.com/eslint/eslintrc/commit/aaf282e3b58636e9b66a58c2355fff671a8a9067) Update: Add /universal entrypoint (fixes #50) (#51) (Nicholas C. Zakas)
