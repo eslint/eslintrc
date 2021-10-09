@@ -1,3 +1,8 @@
+v1.0.2 - October 9, 2021
+
+* [`347fe40`](https://github.com/eslint/eslintrc/commit/347fe4003226d35dac144d1f3e7efc5c4d4a6065) Build: Don't freeze Rollup output (#56) (Nicholas C. Zakas)
+* [`3b8ae43`](https://github.com/eslint/eslintrc/commit/3b8ae43b32bbe08311a7de0b81bf1219c7cd52d7) Chore: ignore package manager lock files (#55) (Nitin Kumar)
+
 v1.0.1 - September 10, 2021
 
 * [`f2e2c33`](https://github.com/eslint/eslintrc/commit/f2e2c3374a810967d233b1ccd7b2e65cf27bc1e0) Upgrade: espree@9.0.0 (#54) (Milos Djermanovic)
