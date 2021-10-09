@@ -10,7 +10,8 @@ export default [
         output: {
             format: "cjs",
             file: "dist/eslintrc.cjs",
-            sourcemap: true
+            sourcemap: true,
+            freeze: false
         }
     },
     {
@@ -24,7 +25,8 @@ export default [
         output: {
             format: "cjs",
             file: "dist/eslintrc-universal.cjs",
-            sourcemap: true
+            sourcemap: true,
+            freeze: false
         }
     }
 ];
