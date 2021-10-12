@@ -19,7 +19,7 @@
     "lib",
     "conf",
     "LICENSE",
-    "dist"
+    "dist",
     "universal.js"
   ],
   "publishConfig": {
