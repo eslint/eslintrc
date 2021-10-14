@@ -1,3 +1,7 @@
+v1.0.3 - October 13, 2021
+
+* [`6b5fc8b`](https://github.com/eslint/eslintrc/commit/6b5fc8b248aa66958ba0c1b05d402c3e509e3098) Fix: add `universal` export to root (#57) (Simen Bekkhus)
+
 v1.0.2 - October 9, 2021
 
 * [`347fe40`](https://github.com/eslint/eslintrc/commit/347fe4003226d35dac144d1f3e7efc5c4d4a6065) Build: Don't freeze Rollup output (#56) (Nicholas C. Zakas)
