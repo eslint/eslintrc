@@ -1,3 +1,9 @@
+v1.0.4 - November 5, 2021
+
+* [`f0b528b`](https://github.com/eslint/eslintrc/commit/f0b528b91b741aa4b95f276e9ad81683366144fd) build: upgrade eslint-release to v3.2.0 to support conventional commits (#62) (Milos Djermanovic)
+* [`731fa49`](https://github.com/eslint/eslintrc/commit/731fa4993e3b37d703cf2ba4f03429f89ae6e0a2) chore: update `js-yaml` dependency (#61) (Nitin Kumar)
+* [`b657cea`](https://github.com/eslint/eslintrc/commit/b657ceafd64f2d5842b5c2d3d660cfd57660cd06) Build: add node v17 (#58) (唯然)
+
 v1.0.3 - October 13, 2021
 
 * [`6b5fc8b`](https://github.com/eslint/eslintrc/commit/6b5fc8b248aa66958ba0c1b05d402c3e509e3098) Fix: add `universal` export to root (#57) (Simen Bekkhus)
