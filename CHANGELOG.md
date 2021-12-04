@@ -1,3 +1,7 @@
+v1.0.5 - December 3, 2021
+
+* [`870810a`](https://github.com/eslint/eslintrc/commit/870810a37804ab9a2e758529b2fd2325c2860950) chore: upgrade espree@9.2.0 (#64) (Milos Djermanovic)
+
 v1.0.4 - November 5, 2021
 
 * [`f0b528b`](https://github.com/eslint/eslintrc/commit/f0b528b91b741aa4b95f276e9ad81683366144fd) build: upgrade eslint-release to v3.2.0 to support conventional commits (#62) (Milos Djermanovic)
