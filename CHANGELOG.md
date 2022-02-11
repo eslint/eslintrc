@@ -1,3 +1,9 @@
+v1.1.0 - February 11, 2022
+
+* [`0f17fb1`](https://github.com/eslint/eslintrc/commit/0f17fb1077834f873bb31de950aa6eec38a0f8f3) chore: Upgrade to espree@9.3.1 (#69) (Milos Djermanovic)
+* [`33b8ee7`](https://github.com/eslint/eslintrc/commit/33b8ee7edbe3c85eda04af8896db71021f172be5) feat: add esN envs for all post-es6 years (#68) (Jordan Harband)
+* [`bc097b6`](https://github.com/eslint/eslintrc/commit/bc097b63ab66a2ebeaa18870c3acab52d63f4e75) chore: upgrade espree@9.3.0 (#65) (Gustavo Santana)
+
 v1.0.5 - December 3, 2021
 
 * [`870810a`](https://github.com/eslint/eslintrc/commit/870810a37804ab9a2e758529b2fd2325c2860950) chore: upgrade espree@9.2.0 (#64) (Milos Djermanovic)
