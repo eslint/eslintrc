@@ -7,15 +7,19 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
+import { assert } from "chai";
 import fs from "fs";
 import { createRequire } from "module";
-import { assert } from "chai";
+import path from "path";
 import sinon from "sinon";
+import systemTempDir from "temp-dir";
+import {
+    fileURLToPath,
+    pathToFileURL
+} from "url";
+
 import { Legacy } from "../../lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
-import systemTempDir from "temp-dir";
 
 const require = createRequire(import.meta.url);
 
@@ -37,6 +41,22 @@ const {
 const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
 const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
+
+/**
+ * Return config data for built-in eslint:all.
+ * @returns {ConfigData} Config data
+ */
+function getEslintAllConfig() {
+    return import("../fixtures/eslint-all.cjs");
+}
+
+/**
+ * Return config data for built-in eslint:recommended.
+ * @returns {ConfigData} Config data
+ */
+function getEslintRecommendedConfig() {
+    return import("../fixtures/eslint-recommended.cjs");
+}
 
 /**
  * Assert a config array element.
@@ -953,7 +973,7 @@ describe("ConfigArrayFactory", () => {
 
                 factory = new ConfigArrayFactory({
                     cwd: getPath(),
-                    eslintAllPath,
+                    getEslintAllConfig,
                     eslintRecommendedPath
                 });
             });
@@ -1595,7 +1615,7 @@ describe("ConfigArrayFactory", () => {
             factory = new ConfigArrayFactory({
                 cwd: getPath(),
                 eslintAllPath,
-                eslintRecommendedPath
+                getEslintRecommendedConfig
             });
         });
 
