@@ -7,17 +7,19 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import os from "os";
 import { assert } from "chai";
+import fs from "fs";
+import os from "os";
+import path from "path";
 import sh from "shelljs";
 import sinon from "sinon";
 import systemTempDir from "temp-dir";
+import { fileURLToPath } from "url";
 
 import { Legacy } from "../../lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
+import eslintAllConfig from "../fixtures/eslint-all.cjs";
+import eslintRecommendedConfig from "../fixtures/eslint-recommended.cjs";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,9 +39,6 @@ const cwdIgnorePatterns = new ConfigArrayFactory()
     .loadDefaultESLintIgnore()[0]
     .ignorePattern
     .patterns;
-
-const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
-const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 
 //-----------------------------------------------------------------------------
 // Tests
@@ -657,8 +656,8 @@ describe("CascadingConfigArrayFactory", () => {
                     cwd: fixtureDir,
                     baseConfig: customBaseConfig,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const config = getConfig(factory);
 
@@ -677,8 +676,8 @@ describe("CascadingConfigArrayFactory", () => {
             // TODO: Tests should not rely on project files!!!
             it("should return the project config when called in current working directory", () => {
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const actual = getConfig(factory);
 
@@ -689,8 +688,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const firstpath = path.resolve(dirname, "../fixtures/configurations/single-quotes/subdir/.eslintrc");
                 const secondpath = path.resolve(dirname, "../fixtures/configurations/single-quotes/.eslintrc");
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 let config;
 
@@ -703,8 +702,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should throw error when a configuration file doesn't exist", () => {
                 const configPath = path.resolve(dirname, "../fixtures/configurations/.eslintrc");
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
 
                 sinon.stub(fs, "readFileSync").throws(new Error());
@@ -718,8 +717,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should throw error when a configuration file is not require-able", () => {
                 const configPath = ".eslintrc";
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
 
                 sinon.stub(fs, "readFileSync").throws(new Error());
@@ -735,8 +734,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const configArrayFactory = new ConfigArrayFactory();
                 const factory = new CascadingConfigArrayFactory({
                     configArrayFactory,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
 
                 sinon.spy(configArrayFactory, "loadInDirectory");
@@ -756,8 +755,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const config = getConfig(factory);
                 const { semi, strict } = config.rules;
@@ -772,8 +771,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const config = getConfig(factory);
                 const { "no-alert": noAlert, "no-undef": noUndef } = config.rules;
@@ -785,8 +784,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should contain the correct value for parser when a custom parser is specified", () => {
                 const configPath = path.resolve(dirname, "../fixtures/configurations/parser/.eslintrc.json");
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const config = getConfig(factory, configPath);
 
@@ -800,8 +799,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should correctly merge environment settings", () => {
                 const factory = new CascadingConfigArrayFactory({
                     useEslintrc: true,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("envs", "sub", "foo.js");
                 const expected = {
@@ -821,8 +820,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should return a blank config when using no .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -840,8 +839,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     baseConfig: false,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -859,8 +858,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should return an empty config when not using .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const actual = getConfig(factory, file);
@@ -879,8 +878,8 @@ describe("CascadingConfigArrayFactory", () => {
                         }
                     },
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -910,8 +909,8 @@ describe("CascadingConfigArrayFactory", () => {
                     },
                     cwd: getFixturePath("plugins"),
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "plugins", "console-wrong-quotes.js");
                 const expected = {
@@ -931,8 +930,8 @@ describe("CascadingConfigArrayFactory", () => {
             // Project configuration - second level .eslintrc
             it("should merge configs when local .eslintrc overrides parent .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "subbroken", "console-wrong-quotes.js");
                 const expected = {
@@ -953,8 +952,8 @@ describe("CascadingConfigArrayFactory", () => {
             // Project configuration - third level .eslintrc
             it("should merge configs when local .eslintrc overrides parent and grandparent .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "subbroken", "subsubbroken", "console-wrong-quotes.js");
                 const expected = {
@@ -975,8 +974,8 @@ describe("CascadingConfigArrayFactory", () => {
             // Project configuration - root set in second level .eslintrc
             it("should not return or traverse configurations in parents of config with root:true", () => {
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("root-true", "parent", "root", "wrong-semi.js");
                 const expected = {
@@ -994,8 +993,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should return project config when called with a relative path from a subdir", () => {
                 const factory = new CascadingConfigArrayFactory({
                     cwd: getFixturePath("root-true", "parent", "root", "subdir"),
-                    eslintRecommendedPath,
-                    eslintAllPath
+                    eslintRecommendedConfig,
+                    eslintAllConfig
                 });
                 const dir = ".";
                 const expected = {
@@ -1012,8 +1011,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should merge command line config when config file adds to local .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: getFixturePath("broken", "add-conf.yaml"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -1035,8 +1034,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should merge command line config when config file overrides local .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: getFixturePath("broken", "override-conf.yaml"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -1057,8 +1056,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should merge command line config when config file adds to local and parent .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: getFixturePath("broken", "add-conf.yaml"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "subbroken", "console-wrong-quotes.js");
                 const expected = {
@@ -1081,8 +1080,8 @@ describe("CascadingConfigArrayFactory", () => {
             it("should merge command line config when config file overrides local and parent .eslintrc", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: getFixturePath("broken", "override-conf.yaml"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "subbroken", "console-wrong-quotes.js");
                 const expected = {
@@ -1109,8 +1108,8 @@ describe("CascadingConfigArrayFactory", () => {
                         }
                     },
                     specificConfigPath: getFixturePath("broken", "override-conf.yaml"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "console-wrong-quotes.js");
                 const expected = {
@@ -1135,8 +1134,8 @@ describe("CascadingConfigArrayFactory", () => {
                     },
                     cwd: getFixturePath("plugins"),
                     resolvePluginsRelativeTo: getFixturePath("plugins"),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("broken", "plugins", "console-wrong-quotes.js");
                 const expected = {
@@ -1159,8 +1158,8 @@ describe("CascadingConfigArrayFactory", () => {
 
             it("should merge multiple different config file formats", () => {
                 const factory = new CascadingConfigArrayFactory({
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const file = getFixturePath("fileexts/subdir/subsubdir/foo.js");
                 const expected = {
@@ -1184,8 +1183,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: configPath,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const expected = {
                     globals: {
@@ -1203,8 +1202,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: configPath,
                     useEslintrc: false,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const config = getConfig(factory, configPath);
 
@@ -1215,8 +1214,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const configPath = path.resolve(dirname, "../fixtures/configurations/env-node.json");
                 const factory = new CascadingConfigArrayFactory({
                     specificConfigPath: configPath,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
 
                 getConfig(factory, path.resolve(dirname, "../fixtures/configurations/empty/empty.json"));
@@ -1230,8 +1229,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const factory = new CascadingConfigArrayFactory({
                         useEslintrc: false,
                         specificConfigPath: configPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     getConfig(factory, configPath);
@@ -1244,8 +1243,8 @@ describe("CascadingConfigArrayFactory", () => {
                 const factory = new CascadingConfigArrayFactory({
                     useEslintrc: false,
                     specificConfigPath: configPath,
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
                 const expected = {
                     rules: { "no-empty": [1], "comma-dangle": [2], "no-console": [2] },
@@ -1260,8 +1259,8 @@ describe("CascadingConfigArrayFactory", () => {
             describe("with env in a child configuration file", () => {
                 it("should not overwrite parserOptions of the parent with env of the child", () => {
                     const factory = new CascadingConfigArrayFactory({
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const targetPath = getFixturePath("overwrite-ecmaFeatures", "child", "foo.js");
                     const expected = {
@@ -1306,8 +1305,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1328,8 +1327,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const filePath = getFakeFixturePath("personal-config", "home-folder", "project", "foo.js");
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1352,8 +1351,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
                         specificConfigPath: configPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1373,8 +1372,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const filePath = getFakeFixturePath("personal-config", "project-with-config", "subfolder", "foo.js");
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(projectPath);
@@ -1421,8 +1420,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1438,8 +1437,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const filePath = getFakeFixturePath("personal-config", "project-without-config", "foo.js");
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1456,8 +1455,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const factory = new CascadingConfigArrayFactory({
                         cwd: projectPath,
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1474,8 +1473,8 @@ describe("CascadingConfigArrayFactory", () => {
                             rules: { quotes: [2, "single"] }
                         },
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1490,8 +1489,8 @@ describe("CascadingConfigArrayFactory", () => {
                     const factory = new CascadingConfigArrayFactory({
                         baseConfig: {},
                         cwd: projectPath,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
 
                     mockOsHomedir(homePath);
@@ -1527,8 +1526,8 @@ describe("CascadingConfigArrayFactory", () => {
                 it("should merge override config when the pattern matches the file name", () => {
                     const factory = new CascadingConfigArrayFactory({
                         cwd: getPath(),
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const targetPath = getFakeFixturePath("overrides", "foo.js");
                     const expected = {
@@ -1547,8 +1546,8 @@ describe("CascadingConfigArrayFactory", () => {
                 it("should merge override config when the pattern matches the file path relative to the config file", () => {
                     const factory = new CascadingConfigArrayFactory({
                         cwd: getPath(),
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const targetPath = getFakeFixturePath("overrides", "child", "child-one.js");
                     const expected = {
@@ -1579,8 +1578,8 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     }), /Invalid override pattern/u);
                 });
 
@@ -1597,16 +1596,16 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     }), /Invalid override pattern/u);
                 });
 
                 it("should merge all local configs (override and non-override) before non-local configs", () => {
                     const factory = new CascadingConfigArrayFactory({
                         cwd: getPath(),
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const targetPath = getFakeFixturePath("overrides", "two", "child-two.js");
                     const expected = {
@@ -1638,8 +1637,8 @@ describe("CascadingConfigArrayFactory", () => {
                             ]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {
@@ -1664,8 +1663,8 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {
@@ -1690,8 +1689,8 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {
@@ -1717,8 +1716,8 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {}
@@ -1742,8 +1741,8 @@ describe("CascadingConfigArrayFactory", () => {
                             }]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {
@@ -1778,8 +1777,8 @@ describe("CascadingConfigArrayFactory", () => {
                             ]
                         },
                         useEslintrc: false,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     const expected = {
                         rules: {
@@ -1814,8 +1813,8 @@ describe("CascadingConfigArrayFactory", () => {
                 beforeEach(() => {
                     factory = new CascadingConfigArrayFactory({
                         cwd,
-                        eslintAllPath,
-                        eslintRecommendedPath
+                        eslintAllConfig,
+                        eslintRecommendedConfig
                     });
                     warning = null;
                     process.on("warning", onWarning);
@@ -1956,8 +1955,8 @@ describe("CascadingConfigArrayFactory", () => {
                     cwd: getPath(),
                     additionalPluginPool,
                     cliConfig: { plugins: ["test"] },
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
             });
 

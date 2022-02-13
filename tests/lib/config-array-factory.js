@@ -7,20 +7,22 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
+import { assert } from "chai";
 import fs from "fs";
 import { createRequire } from "module";
-import { assert } from "chai";
+import path from "path";
 import sinon from "sinon";
+import systemTempDir from "temp-dir";
+import { fileURLToPath } from "url";
+
 import { Legacy } from "../../lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
-import systemTempDir from "temp-dir";
+import eslintAllConfig from "../fixtures/eslint-all.cjs";
+import eslintRecommendedConfig from "../fixtures/eslint-recommended.cjs";
 
 const require = createRequire(import.meta.url);
 
 const fileName = fileURLToPath(import.meta.url);
-const dirname = path.dirname(fileName);
 const { spy } = sinon;
 
 const {
@@ -34,8 +36,6 @@ const {
 // Helpers
 //-----------------------------------------------------------------------------
 
-const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
-const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
 
 /**
@@ -953,8 +953,8 @@ describe("ConfigArrayFactory", () => {
 
                 factory = new ConfigArrayFactory({
                     cwd: getPath(),
-                    eslintAllPath,
-                    eslintRecommendedPath
+                    eslintAllConfig,
+                    eslintRecommendedConfig
                 });
             });
 
@@ -1023,8 +1023,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:all' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
-                        filePath: eslintAllPath,
-                        ...(await import(pathToFileURL(eslintAllPath))).default
+                        ...eslintAllConfig
                     });
                 });
 
@@ -1053,8 +1052,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:recommended' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:recommended",
-                        filePath: eslintRecommendedPath,
-                        ...(await import(pathToFileURL(eslintRecommendedPath))).default
+                        ...eslintRecommendedConfig
                     });
                 });
 
@@ -1594,8 +1592,8 @@ describe("ConfigArrayFactory", () => {
             await prepare();
             factory = new ConfigArrayFactory({
                 cwd: getPath(),
-                eslintAllPath,
-                eslintRecommendedPath
+                eslintAllConfig,
+                eslintRecommendedConfig
             });
         });
 
@@ -1809,7 +1807,7 @@ describe("ConfigArrayFactory", () => {
         let cleanup;
 
         beforeEach(() => {
-            cleanup = () => {};
+            cleanup = () => { };
         });
 
         afterEach(() => cleanup());
@@ -2508,7 +2506,18 @@ env:
             try {
                 load(factory, "invalid/invalid-top-level-property.yml");
             } catch (err) {
-                assert.include(err.message, `ESLint configuration in ${`invalid${path.sep}invalid-top-level-property.yml`} is invalid`);
+
+                /**
+                 * Received error message is:
+                 *
+                 * ```
+                 * ESLint configuration: {
+                 *   "invalidProperty": 3
+                 * } in invalid/invalid-top-level-property.yml is invalid:
+                 * - Unexpected top-level property "invalidProperty".
+                 * ```
+                 */
+                assert.include(err.message, `${`invalid${path.sep}invalid-top-level-property.yml`} is invalid`);
                 return;
             }
             assert.fail();

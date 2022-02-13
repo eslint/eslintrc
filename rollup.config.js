@@ -1,3 +1,5 @@
+import commonjs from "@rollup/plugin-commonjs";
+
 export default [
     {
         input: "./lib/index.js",
@@ -12,7 +14,8 @@ export default [
             file: "dist/eslintrc.cjs",
             sourcemap: true,
             freeze: false
-        }
+        },
+        plugins: [commonjs()]
     },
     {
         input: "./lib/index-universal.js",
@@ -27,6 +30,7 @@ export default [
             file: "dist/eslintrc-universal.cjs",
             sourcemap: true,
             freeze: false
-        }
+        },
+        plugins: [commonjs()]
     }
 ];
