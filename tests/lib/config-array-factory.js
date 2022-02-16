@@ -47,7 +47,7 @@ const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
  * @returns {ConfigData} Config data
  */
 function getEslintAllConfig() {
-    return import("../fixtures/eslint-all.cjs");
+    return require("../fixtures/eslint-all.cjs");
 }
 
 /**
@@ -55,7 +55,7 @@ function getEslintAllConfig() {
  * @returns {ConfigData} Config data
  */
 function getEslintRecommendedConfig() {
-    return import("../fixtures/eslint-recommended.cjs");
+    return require("../fixtures/eslint-recommended.cjs");
 }
 
 /**
@@ -1043,8 +1043,7 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:all' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
-                        filePath: eslintAllPath,
-                        ...(await import(pathToFileURL(eslintAllPath))).default
+                        ...getEslintAllConfig()
                     });
                 });
 
@@ -1608,217 +1607,436 @@ describe("ConfigArrayFactory", () => {
             "yaml/.eslintrc.yaml": "env:\n    browser: true"
         };
         const { prepare, cleanup, getPath } = createCustomTeardown({ cwd: tempDir, files });
-        let factory;
 
-        beforeEach(async () => {
-            await prepare();
-            factory = new ConfigArrayFactory({
-                cwd: getPath(),
-                eslintAllPath,
-                getEslintRecommendedConfig
-            });
-        });
+        describe("with eslint built-in config paths", () => {
+            let factory;
 
-        afterEach(cleanup);
-
-        /**
-         * Apply `extends` property.
-         * @param {Object} configData The config that has `extends` property.
-         * @param {string} [filePath] The path to the config data.
-         * @returns {Object} The applied config data.
-         */
-        function applyExtends(configData, filePath = "whatever") {
-            return factory
-                .create(configData, { filePath })
-                .extractConfig(filePath)
-                .toCompatibleObjectAsConfigFileContent();
-        }
-
-        it("should apply extension 'foo' when specified from root directory config", () => {
-            const config = applyExtends({
-                extends: "foo",
-                rules: { eqeqeq: 2 }
+            beforeEach(async () => {
+                await prepare();
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    eslintAllPath,
+                    eslintRecommendedPath
+                });
             });
 
-            assertConfig(config, {
-                env: { browser: true },
-                rules: { eqeqeq: [2] }
-            });
-        });
+            afterEach(cleanup);
 
-        it("should apply all rules when extends config includes 'eslint:all'", () => {
-            const config = applyExtends({
-                extends: "eslint:all"
-            });
-
-            assert.strictEqual(config.rules.eqeqeq[0], "error");
-            assert.strictEqual(config.rules.curly[0], "error");
-        });
-
-        it("should throw an error when extends config module is not found", () => {
-            assert.throws(() => {
-                applyExtends({
-                    extends: "not-exist",
-                    rules: { eqeqeq: 2 }
-                });
-            }, /Failed to load config "not-exist" to extend from./u);
-        });
-
-        it("should throw an error when an eslint config is not found", () => {
-            assert.throws(() => {
-                applyExtends({
-                    extends: "eslint:foo",
-                    rules: { eqeqeq: 2 }
-                });
-            }, /Failed to load config "eslint:foo" to extend from./u);
-        });
-
-        it("should throw an error when a parser in a plugin config is not found", () => {
-            assert.throws(() => {
-                applyExtends({
-                    extends: "plugin:invalid-parser/foo",
-                    rules: { eqeqeq: 2 }
-                });
-            }, /Failed to load parser 'nonexistent-parser' declared in 'whatever » plugin:invalid-parser\/foo'/u);
-        });
-
-        it("should fall back to default parser when a parser called 'espree' is not found", async () => {
-            const config = applyExtends({ parser: "espree" });
-
-            assertConfig(config, {
-
-                // parser: await import.meta.resolve("espree")
-                parser: require.resolve("espree")
-            });
-        });
-
-        it("should throw an error when a plugin config is not found", () => {
-            assert.throws(() => {
-                applyExtends({
-                    extends: "plugin:invalid-config/bar",
-                    rules: { eqeqeq: 2 }
-                });
-            }, /Failed to load config "plugin:invalid-config\/bar" to extend from./u);
-        });
-
-        it("should throw an error with a message template when a plugin config specifier is missing config name", () => {
-            try {
-                applyExtends({
-                    extends: "plugin:some-plugin",
-                    rules: { eqeqeq: 2 }
-                });
-            } catch (err) {
-                assert.strictEqual(err.messageTemplate, "plugin-invalid");
-                assert.deepStrictEqual(err.messageData, {
-                    configName: "plugin:some-plugin",
-                    importerName: path.join(getPath(), "whatever")
-                });
-                return;
-            }
-            assert.fail("Expected to throw an error");
-        });
-
-        it("should throw an error with a message template when a plugin referenced for a plugin config is not found", () => {
-            try {
-                applyExtends({
-                    extends: "plugin:nonexistent-plugin/baz",
-                    rules: { eqeqeq: 2 }
-                });
-            } catch (err) {
-                assert.strictEqual(err.messageTemplate, "plugin-missing");
-                assert.deepStrictEqual(err.messageData, {
-                    pluginName: "eslint-plugin-nonexistent-plugin",
-                    resolvePluginsRelativeTo: getPath(),
-                    importerName: "whatever"
-                });
-                return;
+            /**
+             * Apply `extends` property.
+             * @param {Object} configData The config that has `extends` property.
+             * @param {string} [filePath] The path to the config data.
+             * @returns {Object} The applied config data.
+             */
+            function applyExtends(configData, filePath = "whatever") {
+                return factory
+                    .create(configData, { filePath })
+                    .extractConfig(filePath)
+                    .toCompatibleObjectAsConfigFileContent();
             }
 
-            assert.fail("Expected to throw an error");
+            it("should apply extension 'foo' when specified from root directory config", () => {
+                const config = applyExtends({
+                    extends: "foo",
+                    rules: { eqeqeq: 2 }
+                });
+
+                assertConfig(config, {
+                    env: { browser: true },
+                    rules: { eqeqeq: [2] }
+                });
+            });
+
+            it("should apply all rules when extends config includes 'eslint:all'", () => {
+                const config = applyExtends({
+                    extends: "eslint:all"
+                });
+
+                assert.strictEqual(config.rules.eqeqeq[0], "error");
+                assert.strictEqual(config.rules.curly[0], "error");
+            });
+
+            it("should throw an error when extends config module is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "not-exist",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "not-exist" to extend from./u);
+            });
+
+            it("should throw an error when an eslint config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "eslint:foo",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "eslint:foo" to extend from./u);
+            });
+
+            it("should throw an error when a parser in a plugin config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "plugin:invalid-parser/foo",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load parser 'nonexistent-parser' declared in 'whatever » plugin:invalid-parser\/foo'/u);
+            });
+
+            it("should fall back to default parser when a parser called 'espree' is not found", async () => {
+                const config = applyExtends({ parser: "espree" });
+
+                assertConfig(config, {
+
+                    // parser: await import.meta.resolve("espree")
+                    parser: require.resolve("espree")
+                });
+            });
+
+            it("should throw an error when a plugin config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "plugin:invalid-config/bar",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "plugin:invalid-config\/bar" to extend from./u);
+            });
+
+            it("should throw an error with a message template when a plugin config specifier is missing config name", () => {
+                try {
+                    applyExtends({
+                        extends: "plugin:some-plugin",
+                        rules: { eqeqeq: 2 }
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-invalid");
+                    assert.deepStrictEqual(err.messageData, {
+                        configName: "plugin:some-plugin",
+                        importerName: path.join(getPath(), "whatever")
+                    });
+                    return;
+                }
+                assert.fail("Expected to throw an error");
+            });
+
+            it("should throw an error with a message template when a plugin referenced for a plugin config is not found", () => {
+                try {
+                    applyExtends({
+                        extends: "plugin:nonexistent-plugin/baz",
+                        rules: { eqeqeq: 2 }
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-missing");
+                    assert.deepStrictEqual(err.messageData, {
+                        pluginName: "eslint-plugin-nonexistent-plugin",
+                        resolvePluginsRelativeTo: getPath(),
+                        importerName: "whatever"
+                    });
+                    return;
+                }
+
+                assert.fail("Expected to throw an error");
+            });
+
+            it("should throw an error with a message template when a plugin in the plugins list is not found", () => {
+                try {
+                    applyExtends({
+                        plugins: ["nonexistent-plugin"]
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-missing");
+                    assert.deepStrictEqual(err.messageData, {
+                        pluginName: "eslint-plugin-nonexistent-plugin",
+                        resolvePluginsRelativeTo: getPath(),
+                        importerName: "whatever"
+                    });
+                    return;
+                }
+                assert.fail("Expected to throw an error");
+            });
+
+            it("should apply extensions recursively when specified from package", () => {
+                const config = applyExtends({
+                    extends: "one",
+                    rules: { eqeqeq: 2 }
+                });
+
+                assertConfig(config, {
+                    env: { browser: true, node: true },
+                    rules: { eqeqeq: [2] }
+                });
+            });
+
+            it("should apply extensions when specified from a JavaScript file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.js",
+                    rules: { eqeqeq: 2 }
+                }, "js/foo.js");
+
+                assertConfig(config, {
+                    rules: {
+                        semi: [2, "always"],
+                        eqeqeq: [2]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a YAML file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.yaml",
+                    rules: { eqeqeq: 2 }
+                }, "yaml/foo.js");
+
+                assertConfig(config, {
+                    env: { browser: true },
+                    rules: {
+                        eqeqeq: [2]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a JSON file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.json",
+                    rules: { eqeqeq: 2 }
+                }, "json/foo.js");
+
+                assertConfig(config, {
+                    rules: {
+                        eqeqeq: [2],
+                        quotes: [2, "double"]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a package.json file in a sibling directory", () => {
+                const config = applyExtends({
+                    extends: "../package-json/package.json",
+                    rules: { eqeqeq: 2 }
+                }, "json/foo.js");
+
+                assertConfig(config, {
+                    env: { es6: true },
+                    rules: {
+                        eqeqeq: [2]
+                    }
+                });
+            });
         });
 
-        it("should throw an error with a message template when a plugin in the plugins list is not found", () => {
-            try {
-                applyExtends({
-                    plugins: ["nonexistent-plugin"]
+        describe("with eslint built-in config callbacks", () => {
+            let factory;
+
+            beforeEach(async () => {
+                await prepare();
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    getEslintAllConfig,
+                    getEslintRecommendedConfig
                 });
-            } catch (err) {
-                assert.strictEqual(err.messageTemplate, "plugin-missing");
-                assert.deepStrictEqual(err.messageData, {
-                    pluginName: "eslint-plugin-nonexistent-plugin",
-                    resolvePluginsRelativeTo: getPath(),
-                    importerName: "whatever"
-                });
-                return;
+            });
+
+            afterEach(cleanup);
+
+            /**
+             * Apply `extends` property.
+             * @param {Object} configData The config that has `extends` property.
+             * @param {string} [filePath] The path to the config data.
+             * @returns {Object} The applied config data.
+             */
+            function applyExtends(configData, filePath = "whatever") {
+                return factory
+                    .create(configData, { filePath })
+                    .extractConfig(filePath)
+                    .toCompatibleObjectAsConfigFileContent();
             }
-            assert.fail("Expected to throw an error");
-        });
 
-        it("should apply extensions recursively when specified from package", () => {
-            const config = applyExtends({
-                extends: "one",
-                rules: { eqeqeq: 2 }
+            it("should apply extension 'foo' when specified from root directory config", () => {
+                const config = applyExtends({
+                    extends: "foo",
+                    rules: { eqeqeq: 2 }
+                });
+
+                assertConfig(config, {
+                    env: { browser: true },
+                    rules: { eqeqeq: [2] }
+                });
             });
 
-            assertConfig(config, {
-                env: { browser: true, node: true },
-                rules: { eqeqeq: [2] }
+            it("should apply all rules when extends config includes 'eslint:all'", () => {
+                const config = applyExtends({
+                    extends: "eslint:all"
+                });
+
+                assert.strictEqual(config.rules.eqeqeq[0], "error");
+                assert.strictEqual(config.rules.curly[0], "error");
             });
-        });
 
-        it("should apply extensions when specified from a JavaScript file", () => {
-            const config = applyExtends({
-                extends: ".eslintrc.js",
-                rules: { eqeqeq: 2 }
-            }, "js/foo.js");
+            it("should throw an error when extends config module is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "not-exist",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "not-exist" to extend from./u);
+            });
 
-            assertConfig(config, {
-                rules: {
-                    semi: [2, "always"],
-                    eqeqeq: [2]
+            it("should throw an error when an eslint config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "eslint:foo",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "eslint:foo" to extend from./u);
+            });
+
+            it("should throw an error when a parser in a plugin config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "plugin:invalid-parser/foo",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load parser 'nonexistent-parser' declared in 'whatever » plugin:invalid-parser\/foo'/u);
+            });
+
+            it("should fall back to default parser when a parser called 'espree' is not found", async () => {
+                const config = applyExtends({ parser: "espree" });
+
+                assertConfig(config, {
+
+                    // parser: await import.meta.resolve("espree")
+                    parser: require.resolve("espree")
+                });
+            });
+
+            it("should throw an error when a plugin config is not found", () => {
+                assert.throws(() => {
+                    applyExtends({
+                        extends: "plugin:invalid-config/bar",
+                        rules: { eqeqeq: 2 }
+                    });
+                }, /Failed to load config "plugin:invalid-config\/bar" to extend from./u);
+            });
+
+            it("should throw an error with a message template when a plugin config specifier is missing config name", () => {
+                try {
+                    applyExtends({
+                        extends: "plugin:some-plugin",
+                        rules: { eqeqeq: 2 }
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-invalid");
+                    assert.deepStrictEqual(err.messageData, {
+                        configName: "plugin:some-plugin",
+                        importerName: path.join(getPath(), "whatever")
+                    });
+                    return;
                 }
+                assert.fail("Expected to throw an error");
             });
-        });
 
-        it("should apply extensions when specified from a YAML file", () => {
-            const config = applyExtends({
-                extends: ".eslintrc.yaml",
-                rules: { eqeqeq: 2 }
-            }, "yaml/foo.js");
-
-            assertConfig(config, {
-                env: { browser: true },
-                rules: {
-                    eqeqeq: [2]
+            it("should throw an error with a message template when a plugin referenced for a plugin config is not found", () => {
+                try {
+                    applyExtends({
+                        extends: "plugin:nonexistent-plugin/baz",
+                        rules: { eqeqeq: 2 }
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-missing");
+                    assert.deepStrictEqual(err.messageData, {
+                        pluginName: "eslint-plugin-nonexistent-plugin",
+                        resolvePluginsRelativeTo: getPath(),
+                        importerName: "whatever"
+                    });
+                    return;
                 }
+
+                assert.fail("Expected to throw an error");
             });
-        });
 
-        it("should apply extensions when specified from a JSON file", () => {
-            const config = applyExtends({
-                extends: ".eslintrc.json",
-                rules: { eqeqeq: 2 }
-            }, "json/foo.js");
-
-            assertConfig(config, {
-                rules: {
-                    eqeqeq: [2],
-                    quotes: [2, "double"]
+            it("should throw an error with a message template when a plugin in the plugins list is not found", () => {
+                try {
+                    applyExtends({
+                        plugins: ["nonexistent-plugin"]
+                    });
+                } catch (err) {
+                    assert.strictEqual(err.messageTemplate, "plugin-missing");
+                    assert.deepStrictEqual(err.messageData, {
+                        pluginName: "eslint-plugin-nonexistent-plugin",
+                        resolvePluginsRelativeTo: getPath(),
+                        importerName: "whatever"
+                    });
+                    return;
                 }
+                assert.fail("Expected to throw an error");
             });
-        });
 
-        it("should apply extensions when specified from a package.json file in a sibling directory", () => {
-            const config = applyExtends({
-                extends: "../package-json/package.json",
-                rules: { eqeqeq: 2 }
-            }, "json/foo.js");
+            it("should apply extensions recursively when specified from package", () => {
+                const config = applyExtends({
+                    extends: "one",
+                    rules: { eqeqeq: 2 }
+                });
 
-            assertConfig(config, {
-                env: { es6: true },
-                rules: {
-                    eqeqeq: [2]
-                }
+                assertConfig(config, {
+                    env: { browser: true, node: true },
+                    rules: { eqeqeq: [2] }
+                });
+            });
+
+            it("should apply extensions when specified from a JavaScript file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.js",
+                    rules: { eqeqeq: 2 }
+                }, "js/foo.js");
+
+                assertConfig(config, {
+                    rules: {
+                        semi: [2, "always"],
+                        eqeqeq: [2]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a YAML file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.yaml",
+                    rules: { eqeqeq: 2 }
+                }, "yaml/foo.js");
+
+                assertConfig(config, {
+                    env: { browser: true },
+                    rules: {
+                        eqeqeq: [2]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a JSON file", () => {
+                const config = applyExtends({
+                    extends: ".eslintrc.json",
+                    rules: { eqeqeq: 2 }
+                }, "json/foo.js");
+
+                assertConfig(config, {
+                    rules: {
+                        eqeqeq: [2],
+                        quotes: [2, "double"]
+                    }
+                });
+            });
+
+            it("should apply extensions when specified from a package.json file in a sibling directory", () => {
+                const config = applyExtends({
+                    extends: "../package-json/package.json",
+                    rules: { eqeqeq: 2 }
+                }, "json/foo.js");
+
+                assertConfig(config, {
+                    env: { es6: true },
+                    rules: {
+                        eqeqeq: [2]
+                    }
+                });
             });
         });
     });
@@ -1829,7 +2047,7 @@ describe("ConfigArrayFactory", () => {
         let cleanup;
 
         beforeEach(() => {
-            cleanup = () => {};
+            cleanup = () => { };
         });
 
         afterEach(() => cleanup());
