@@ -13,16 +13,18 @@ import { createRequire } from "module";
 import path from "path";
 import sinon from "sinon";
 import systemTempDir from "temp-dir";
-import { fileURLToPath } from "url";
+import {
+    fileURLToPath,
+    pathToFileURL
+} from "url";
 
 import { Legacy } from "../../lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
-import eslintAllConfig from "../fixtures/eslint-all.cjs";
-import eslintRecommendedConfig from "../fixtures/eslint-recommended.cjs";
 
 const require = createRequire(import.meta.url);
 
 const fileName = fileURLToPath(import.meta.url);
+const dirname = path.dirname(fileName);
 const { spy } = sinon;
 
 const {
@@ -36,7 +38,25 @@ const {
 // Helpers
 //-----------------------------------------------------------------------------
 
+const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
+const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
 const tempDir = path.join(systemTempDir, "eslintrc/config-array-factory");
+
+/**
+ * Return config data for built-in eslint:all.
+ * @returns {ConfigData} Config data
+ */
+function getEslintAllConfig() {
+    return import("../fixtures/eslint-all.cjs");
+}
+
+/**
+ * Return config data for built-in eslint:recommended.
+ * @returns {ConfigData} Config data
+ */
+function getEslintRecommendedConfig() {
+    return import("../fixtures/eslint-recommended.cjs");
+}
 
 /**
  * Assert a config array element.
@@ -953,8 +973,8 @@ describe("ConfigArrayFactory", () => {
 
                 factory = new ConfigArrayFactory({
                     cwd: getPath(),
-                    eslintAllConfig,
-                    eslintRecommendedConfig
+                    getEslintAllConfig,
+                    eslintRecommendedPath
                 });
             });
 
@@ -1023,7 +1043,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:all' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:all",
-                        ...eslintAllConfig
+                        filePath: eslintAllPath,
+                        ...(await import(pathToFileURL(eslintAllPath))).default
                     });
                 });
 
@@ -1052,7 +1073,8 @@ describe("ConfigArrayFactory", () => {
                 it("should have the config data of 'eslint:recommended' at the first element.", async () => {
                     assertConfigArrayElement(configArray[0], {
                         name: ".eslintrc » eslint:recommended",
-                        ...eslintRecommendedConfig
+                        filePath: eslintRecommendedPath,
+                        ...(await import(pathToFileURL(eslintRecommendedPath))).default
                     });
                 });
 
@@ -1592,8 +1614,8 @@ describe("ConfigArrayFactory", () => {
             await prepare();
             factory = new ConfigArrayFactory({
                 cwd: getPath(),
-                eslintAllConfig,
-                eslintRecommendedConfig
+                eslintAllPath,
+                getEslintRecommendedConfig
             });
         });
 
@@ -1807,7 +1829,7 @@ describe("ConfigArrayFactory", () => {
         let cleanup;
 
         beforeEach(() => {
-            cleanup = () => { };
+            cleanup = () => {};
         });
 
         afterEach(() => cleanup());
@@ -2506,18 +2528,7 @@ env:
             try {
                 load(factory, "invalid/invalid-top-level-property.yml");
             } catch (err) {
-
-                /**
-                 * Received error message is:
-                 *
-                 * ```
-                 * ESLint configuration: {
-                 *   "invalidProperty": 3
-                 * } in invalid/invalid-top-level-property.yml is invalid:
-                 * - Unexpected top-level property "invalidProperty".
-                 * ```
-                 */
-                assert.include(err.message, `${`invalid${path.sep}invalid-top-level-property.yml`} is invalid`);
+                assert.include(err.message, `ESLint configuration in ${`invalid${path.sep}invalid-top-level-property.yml`} is invalid`);
                 return;
             }
             assert.fail();
