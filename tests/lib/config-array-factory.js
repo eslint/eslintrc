@@ -2143,17 +2143,6 @@ describe("ConfigArrayFactory", () => {
         describe("with eslint built-in config callbacks", () => {
             let factory;
 
-            beforeEach(async () => {
-                await prepare();
-                factory = new ConfigArrayFactory({
-                    cwd: getPath(),
-                    getEslintAllConfig,
-                    getEslintRecommendedConfig
-                });
-            });
-
-            afterEach(cleanup);
-
             /**
              * Apply `extends` property.
              * @param {Object} configData The config that has `extends` property.
@@ -2166,6 +2155,42 @@ describe("ConfigArrayFactory", () => {
                     .extractConfig(filePath)
                     .toCompatibleObjectAsConfigFileContent();
             }
+
+            describe("with incorrect getConfig callbacks", () => {
+                beforeEach(async () => {
+                    await prepare();
+                    factory = new ConfigArrayFactory({
+                        cwd: getPath(),
+                        getEslintAllConfig: true,
+                        getEslintRecommendedConfig: 12345
+                    });
+                });
+
+                afterEach(cleanup);
+
+                it("should throw error when extends config includes 'eslint:all'", () => {
+                    assert.throws(() => {
+                        applyExtends({ extends: "eslint:all" });
+                    }, /getEslintAllConfig must be a function instead of .*/u);
+                });
+
+                it("should throw error when extends config includes 'eslint:recommended'", () => {
+                    assert.throws(() => {
+                        applyExtends({ extends: "eslint:recommended" });
+                    }, /getEslintRecommendedConfig must be a function instead of .*/u);
+                });
+            });
+
+            beforeEach(async () => {
+                await prepare();
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    getEslintAllConfig,
+                    getEslintRecommendedConfig
+                });
+            });
+
+            afterEach(cleanup);
 
             it("should apply extension 'foo' when specified from root directory config", () => {
                 const config = applyExtends({
