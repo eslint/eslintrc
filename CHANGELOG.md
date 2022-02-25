@@ -1,3 +1,7 @@
+v1.2.0 - February 25, 2022
+
+* [`9b71981`](https://github.com/eslint/eslintrc/commit/9b719813fc6f023b722168a4f67d895106e875ce) feat: Avoid dirname for built-in configs (#71) (DoZerg)
+
 v1.1.0 - February 11, 2022
 
 * [`0f17fb1`](https://github.com/eslint/eslintrc/commit/0f17fb1077834f873bb31de950aa6eec38a0f8f3) chore: Upgrade to espree@9.3.1 (#69) (Milos Djermanovic)
