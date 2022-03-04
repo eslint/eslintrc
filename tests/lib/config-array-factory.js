@@ -793,13 +793,6 @@ describe("ConfigArrayFactory", () => {
 
             beforeEach(prepare);
             afterEach(cleanup);
-
-            it("should throw an error if a 'plugins' value is a file path.", () => {
-                assert.throws(() => {
-                    create({ plugins: ["./path/to/plugin"] });
-                }, /Plugins array cannot includes file paths/u);
-            });
-
             describe("if the 'plugins' property was a valid package, the first config array element", () => {
                 let element;
 
@@ -1003,15 +996,6 @@ describe("ConfigArrayFactory", () => {
                             rules: { eqeqeq: 2 }
                         });
                     }, /xxx error/u);
-                });
-
-                it("should throw an error when a plugin extend is a file path.", () => {
-                    assert.throws(() => {
-                        create({
-                            extends: "plugin:./path/to/foo",
-                            rules: { eqeqeq: 2 }
-                        });
-                    }, /'extends' cannot use a file path for plugins/u);
                 });
 
                 it("should throw an error when an eslint config is not found", () => {
@@ -1322,15 +1306,6 @@ describe("ConfigArrayFactory", () => {
                             rules: { eqeqeq: 2 }
                         });
                     }, /xxx error/u);
-                });
-
-                it("should throw an error when a plugin extend is a file path.", () => {
-                    assert.throws(() => {
-                        create({
-                            extends: "plugin:./path/to/foo",
-                            rules: { eqeqeq: 2 }
-                        });
-                    }, /'extends' cannot use a file path for plugins/u);
                 });
 
                 it("should throw an error when an eslint config is not found", () => {
@@ -3001,6 +2976,41 @@ env:
                     }
                 });
             });
+
+            it("should load two separate configs from a plugin, even when it was loaded by relative path", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
+                    files: {
+                        "plugins/eslint-plugin-foo.js": `
+                            module.exports = {
+                                configs: {
+                                    foo: { rules: { semi: 2, quotes: 1 } },
+                                    bar: { rules: { quotes: 2, yoda: 2 } }
+                                }
+                            }
+                        `,
+                        "plugins/.eslintrc.yml": `
+                            extends:
+                                - plugin:./eslint-plugin-foo.js/foo
+                                - plugin:./eslint-plugin-foo.js/bar
+                        `
+                    }
+                });
+
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+                const config = load(factory, "plugins/.eslintrc.yml");
+
+                assertConfig(config, {
+                    rules: {
+                        semi: [2],
+                        quotes: [2],
+                        yoda: [2]
+                    }
+                });
+            });
         });
 
         describe("even if config files have Unicode BOM,", () => {
@@ -3107,6 +3117,7 @@ env:
                 "node_modules/eslint-plugin-foo/index.js": "exports.configs = { bar: {} }",
                 "node_modules/@foo/eslint-plugin/index.js": "exports.configs = { bar: {} }",
                 "node_modules/@foo/eslint-plugin-bar/index.js": "exports.configs = { baz: {} }",
+                "eslint-plugin-foo.js": "exports.configs = { foo: {} }",
                 "foo/bar/.eslintrc": "",
                 ".eslintrc": ""
             }
@@ -3147,7 +3158,8 @@ env:
                 { input: "@foo/bar", expected: path.resolve(tempDir, "node_modules/@foo/eslint-config-bar/index.js") },
                 { input: "plugin:foo/bar", expected: path.resolve(tempDir, "node_modules/eslint-plugin-foo/index.js") },
                 { input: "plugin:@foo/bar", expected: path.resolve(tempDir, "node_modules/@foo/eslint-plugin/index.js") },
-                { input: "plugin:@foo/bar/baz", expected: path.resolve(tempDir, "node_modules/@foo/eslint-plugin-bar/index.js") }
+                { input: "plugin:@foo/bar/baz", expected: path.resolve(tempDir, "node_modules/@foo/eslint-plugin-bar/index.js") },
+                { input: "plugin:./eslint-plugin-foo.js/foo", expected: path.resolve(tempDir, "./eslint-plugin-foo.js") }
             ]) {
                 it(`should return ${expected} when passed ${input}`, () => {
                     const result = resolve(input);
@@ -3190,7 +3202,9 @@ env:
             files: {
                 "node_modules/@scope/eslint-plugin-example/index.js": "exports.configs = { name: '@scope/eslint-plugin-example' };",
                 "node_modules/eslint-plugin-example/index.js": "exports.configs = { name: 'eslint-plugin-example' };",
-                "node_modules/eslint-plugin-throws-on-load/index.js": "throw new Error('error thrown while loading this module')"
+                "node_modules/eslint-plugin-throws-on-load/index.js": "throw new Error('error thrown while loading this module')",
+                "eslint-plugin-example.js": "exports.configs = { name: 'eslint-plugin-example' };",
+                "eslint-plugin-throws-on-load.js": "throw new Error('error thrown while loading this module')"
             }
         });
 
@@ -3266,24 +3280,97 @@ env:
             );
         });
 
-        it("should throw an error when a plugin has whitespace", () => {
+        it("should load a plugin when provide a file path", () => {
+            const loadedPlugins = load("./eslint-plugin-example.js");
+
+            assertPluginDefinition(
+                loadedPlugins.get("./eslint-plugin-example.js"),
+                { configs: { name: "eslint-plugin-example" } }
+            );
+        });
+
+        it("should load a plugin when provide a file path, even when using a custom loadPluginsRelativeTo value", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "subdir/eslint-plugin-example.js": "exports.configs = { name: 'eslint-plugin-example' };"
+                }
+            });
+
+            await teardown.prepare();
+            const factoryWithCustomPluginPath = new ConfigArrayFactory({
+                cwd: teardown.getPath(),
+                resolvePluginsRelativeTo: "subdir"
+            });
+
+            const loadedPlugins = load("./eslint-plugin-example.js", factoryWithCustomPluginPath);
+
+            assertPluginDefinition(
+                loadedPlugins.get("./eslint-plugin-example.js"),
+                { configs: { name: "eslint-plugin-example" } }
+            );
+
+            await teardown.cleanup();
+        });
+
+        it("should throw an error when a plugin file is not validate", async () => {
+            const teardown = createCustomTeardown({
+                cwd: tempDir,
+                files: {
+                    "eslint-plugin-invalidate.js": "exports.configs = { name: 'eslint-plugin-example };",
+                    "node_modules/eslint-plugin-invalidate/index.js": "exports.configs = { name: 'eslint-plugin-example };"
+                }
+            });
+
+            await teardown.prepare();
+
+            assert.throws(() => {
+                load("./eslint-plugin-invalidate.js");
+            }, /Invalid or unexpected token/u);
+
+            assert.throws(() => {
+                load("invalidate");
+            }, /Invalid or unexpected token/u);
+
+            await teardown.cleanup();
+        });
+
+        it("should throw an error when a plugin name has whitespace", () => {
             assert.throws(() => {
                 load("whitespace ");
-            }, /Whitespace found in plugin name 'whitespace '/u);
+            }, /Whitespace found in plugin name or path 'whitespace '/u);
             assert.throws(() => {
                 load("whitespace\t");
-            }, /Whitespace found in plugin name/u);
+            }, /Whitespace found in plugin name or path /u);
             assert.throws(() => {
                 load("whitespace\n");
-            }, /Whitespace found in plugin name/u);
+            }, /Whitespace found in plugin name or path /u);
             assert.throws(() => {
                 load("whitespace\r");
-            }, /Whitespace found in plugin name/u);
+            }, /Whitespace found in plugin name or path /u);
+        });
+
+        it("should throw an error when a plugin path has whitespace", () => {
+            assert.throws(() => {
+                load("./ foo-plugin.js");
+            }, /Whitespace found in plugin name or path '\.\/ foo-plugin.js'/u);
+            assert.throws(() => {
+                load("./\tfoo-plugin.js");
+            }, /Whitespace found in plugin name or path /u);
+            assert.throws(() => {
+                load("./\nfoo-plugin.js");
+            }, /Whitespace found in plugin name or path /u);
+            assert.throws(() => {
+                load("./\rfoo-plugin.js");
+            }, /Whitespace found in plugin name or path /u);
         });
 
         it("should throw an error when a plugin doesn't exist", () => {
             assert.throws(() => {
                 load("nonexistentplugin");
+            }, /Failed to load plugin/u);
+            assert.throws(() => {
+                load("./none-exist-plugin.js");
             }, /Failed to load plugin/u);
         });
 
@@ -3332,7 +3419,8 @@ env:
             cwd: tempDir,
             files: {
                 "node_modules/eslint-plugin-example1/index.js": "exports.configs = { name: 'eslint-plugin-example1' };",
-                "node_modules/eslint-plugin-example2/index.js": "exports.configs = { name: 'eslint-plugin-example2' };"
+                "node_modules/eslint-plugin-example2/index.js": "exports.configs = { name: 'eslint-plugin-example2' };",
+                "eslint-plugin-example3.js": "exports.configs = { name: 'eslint-plugin-example3' };"
             }
         });
 
@@ -3366,7 +3454,7 @@ env:
         }
 
         it("should load plugins when passed multiple plugins", () => {
-            const loadedPlugins = loadAll(["example1", "example2"]);
+            const loadedPlugins = loadAll(["example1", "example2", "./eslint-plugin-example3.js"]);
 
             assertPluginDefinition(
                 loadedPlugins.get("example1"),
@@ -3375,6 +3463,10 @@ env:
             assertPluginDefinition(
                 loadedPlugins.get("example2"),
                 { configs: { name: "eslint-plugin-example2" } }
+            );
+            assertPluginDefinition(
+                loadedPlugins.get("./eslint-plugin-example3.js"),
+                { configs: { name: "eslint-plugin-example3" } }
             );
         });
     });
