@@ -1,3 +1,7 @@
+v1.2.1 - March 11, 2022
+
+* [`98fb12d`](https://github.com/eslint/eslintrc/commit/98fb12d106f7f76132e64bce08aea4b79b45208f) chore: upgrade `ignore` to `v5.2.0` (#72) (Nitin Kumar)
+
 v1.2.0 - February 25, 2022
 
 * [`9b71981`](https://github.com/eslint/eslintrc/commit/9b719813fc6f023b722168a4f67d895106e875ce) feat: Avoid dirname for built-in configs (#71) (DoZerg)
