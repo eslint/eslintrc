@@ -10,7 +10,7 @@ function importMetaURLPlugin() {
         name: "custom-import-meta-url",
         resolveImportMeta(property) {
             if (property === "url") {
-                return "require('url').pathToFileURL(__filename)";
+                return "require('url').pathToFileURL(__filename).toString()";
             }
             return null;
         }
