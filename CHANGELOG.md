@@ -1,3 +1,8 @@
+v1.2.2 - April 22, 2022
+
+* [`18b15ac`](https://github.com/eslint/eslintrc/commit/18b15ac0b0150ad0a4f69e61319e5adaea83a9c7) fix: use custom Rollup plugin for `import.meta.url` (#77) (Milos Djermanovic)
+* [`a6e12e4`](https://github.com/eslint/eslintrc/commit/a6e12e4c7545cc7e091f577f644c4bf1f5d61dd7) build: add node v18 (#78) (唯然)
+
 v1.2.1 - March 11, 2022
 
 * [`98fb12d`](https://github.com/eslint/eslintrc/commit/98fb12d106f7f76132e64bce08aea4b79b45208f) chore: upgrade `ignore` to `v5.2.0` (#72) (Nitin Kumar)
