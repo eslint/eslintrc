@@ -1,3 +1,9 @@
+v1.2.3 - May 6, 2022
+
+* [`c9047b4`](https://github.com/eslint/eslintrc/commit/c9047b4fcf7fe34b89066623df61db03656b2d39) chore: Upgrade espree@9.3.2 (#80) (Milos Djermanovic)
+* [`baf145f`](https://github.com/eslint/eslintrc/commit/baf145f88deace39cc8a91eb7e20ea06ac49f028) chore: bump version of minimatch due to security issue PRISMA-2022-0039 (#76) (Jan Opravil)
+* [`44415d3`](https://github.com/eslint/eslintrc/commit/44415d36197742e9efaf9d41cf3d1c7eb2645f98) chore: update license copyright (#79) (唯然)
+
 v1.2.2 - April 22, 2022
 
 * [`18b15ac`](https://github.com/eslint/eslintrc/commit/18b15ac0b0150ad0a4f69e61319e5adaea83a9c7) fix: use custom Rollup plugin for `import.meta.url` (#77) (Milos Djermanovic)
