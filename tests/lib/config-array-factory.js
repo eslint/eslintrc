@@ -2681,10 +2681,10 @@ describe("ConfigArrayFactory", () => {
                 try {
                     load(factory, "broken-package-json/package.json");
                 } catch (error) {
-                    assert.strictEqual(error.messageTemplate, "failed-to-read-json");
+                    assert.strictEqual(error.messageTemplate, "extend-config-missing");
                     throw error;
                 }
-            }, /Cannot read config file/u);
+            }, /Failed to load config "broken-package-json\/package.json" to extend from./u);
         });
 
         it("should load fresh information from a package.json file", () => {
