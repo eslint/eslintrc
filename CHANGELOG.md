@@ -1,3 +1,7 @@
+v1.3.0 - May 20, 2022
+
+* [`aefa2a7`](https://github.com/eslint/eslintrc/commit/aefa2a749eeab1d2b872824d2de952e97bc7aa4f) feat: update globals (#81) (Milos Djermanovic)
+
 v1.2.3 - May 6, 2022
 
 * [`c9047b4`](https://github.com/eslint/eslintrc/commit/c9047b4fcf7fe34b89066623df61db03656b2d39) chore: Upgrade espree@9.3.2 (#80) (Milos Djermanovic)
