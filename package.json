@@ -38,6 +38,7 @@
     "publish-release": "eslint-publish-release"
   },
   "repository": "eslint/eslintrc",
+  "funding": "https://opencollective.com/eslint",
   "keywords": [
     "ESLint",
     "ESLintRC",
