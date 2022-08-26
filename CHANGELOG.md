@@ -1,3 +1,10 @@
+v1.3.1 - August 26, 2022
+
+* [`495af93`](https://github.com/eslint/eslintrc/commit/495af93c1b2954824de02bd85ea9a822942d5c0d) chore: Upgrade to espree@9.4.0 (#87) (Milos Djermanovic)
+* [`2632367`](https://github.com/eslint/eslintrc/commit/263236717bd0802ab36c44af475e25189fc2be0b) docs: Update README with FlatCompat options (#86) (Nicholas C. Zakas)
+* [`ffba0c5`](https://github.com/eslint/eslintrc/commit/ffba0c5fa698e01e5d377896bd198218ceccb543) ci: update github actions (#85) (Amaresh  S M)
+* [`9ff004e`](https://github.com/eslint/eslintrc/commit/9ff004e30687c35502ca600b5dce77ce1e89948d) chore: add funding field (#84) (Amaresh  S M)
+
 v1.3.0 - May 20, 2022
 
 * [`aefa2a7`](https://github.com/eslint/eslintrc/commit/aefa2a749eeab1d2b872824d2de952e97bc7aa4f) feat: update globals (#81) (Milos Djermanovic)
