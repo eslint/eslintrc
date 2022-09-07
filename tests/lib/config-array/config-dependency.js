@@ -66,6 +66,7 @@ describe("ConfigDependency", () => {
                 {
                     error: { message: "error?" },
                     filePath: "filePath?",
+                    version: null,
                     id: "id?",
                     importerName: "importerName?",
                     importerPath: "importerPath?"
@@ -90,6 +91,7 @@ describe("ConfigDependency", () => {
             const error = new Error("error?"); // reuse error object to use the same stacktrace.
             const dep = new ConfigDependency({
                 definition: { name: "definition?" },
+                version: "1.0.1",
                 error,
                 filePath: "filePath?",
                 id: "id?",
@@ -105,6 +107,7 @@ describe("ConfigDependency", () => {
             // Make expected output; no `definition` property.
             output = "";
             localConsole.log({
+                version: "1.0.1",
                 error,
                 filePath: "filePath?",
                 id: "id?",
