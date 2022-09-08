@@ -2967,6 +2967,49 @@ env:
                 });
             });
 
+            it("should represent the same plugin with the same object reference", async () => {
+                const teardown = createCustomTeardown({
+                    cwd: tempDir,
+                    files: {
+                        "node_modules/eslint-plugin-test/index.js": `
+                            module.exports = {
+                                environments: {
+                                    bar: { globals: { bar: true } }
+                                }
+                            }
+                        `,
+                        "plugins/.eslintrc.yml": `
+plugins:
+    - test
+rules:
+    test/foo: 2
+env:
+    test/bar: true
+                        `
+                    }
+                });
+
+                cleanup = teardown.cleanup;
+
+                await teardown.prepare();
+                const factory = new ConfigArrayFactory({ cwd: teardown.getPath() });
+
+                const filePath = "plugins/.eslintrc.yml";
+                const config1 = factory
+                    .loadFile(filePath)
+                    .extractConfig(filePath);
+
+                const config2 = factory
+                    .loadFile(filePath)
+                    .extractConfig(filePath);
+
+                const first = config1.plugins.test.definition;
+                const second = config2.plugins.test.definition;
+
+                assert.strictEqual(first, second);
+            });
+
+
             it("should load two separate configs from a plugin", async () => {
                 const teardown = createCustomTeardown({
                     cwd: tempDir,
