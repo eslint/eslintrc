@@ -114,6 +114,12 @@ export default new Map(Object.entries({
             ecmaVersion: 13
         }
     },
+    es2023: {
+        globals: { ...newGlobals2015, ...newGlobals2017, ...newGlobals2020, ...newGlobals2021 },
+        parserOptions: {
+            ecmaVersion: 14
+        }
+    },
 
     // Platforms
     browser: {
