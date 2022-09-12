@@ -1,3 +1,7 @@
+v1.3.2 - September 12, 2022
+
+* [`2a2bef1`](https://github.com/eslint/eslintrc/commit/2a2bef144e9b5ef0fbf780abae0890e0c1f9d23a) fix: Plugins should always use the same reference (#91) (Nicholas C. Zakas)
+
 v1.3.1 - August 26, 2022
 
 * [`495af93`](https://github.com/eslint/eslintrc/commit/495af93c1b2954824de02bd85ea9a822942d5c0d) chore: Upgrade to espree@9.4.0 (#87) (Milos Djermanovic)
