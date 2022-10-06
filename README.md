@@ -21,8 +21,13 @@ yarn add @eslint/eslintrc -D
 The primary class in this package is `FlatCompat`, which is a utility to translate ESLintRC-style configs into flat configs. Here's how you use it inside of your `eslint.config.js` file:
 
 ```js
-import pkg from "@eslint/eslintrc";
-const { FlatCompat } = pkg;
+import { FlatCompat } from "@eslint/eslintrc";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// mimic CommonJS variables -- not needed if using CommonJS
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
     baseDirectory: __dirname,                // optional; default: process.cwd()
