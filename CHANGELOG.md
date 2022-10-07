@@ -1,3 +1,8 @@
+v1.3.3 - October 7, 2022
+
+* [`adafd11`](https://github.com/eslint/eslintrc/commit/adafd114292684d522c1119f3aef55be717e94cf) docs: Update README (#92) (Nicholas C. Zakas)
+* [`56755d9`](https://github.com/eslint/eslintrc/commit/56755d9fea0abe43ff8c419a40950289132d96d4) chore: cascading-config-array: createBaseConfigArray not expect resolver (#95) (coderaiser)
+
 v1.3.2 - September 12, 2022
 
 * [`2a2bef1`](https://github.com/eslint/eslintrc/commit/2a2bef144e9b5ef0fbf780abae0890e0c1f9d23a) fix: Plugins should always use the same reference (#91) (Nicholas C. Zakas)
