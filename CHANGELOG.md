@@ -1,3 +1,8 @@
+v1.4.0 - December 16, 2022
+
+* [`89c504f`](https://github.com/eslint/eslintrc/commit/89c504f216298b8aafc55371a9e75b2e2d4cac40) feat: update globals (#98) (Sébastien Règne)
+* [`5438c6b`](https://github.com/eslint/eslintrc/commit/5438c6ba1e01fdfb02a7f09fafb73e6dabe31c2d) ci: add Node v19 (#96) (Milos Djermanovic)
+
 v1.3.3 - October 7, 2022
 
 * [`adafd11`](https://github.com/eslint/eslintrc/commit/adafd114292684d522c1119f3aef55be717e94cf) docs: Update README (#92) (Nicholas C. Zakas)
