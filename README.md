@@ -37,19 +37,19 @@ const compat = new FlatCompat({
 export default [
 
     // mimic ESLintRC-style extends
-    compat.extends("standard", "example"),
+    ...compat.extends("standard", "example"),
 
     // mimic environments
-    compat.env({
+    ...compat.env({
         es2020: true,
         node: true
     }),
 
     // mimic plugins
-    compat.plugins("airbnb", "react"),
+    ...compat.plugins("airbnb", "react"),
 
     // translate an entire config
-    compat.config({
+    ...compat.config({
         plugins: ["airbnb", "react"],
         extends: "standard",
         env: {
