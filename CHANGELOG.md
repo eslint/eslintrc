@@ -1,3 +1,7 @@
+v1.4.1 - December 30, 2022
+
+* [`5be711e`](https://github.com/eslint/eslintrc/commit/5be711e4e81734f79c62cb9781921a9068de1c54) fix: Update FlatCompat docs + typings to reflect Array (#99) (Wes Bos)
+
 v1.4.0 - December 16, 2022
 
 * [`89c504f`](https://github.com/eslint/eslintrc/commit/89c504f216298b8aafc55371a9e75b2e2d4cac40) feat: update globals (#98) (Sébastien Règne)
