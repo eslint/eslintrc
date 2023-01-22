@@ -6,11 +6,10 @@
 import assert from "assert";
 import { Console } from "console";
 import { Writable } from "stream";
-import { ConfigDependency } from "../../../lib/config-array/config-dependency.js";
+import { ConfigDependency } from "../../../dist/lib/config-array/config-dependency.js";
 
 describe("ConfigDependency", () => {
     describe("'constructor(data)' should initialize properties.", () => {
-
         /** @type {ConfigDependency} */
         let dep;
 
@@ -21,7 +20,7 @@ describe("ConfigDependency", () => {
                 filePath: "filePath?",
                 id: "id?",
                 importerName: "importerName?",
-                importerPath: "importerPath?"
+                importerPath: "importerPath?",
             });
         });
 
@@ -58,32 +57,29 @@ describe("ConfigDependency", () => {
                 filePath: "filePath?",
                 id: "id?",
                 importerName: "importerName?",
-                importerPath: "importerPath?"
+                importerPath: "importerPath?",
             });
 
-            assert.deepStrictEqual(
-                JSON.parse(JSON.stringify(dep)),
-                {
-                    error: { message: "error?" },
-                    filePath: "filePath?",
-                    id: "id?",
-                    importerName: "importerName?",
-                    importerPath: "importerPath?"
-                }
-            );
+            assert.deepStrictEqual(JSON.parse(JSON.stringify(dep)), {
+                error: { message: "error?" },
+                filePath: "filePath?",
+                id: "id?",
+                importerName: "importerName?",
+                importerPath: "importerPath?",
+            });
         });
     });
 
     describe("'console.log(...)' should print readable string; not include 'defininition' property", () => {
-
         // Record the written strings to `output` variable.
         let output = "";
         const localConsole = new Console(
-            new class extends Writable {
-                write(chunk) { // eslint-disable-line class-methods-use-this
+            new (class extends Writable {
+                write(chunk) {
+                    // eslint-disable-line class-methods-use-this
                     output += chunk;
                 }
-            }()
+            })()
         );
 
         it("should not print 'definition' property.", () => {
@@ -94,7 +90,7 @@ describe("ConfigDependency", () => {
                 filePath: "filePath?",
                 id: "id?",
                 importerName: "importerName?",
-                importerPath: "importerPath?"
+                importerPath: "importerPath?",
             });
 
             // Make actual output.
@@ -109,7 +105,7 @@ describe("ConfigDependency", () => {
                 filePath: "filePath?",
                 id: "id?",
                 importerName: "importerName?",
-                importerPath: "importerPath?"
+                importerPath: "importerPath?",
             });
             const expected = output;
 

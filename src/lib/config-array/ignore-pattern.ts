@@ -32,12 +32,13 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-import assert from "assert";
-import path from "path";
-import ignore from "ignore";
-import debugOrig from "debug";
+import assert from 'assert';
+import path from 'path';
 
-const debug = debugOrig("eslintrc:ignore-pattern");
+import debugOrig from 'debug';
+import ignore from 'ignore';
+
+const debug = debugOrig('eslintrc:ignore-pattern');
 
 /** @typedef {ReturnType<import("ignore").default>} Ignore */
 
@@ -50,7 +51,7 @@ const debug = debugOrig("eslintrc:ignore-pattern");
  * @param {string[]} sourcePaths The paths to calculate the common ancestor.
  * @returns {string} The path to the common ancestor directory.
  */
-function getCommonAncestorPath(sourcePaths) {
+function getCommonAncestorPath(sourcePaths: string[]) {
     let result = sourcePaths[0];
 
     for (let i = 1; i < sourcePaths.length; ++i) {
@@ -75,7 +76,7 @@ function getCommonAncestorPath(sourcePaths) {
     let resolvedResult = result || path.sep;
 
     // if Windows common ancestor is root of drive must have trailing slash to be absolute.
-    if (resolvedResult && resolvedResult.endsWith(":") && process.platform === "win32") {
+    if (resolvedResult && resolvedResult.endsWith(':') && process.platform === 'win32') {
         resolvedResult += path.sep;
     }
     return resolvedResult;
@@ -87,13 +88,13 @@ function getCommonAncestorPath(sourcePaths) {
  * @param {string} to The destination path to get relative path.
  * @returns {string} The relative path.
  */
-function relative(from, to) {
+function relative(from: string, to: string) {
     const relPath = path.relative(from, to);
 
-    if (path.sep === "/") {
+    if (path.sep === '/') {
         return relPath;
     }
-    return relPath.split(path.sep).join("/");
+    return relPath.split(path.sep).join('/');
 }
 
 /**
@@ -101,24 +102,24 @@ function relative(from, to) {
  * @param {string} filePath The path to check.
  * @returns {string} The trailing slash if existed.
  */
-function dirSuffix(filePath) {
-    const isDir = (
-        filePath.endsWith(path.sep) ||
-        (process.platform === "win32" && filePath.endsWith("/"))
-    );
+function dirSuffix(filePath: string) {
+    const isDir =
+        filePath.endsWith(path.sep) || (process.platform === 'win32' && filePath.endsWith('/'));
 
-    return isDir ? "/" : "";
+    return isDir ? '/' : '';
 }
 
-const DefaultPatterns = Object.freeze(["/**/node_modules/*"]);
-const DotPatterns = Object.freeze([".*", "!.eslintrc.*", "!../"]);
+const DefaultPatterns = Object.freeze(['/**/node_modules/*']);
+const DotPatterns = Object.freeze(['.*', '!.eslintrc.*', '!../']);
 
 //------------------------------------------------------------------------------
 // Public
 //------------------------------------------------------------------------------
 
 class IgnorePattern {
-
+    private patterns: readonly string[];
+    private basePath: string;
+    private loose: boolean;
     /**
      * The default patterns.
      * @type {string[]}
@@ -136,7 +137,7 @@ class IgnorePattern {
      * The second argument is the flag to not ignore dotfiles.
      * If the predicate function returned `true`, it means the path should be ignored.
      */
-    static createDefaultIgnore(cwd) {
+    static createDefaultIgnore(cwd: string) {
         return this.createIgnore([new IgnorePattern(DefaultPatterns, cwd)]);
     }
 
@@ -149,27 +150,28 @@ class IgnorePattern {
      * The second argument is the flag to not ignore dotfiles.
      * If the predicate function returned `true`, it means the path should be ignored.
      */
-    static createIgnore(ignorePatterns) {
-        debug("Create with: %o", ignorePatterns);
+    static createIgnore(ignorePatterns: IgnorePattern[]) {
+        debug('Create with: %o', ignorePatterns);
 
-        const basePath = getCommonAncestorPath(ignorePatterns.map(p => p.basePath));
-        const patterns = [].concat(
-            ...ignorePatterns.map(p => p.getPatternsRelativeTo(basePath))
-        );
+        const basePath = getCommonAncestorPath(ignorePatterns.map((p) => p.basePath));
+        // @ts-ignore
+        const patterns = [].concat(...ignorePatterns.map((p) => p.getPatternsRelativeTo(basePath)));
+        // @ts-ignore
         const ig = ignore({ allowRelativePaths: true }).add([...DotPatterns, ...patterns]);
+        // @ts-ignore
         const dotIg = ignore({ allowRelativePaths: true }).add(patterns);
 
-        debug("  processed: %o", { basePath, patterns });
+        debug('  processed: %o', { basePath, patterns });
 
         return Object.assign(
-            (filePath, dot = false) => {
+            (filePath: string, dot = false) => {
                 assert(path.isAbsolute(filePath), "'filePath' should be an absolute path.");
                 const relPathRaw = relative(basePath, filePath);
-                const relPath = relPathRaw && (relPathRaw + dirSuffix(filePath));
+                const relPath = relPathRaw && relPathRaw + dirSuffix(filePath);
                 const adoptedIg = dot ? dotIg : ig;
-                const result = relPath !== "" && adoptedIg.ignores(relPath);
+                const result = relPath !== '' && adoptedIg.ignores(relPath);
 
-                debug("Check", { filePath, dot, relativePath: relPath, result });
+                debug('Check', { filePath, dot, relativePath: relPath, result });
                 return result;
             },
             { basePath, patterns }
@@ -181,7 +183,7 @@ class IgnorePattern {
      * @param {string[]} patterns The glob patterns that ignore to lint.
      * @param {string} basePath The base path of `patterns`.
      */
-    constructor(patterns, basePath) {
+    constructor(patterns: readonly string[], basePath: string) {
         assert(path.isAbsolute(basePath), "'basePath' should be an absolute path.");
 
         /**
@@ -213,7 +215,7 @@ class IgnorePattern {
      * @param {string} newBasePath The base path.
      * @returns {string[]} Modifired patterns.
      */
-    getPatternsRelativeTo(newBasePath) {
+    getPatternsRelativeTo(newBasePath: string): readonly string[] {
         assert(path.isAbsolute(newBasePath), "'newBasePath' should be an absolute path.");
         const { basePath, loose, patterns } = this;
 
@@ -222,12 +224,12 @@ class IgnorePattern {
         }
         const prefix = `/${relative(newBasePath, basePath)}`;
 
-        return patterns.map(pattern => {
-            const negative = pattern.startsWith("!");
-            const head = negative ? "!" : "";
+        return patterns.map((pattern) => {
+            const negative = pattern.startsWith('!');
+            const head = negative ? '!' : '';
             const body = negative ? pattern.slice(1) : pattern;
 
-            if (body.startsWith("/") || body.startsWith("../")) {
+            if (body.startsWith('/') || body.startsWith('../')) {
                 return `${head}${prefix}${body}`;
             }
             return loose ? pattern : `${head}${prefix}/**/${body}`;

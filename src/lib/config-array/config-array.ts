@@ -29,8 +29,12 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-import { ExtractedConfig } from "./extracted-config.js";
-import { IgnorePattern } from "./ignore-pattern.js";
+import { Environment, GlobalConf, Processor, Rule, RuleConf } from '../shared/types.js';
+
+import { DependentParser, DependentPlugin } from './config-dependency.js';
+import { ExtractedConfig } from './extracted-config.js';
+import { IgnorePattern } from './ignore-pattern.js';
+import { OverrideTester } from './override-tester.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -66,6 +70,24 @@ import { IgnorePattern } from "./ignore-pattern.js";
  * @property {Object|undefined} settings The shared settings.
  * @property {"config" | "ignore" | "implicit-processor"} type The element type.
  */
+interface ConfigArrayElement {
+    name: string;
+    filePath: string;
+    criteria: OverrideTester | null;
+    env: Record<string, boolean> | undefined;
+    globals: Record<string, GlobalConf> | undefined;
+    ignorePattern: IgnorePattern | undefined;
+    noInlineConfig: boolean | undefined;
+    parser: DependentParser | undefined;
+    parserOptions: Record<string, unknown> | undefined;
+    plugins: Record<string, DependentPlugin> | undefined;
+    processor: string | undefined;
+    reportUnusedDisableDirectives: boolean | undefined;
+    root: boolean | undefined;
+    rules: Record<string, RuleConf> | undefined;
+    settings: Record<string, unknown> | undefined;
+    type: 'config' | 'ignore' | 'implicit-processor';
+}
 
 /**
  * @typedef {Object} ConfigArrayInternalSlots
@@ -75,9 +97,16 @@ import { IgnorePattern } from "./ignore-pattern.js";
  * @property {ReadonlyMap<string, Rule>|null} ruleMap The map from rule ID to rule definition.
  */
 
+interface ConfigArrayInternalSlots {
+    cache: Map<string, ExtractedConfig>;
+    envMap: Map<string, Environment> | null;
+    processorMap: Map<string, Processor> | null;
+    ruleMap: Map<string, Rule> | null;
+}
+
 /** @type {WeakMap<ConfigArray, ConfigArrayInternalSlots>} */
-const internalSlotsMap = new class extends WeakMap {
-    get(key) {
+const internalSlotsMap = new (class extends WeakMap<ConfigArray, ConfigArrayInternalSlots> {
+    get(key: ConfigArray) {
         let value = super.get(key);
 
         if (!value) {
@@ -92,7 +121,7 @@ const internalSlotsMap = new class extends WeakMap {
 
         return value;
     }
-}();
+})();
 
 /**
  * Get the indices which are matched to a given file.
@@ -100,7 +129,7 @@ const internalSlotsMap = new class extends WeakMap {
  * @param {string} filePath The path to a target file.
  * @returns {number[]} The indices.
  */
-function getMatchedIndices(elements, filePath) {
+function getMatchedIndices(elements: ConfigArrayElement[], filePath: string) {
     const indices = [];
 
     for (let i = elements.length - 1; i >= 0; --i) {
@@ -119,8 +148,8 @@ function getMatchedIndices(elements, filePath) {
  * @param {any} x The value to check.
  * @returns {boolean} `true` if the value is a non-null object.
  */
-function isNonNullObject(x) {
-    return typeof x === "object" && x !== null;
+function isNonNullObject(x: any) {
+    return typeof x === 'object' && x !== null;
 }
 
 /**
@@ -132,13 +161,13 @@ function isNonNullObject(x) {
  * @param {Object|undefined} source The source to merge.
  * @returns {void}
  */
-function mergeWithoutOverwrite(target, source) {
+function mergeWithoutOverwrite(target: Record<string, any>, source: Record<string, any>) {
     if (!isNonNullObject(source)) {
         return;
     }
 
     for (const key of Object.keys(source)) {
-        if (key === "__proto__") {
+        if (key === '__proto__') {
             continue;
         }
 
@@ -159,15 +188,23 @@ function mergeWithoutOverwrite(target, source) {
  * The error for plugin conflicts.
  */
 class PluginConflictError extends Error {
-
+    messageTemplate: string;
+    messageData: {
+        pluginId: string;
+        plugins: { filePath: string; importerName: string }[];
+    };
     /**
      * Initialize this error object.
      * @param {string} pluginId The plugin ID.
      * @param {{filePath:string, importerName:string}[]} plugins The resolved plugins.
      */
-    constructor(pluginId, plugins) {
-        super(`Plugin "${pluginId}" was conflicted between ${plugins.map(p => `"${p.importerName}"`).join(" and ")}.`);
-        this.messageTemplate = "plugin-conflict";
+    constructor(pluginId: string, plugins: { filePath: string; importerName: string }[]) {
+        super(
+            `Plugin "${pluginId}" was conflicted between ${plugins
+                .map((p) => `"${p.importerName}"`)
+                .join(' and ')}.`
+        );
+        this.messageTemplate = 'plugin-conflict';
         this.messageData = { pluginId, plugins };
     }
 }
@@ -179,13 +216,16 @@ class PluginConflictError extends Error {
  * @param {Record<string, DependentPlugin>|undefined} source The source to merge.
  * @returns {void}
  */
-function mergePlugins(target, source) {
+function mergePlugins(
+    target: Record<string, DependentPlugin>,
+    source: Record<string, DependentPlugin>
+) {
     if (!isNonNullObject(source)) {
         return;
     }
 
     for (const key of Object.keys(source)) {
-        if (key === "__proto__") {
+        if (key === '__proto__') {
             continue;
         }
         const targetValue = target[key];
@@ -193,21 +233,30 @@ function mergePlugins(target, source) {
 
         // Adopt the plugin which was found at first.
         if (targetValue === void 0) {
+            // @ts-ignore
             if (sourceValue.error) {
+                // @ts-ignore
                 throw sourceValue.error;
             }
             target[key] = sourceValue;
-        } else if (sourceValue.filePath !== targetValue.filePath) {
-            throw new PluginConflictError(key, [
-                {
-                    filePath: targetValue.filePath,
-                    importerName: targetValue.importerName
-                },
-                {
-                    filePath: sourceValue.filePath,
-                    importerName: sourceValue.importerName
-                }
-            ]);
+        } else {
+            // @ts-ignore
+            if (sourceValue.filePath !== targetValue.filePath) {
+                throw new PluginConflictError(key, [
+                    {
+                        // @ts-ignore
+                        filePath: targetValue.filePath,
+                        // @ts-ignore
+                        importerName: targetValue.importerName
+                    },
+                    {
+                        // @ts-ignore
+                        filePath: sourceValue.filePath,
+                        // @ts-ignore
+                        importerName: sourceValue.importerName
+                    }
+                ]);
+            }
         }
     }
 }
@@ -219,13 +268,13 @@ function mergePlugins(target, source) {
  * @param {Record<string, RuleConf>|undefined} source The source to merge.
  * @returns {void}
  */
-function mergeRuleConfigs(target, source) {
+function mergeRuleConfigs(target: Record<string, any[]>, source: Record<string, RuleConf>) {
     if (!isNonNullObject(source)) {
         return;
     }
 
     for (const key of Object.keys(source)) {
-        if (key === "__proto__") {
+        if (key === '__proto__') {
             continue;
         }
         const targetDef = target[key];
@@ -239,15 +288,11 @@ function mergeRuleConfigs(target, source) {
                 target[key] = [sourceDef];
             }
 
-        /*
-         * If the first found rule config is severity only and the current rule
-         * config has options, merge the severity and the options.
-         */
-        } else if (
-            targetDef.length === 1 &&
-            Array.isArray(sourceDef) &&
-            sourceDef.length >= 2
-        ) {
+            /*
+             * If the first found rule config is severity only and the current rule
+             * config has options, merge the severity and the options.
+             */
+        } else if (targetDef.length === 1 && Array.isArray(sourceDef) && sourceDef.length >= 2) {
             targetDef.push(...sourceDef.slice(1));
         }
     }
@@ -259,7 +304,7 @@ function mergeRuleConfigs(target, source) {
  * @param {number[]} indices The indices to use.
  * @returns {ExtractedConfig} The extracted config.
  */
-function createConfig(instance, indices) {
+function createConfig(instance: ConfigArray, indices: number[]): ExtractedConfig {
     const config = new ExtractedConfig();
     const ignorePatterns = [];
 
@@ -287,7 +332,10 @@ function createConfig(instance, indices) {
         }
 
         // Adopt the reportUnusedDisableDirectives which was found at first.
-        if (config.reportUnusedDisableDirectives === void 0 && element.reportUnusedDisableDirectives !== void 0) {
+        if (
+            config.reportUnusedDisableDirectives === void 0 &&
+            element.reportUnusedDisableDirectives !== void 0
+        ) {
             config.reportUnusedDisableDirectives = element.reportUnusedDisableDirectives;
         }
 
@@ -322,15 +370,18 @@ function createConfig(instance, indices) {
  * @param {function(T): U} [normalize] The normalize function for each value.
  * @returns {void}
  */
-function collect(pluginId, defs, map, normalize) {
+function collect<T, U extends T>(
+    pluginId: string,
+    defs: Record<string, T>,
+    map: Map<string, U>,
+    normalize?: (t: T) => U
+) {
     if (defs) {
         const prefix = pluginId && `${pluginId}/`;
 
         for (const [key, value] of Object.entries(defs)) {
-            map.set(
-                `${prefix}${key}`,
-                normalize ? normalize(value) : value
-            );
+            // @ts-ignore
+            map.set(`${prefix}${key}`, normalize ? normalize(value) : value);
         }
     }
 }
@@ -340,8 +391,8 @@ function collect(pluginId, defs, map, normalize) {
  * @param {Function|Rule} rule The rule definition to normalize.
  * @returns {Rule} The normalized rule definition.
  */
-function normalizePluginRule(rule) {
-    return typeof rule === "function" ? { create: rule } : rule;
+function normalizePluginRule(rule: (...args: any[]) => any) {
+    return typeof rule === 'function' ? { create: rule } : rule;
 }
 
 /**
@@ -349,7 +400,7 @@ function normalizePluginRule(rule) {
  * @param {Map<any, any>} map The map object to delete.
  * @returns {void}
  */
-function deleteMutationMethods(map) {
+function deleteMutationMethods(map: Map<any, any>) {
     Object.defineProperties(map, {
         clear: { configurable: true, value: void 0 },
         delete: { configurable: true, value: void 0 },
@@ -363,7 +414,7 @@ function deleteMutationMethods(map) {
  * @param {ConfigArrayInternalSlots} slots The internal slots.
  * @returns {void}
  */
-function initPluginMemberMaps(elements, slots) {
+function initPluginMemberMaps(elements: ConfigArrayElement[], slots: ConfigArrayInternalSlots) {
     const processed = new Set();
 
     slots.envMap = new Map();
@@ -376,6 +427,7 @@ function initPluginMemberMaps(elements, slots) {
         }
 
         for (const [pluginId, value] of Object.entries(element.plugins)) {
+            // @ts-ignore
             const plugin = value.definition;
 
             if (!plugin || processed.has(pluginId)) {
@@ -385,6 +437,7 @@ function initPluginMemberMaps(elements, slots) {
 
             collect(pluginId, plugin.environments, slots.envMap);
             collect(pluginId, plugin.processors, slots.processorMap);
+            // @ts-ignore
             collect(pluginId, plugin.rules, slots.ruleMap, normalizePluginRule);
         }
     }
@@ -399,7 +452,7 @@ function initPluginMemberMaps(elements, slots) {
  * @param {ConfigArray} instance The config elements.
  * @returns {ConfigArrayInternalSlots} The extracted config.
  */
-function ensurePluginMemberMaps(instance) {
+function ensurePluginMemberMaps(instance: ConfigArray): ConfigArrayInternalSlots {
     const slots = internalSlotsMap.get(instance);
 
     if (!slots.ruleMap) {
@@ -423,7 +476,6 @@ function ensurePluginMemberMaps(instance) {
  * @extends {Array<ConfigArrayElement>}
  */
 class ConfigArray extends Array {
-
     /**
      * Get the plugin environments.
      * The returned map cannot be mutated.
@@ -459,7 +511,7 @@ class ConfigArray extends Array {
         for (let i = this.length - 1; i >= 0; --i) {
             const root = this[i].root;
 
-            if (typeof root === "boolean") {
+            if (typeof root === 'boolean') {
                 return root;
             }
         }
@@ -471,10 +523,10 @@ class ConfigArray extends Array {
      * @param {string} filePath The absolute path to the target file.
      * @returns {ExtractedConfig} The extracted config data.
      */
-    extractConfig(filePath) {
+    extractConfig(filePath: string) {
         const { cache } = internalSlotsMap.get(this);
         const indices = getMatchedIndices(this, filePath);
-        const cacheKey = indices.join(",");
+        const cacheKey = indices.join(',');
 
         if (!cache.has(cacheKey)) {
             cache.set(cacheKey, createConfig(this, indices));
@@ -488,10 +540,10 @@ class ConfigArray extends Array {
      * @param {string} filePath The absolute path to the target file.
      * @returns {boolean} `true` if the file is an additional lint target.
      */
-    isAdditionalTargetPath(filePath) {
+    isAdditionalTargetPath(filePath: string) {
         for (const { criteria, type } of this) {
             if (
-                type === "config" &&
+                type === 'config' &&
                 criteria &&
                 !criteria.endsWithWildcard &&
                 criteria.test(filePath)
@@ -510,14 +562,10 @@ class ConfigArray extends Array {
  * @returns {ExtractedConfig[]} The used extracted configs.
  * @private
  */
-function getUsedExtractedConfigs(instance) {
+function getUsedExtractedConfigs(instance: ConfigArray) {
     const { cache } = internalSlotsMap.get(instance);
 
     return Array.from(cache.values());
 }
 
-
-export {
-    ConfigArray,
-    getUsedExtractedConfigs
-};
+export { ConfigArray, getUsedExtractedConfigs };

@@ -22,20 +22,18 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-import debugOrig from "debug";
-import os from "os";
-import path from "path";
+import os from 'os';
+import path from 'path';
 
-import { ConfigArrayFactory } from "./config-array-factory.js";
-import {
-    ConfigArray,
-    ConfigDependency,
-    IgnorePattern
-} from "./config-array/index.js";
-import ConfigValidator from "./shared/config-validator.js";
-import { emitDeprecationWarning } from "./shared/deprecation-warnings.js";
+import debugOrig from 'debug';
 
-const debug = debugOrig("eslintrc:cascading-config-array-factory");
+import { ConfigArray, ConfigDependency, IgnorePattern } from './config-array/index.js';
+import { ConfigArrayFactory } from './config-array-factory.js';
+import ConfigValidator from './shared/config-validator.js';
+import { emitDeprecationWarning } from './shared/deprecation-warnings.js';
+import { ConfigData, Plugin, Rule } from './shared/types.js';
+
+const debug = debugOrig('eslintrc:cascading-config-array-factory');
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -67,6 +65,24 @@ const debug = debugOrig("eslintrc:cascading-config-array-factory");
  * @property {Function} getEslintRecommendedConfig Returns the config data for eslint:recommended.
  */
 
+interface CascadingConfigArrayFactoryOptions {
+    additionalPluginPool?: Map<string, Plugin>;
+    baseConfig?: ConfigData;
+    cliConfig?: ConfigData;
+    cwd?: string;
+    ignorePath?: string;
+    rulePaths?: string[];
+    builtInRules?: Map<string, Rule>;
+    specificConfigPath?: string;
+    useEslintrc?: boolean;
+    loadRules?: (...args: any) => any;
+    resolver?: (moduleName: string, relativeToPath: string) => string;
+    eslintAllPath?: string;
+    eslintRecommendedPath?: string;
+    getEslintAllConfig?: (...args: any[]) => any;
+    getEslintRecommendedConfig?: (...args: any[]) => any;
+}
+
 /**
  * @typedef {Object} CascadingConfigArrayFactoryInternalSlots
  * @property {ConfigArray} baseConfigArray The config array of `baseConfig` option.
@@ -90,35 +106,57 @@ const debug = debugOrig("eslintrc:cascading-config-array-factory");
  * @property {Function} getEslintRecommendedConfig Returns the config data for eslint:recommended.
  */
 
+interface CascadingConfigArrayFactoryInternalSlots {
+    baseConfigArray: ConfigArray;
+    baseConfigData?: ConfigData;
+    cliConfigArray: ConfigArray;
+    cliConfigData?: ConfigData;
+    configArrayFactory: ConfigArrayFactory;
+    configCache: Map<string, ConfigArray>;
+    cwd: string;
+    finalizeCache: WeakMap<ConfigArray, ConfigArray>;
+    ignorePath?: string;
+    rulePaths: string[] | null;
+    specificConfigPath: string | null;
+    useEslintrc: boolean;
+    loadRules: (...args: any[]) => any;
+    builtInRules: Map<string, Rule>;
+    resolver?: (moduleName: string, relativeToPath: string) => string;
+    eslintAllPath: string;
+    getEslintAllConfig: (...args: any[]) => any;
+    eslintRecommendedPath: string;
+    getEslintRecommendedConfig: (...args: any[]) => any;
+}
+
 /** @type {WeakMap<CascadingConfigArrayFactory, CascadingConfigArrayFactoryInternalSlots>} */
-const internalSlotsMap = new WeakMap();
+const internalSlotsMap = new WeakMap<
+    CascadingConfigArrayFactory,
+    CascadingConfigArrayFactoryInternalSlots
+>();
 
 /**
  * Create the config array from `baseConfig` and `rulePaths`.
  * @param {CascadingConfigArrayFactoryInternalSlots} slots The slots.
  * @returns {ConfigArray} The config array of the base configs.
  */
-function createBaseConfigArray({
-    configArrayFactory,
-    baseConfigData,
-    rulePaths,
-    cwd,
-    loadRules
-}) {
-    const baseConfigArray = configArrayFactory.create(
-        baseConfigData,
-        { name: "BaseConfig" }
-    );
+function createBaseConfigArray(slots: CascadingConfigArrayFactoryInternalSlots) {
+    const { configArrayFactory, baseConfigData, rulePaths, cwd, loadRules } = slots;
+    const baseConfigArray = configArrayFactory.create(baseConfigData ?? null, {
+        name: 'BaseConfig'
+    });
 
     /*
      * Create the config array element for the default ignore patterns.
      * This element has `ignorePattern` property that ignores the default
      * patterns in the current working directory.
      */
-    baseConfigArray.unshift(configArrayFactory.create(
-        { ignorePatterns: IgnorePattern.DefaultPatterns },
-        { name: "DefaultIgnorePattern" }
-    )[0]);
+    baseConfigArray.unshift(
+        configArrayFactory.create(
+            // @ts-ignore
+            { ignorePatterns: IgnorePattern.DefaultPatterns },
+            { name: 'DefaultIgnorePattern' }
+        )[0]
+    );
 
     /*
      * Load rules `--rulesdir` option as a pseudo plugin.
@@ -127,24 +165,21 @@ function createBaseConfigArray({
      */
     if (rulePaths && rulePaths.length > 0) {
         baseConfigArray.push({
-            type: "config",
-            name: "--rulesdir",
-            filePath: "",
+            type: 'config',
+            name: '--rulesdir',
+            filePath: '',
             plugins: {
-                "": new ConfigDependency({
+                '': new ConfigDependency({
                     definition: {
                         rules: rulePaths.reduce(
-                            (map, rulesPath) => Object.assign(
-                                map,
-                                loadRules(rulesPath, cwd)
-                            ),
+                            (map, rulesPath) => Object.assign(map, loadRules(rulesPath, cwd)),
                             {}
                         )
                     },
-                    filePath: "",
-                    id: "",
-                    importerName: "--rulesdir",
-                    importerPath: ""
+                    filePath: '',
+                    id: '',
+                    importerName: '--rulesdir',
+                    importerPath: ''
                 })
             }
         });
@@ -158,17 +193,9 @@ function createBaseConfigArray({
  * @param {CascadingConfigArrayFactoryInternalSlots} slots The slots.
  * @returns {ConfigArray} The config array of the base configs.
  */
-function createCLIConfigArray({
-    cliConfigData,
-    configArrayFactory,
-    cwd,
-    ignorePath,
-    specificConfigPath
-}) {
-    const cliConfigArray = configArrayFactory.create(
-        cliConfigData,
-        { name: "CLIOptions" }
-    );
+function createCLIConfigArray(slots: CascadingConfigArrayFactoryInternalSlots) {
+    const { cliConfigData, configArrayFactory, cwd, ignorePath, specificConfigPath } = slots;
+    const cliConfigArray = configArrayFactory.create(cliConfigData ?? null, { name: 'CLIOptions' });
 
     cliConfigArray.unshift(
         ...(ignorePath
@@ -178,10 +205,7 @@ function createCLIConfigArray({
 
     if (specificConfigPath) {
         cliConfigArray.unshift(
-            ...configArrayFactory.loadFile(
-                specificConfigPath,
-                { name: "--config", basePath: cwd }
-            )
+            ...configArrayFactory.loadFile(specificConfigPath, { name: '--config', basePath: cwd })
         );
     }
 
@@ -192,14 +216,14 @@ function createCLIConfigArray({
  * The error type when there are files matched by a glob, but all of them have been ignored.
  */
 class ConfigurationNotFoundError extends Error {
-
-    // eslint-disable-next-line jsdoc/require-description
+    messageData: { directoryPath: string };
+    messageTemplate: string;
     /**
      * @param {string} directoryPath The directory path.
      */
-    constructor(directoryPath) {
+    constructor(directoryPath: string) {
         super(`No ESLint configuration found in ${directoryPath}.`);
-        this.messageTemplate = "no-config-found";
+        this.messageTemplate = 'no-config-found';
         this.messageData = { directoryPath };
     }
 }
@@ -209,58 +233,65 @@ class ConfigurationNotFoundError extends Error {
  * matched by given glob patterns and that configuration.
  */
 class CascadingConfigArrayFactory {
-
     /**
      * Initialize this enumerator.
      * @param {CascadingConfigArrayFactoryOptions} options The options.
      */
-    constructor({
-        additionalPluginPool = new Map(),
-        baseConfig: baseConfigData = null,
-        cliConfig: cliConfigData = null,
-        cwd = process.cwd(),
-        ignorePath,
-        resolvePluginsRelativeTo,
-        rulePaths = [],
-        specificConfigPath = null,
-        useEslintrc = true,
-        builtInRules = new Map(),
-        loadRules,
-        resolver,
-        eslintRecommendedPath,
-        getEslintRecommendedConfig,
-        eslintAllPath,
-        getEslintAllConfig
-    } = {}) {
+    constructor(options: CascadingConfigArrayFactoryOptions = {}) {
+        const {
+            additionalPluginPool = new Map(),
+            baseConfig: baseConfigData = null,
+            cliConfig: cliConfigData = null,
+            cwd = process.cwd(),
+            ignorePath,
+            // @ts-ignore
+            resolvePluginsRelativeTo,
+            rulePaths = [],
+            specificConfigPath = null,
+            useEslintrc = true,
+            builtInRules = new Map(),
+            loadRules,
+            resolver,
+            eslintRecommendedPath,
+            getEslintRecommendedConfig,
+            eslintAllPath,
+            getEslintAllConfig
+        } = options;
         const configArrayFactory = new ConfigArrayFactory({
             additionalPluginPool,
             cwd,
             resolvePluginsRelativeTo,
             builtInRules,
             resolver,
+            // @ts-ignore
             eslintRecommendedPath,
+            // @ts-ignore
             getEslintRecommendedConfig,
+            // @ts-ignore
             eslintAllPath,
+            // @ts-ignore
             getEslintAllConfig
         });
 
         internalSlotsMap.set(this, {
             baseConfigArray: createBaseConfigArray({
-                baseConfigData,
+                baseConfigData: baseConfigData ?? undefined,
                 configArrayFactory,
                 cwd,
                 rulePaths,
+                // @ts-ignore
                 loadRules
             }),
-            baseConfigData,
+            baseConfigData: baseConfigData ?? undefined,
+            // @ts-ignore
             cliConfigArray: createCLIConfigArray({
-                cliConfigData,
+                cliConfigData: cliConfigData ?? undefined,
                 configArrayFactory,
                 cwd,
                 ignorePath,
                 specificConfigPath
             }),
-            cliConfigData,
+            cliConfigData: cliConfigData ?? undefined,
             configArrayFactory,
             configCache: new Map(),
             cwd,
@@ -270,6 +301,7 @@ class CascadingConfigArrayFactory {
             specificConfigPath,
             useEslintrc,
             builtInRules,
+            // @ts-ignore
             loadRules
         });
     }
@@ -280,6 +312,7 @@ class CascadingConfigArrayFactory {
      * @type {string}
      */
     get cwd() {
+        // @ts-ignore
         const { cwd } = internalSlotsMap.get(this);
 
         return cwd;
@@ -294,12 +327,9 @@ class CascadingConfigArrayFactory {
      * @param {boolean} [options.ignoreNotFoundError] If `true` then it doesn't throw `ConfigurationNotFoundError`.
      * @returns {ConfigArray} The config array of the file.
      */
-    getConfigArrayForFile(filePath, { ignoreNotFoundError = false } = {}) {
-        const {
-            baseConfigArray,
-            cliConfigArray,
-            cwd
-        } = internalSlotsMap.get(this);
+    getConfigArrayForFile(filePath: string, { ignoreNotFoundError = false } = {}) {
+        // @ts-ignore
+        const { baseConfigArray, cliConfigArray, cwd } = internalSlotsMap.get(this);
 
         if (!filePath) {
             return new ConfigArray(...baseConfigArray, ...cliConfigArray);
@@ -322,9 +352,10 @@ class CascadingConfigArrayFactory {
      * @param {ConfigData} configData The config data to override all configs.
      * @returns {void}
      */
-    setOverrideConfig(configData) {
+    setOverrideConfig(configData: ConfigData) {
         const slots = internalSlotsMap.get(this);
 
+        // @ts-ignore
         slots.cliConfigData = configData;
     }
 
@@ -335,8 +366,11 @@ class CascadingConfigArrayFactory {
     clearCache() {
         const slots = internalSlotsMap.get(this);
 
+        // @ts-ignore
         slots.baseConfigArray = createBaseConfigArray(slots);
+        // @ts-ignore
         slots.cliConfigArray = createCLIConfigArray(slots);
+        // @ts-ignore
         slots.configCache.clear();
     }
 
@@ -347,14 +381,10 @@ class CascadingConfigArrayFactory {
      * @returns {ConfigArray} The loaded config.
      * @private
      */
-    _loadConfigInAncestors(directoryPath, configsExistInSubdirs = false) {
-        const {
-            baseConfigArray,
-            configArrayFactory,
-            configCache,
-            cwd,
-            useEslintrc
-        } = internalSlotsMap.get(this);
+    _loadConfigInAncestors(directoryPath: string, configsExistInSubdirs = false) {
+        // @ts-ignore
+        const { baseConfigArray, configArrayFactory, configCache, cwd, useEslintrc } =
+            internalSlotsMap.get(this);
 
         if (!useEslintrc) {
             return baseConfigArray;
@@ -373,15 +403,12 @@ class CascadingConfigArrayFactory {
 
         // Consider this is root.
         if (directoryPath === homePath && cwd !== homePath) {
-            debug("Stop traversing because of considered root.");
+            debug('Stop traversing because of considered root.');
             if (configsExistInSubdirs) {
                 const filePath = ConfigArrayFactory.getPathToConfigFileInDirectory(directoryPath);
 
                 if (filePath) {
-                    emitDeprecationWarning(
-                        filePath,
-                        "ESLINT_PERSONAL_CONFIG_SUPPRESS"
-                    );
+                    emitDeprecationWarning(filePath, 'ESLINT_PERSONAL_CONFIG_SUPPRESS');
                 }
             }
             return this._cacheConfig(directoryPath, baseConfigArray);
@@ -390,9 +417,9 @@ class CascadingConfigArrayFactory {
         // Load the config on this directory.
         try {
             configArray = configArrayFactory.loadInDirectory(directoryPath);
-        } catch (error) {
+        } catch (error: any) {
             /* istanbul ignore next */
-            if (error.code === "EACCES") {
+            if (error.code === 'EACCES') {
                 debug("Stop traversing because of 'EACCES' error.");
                 return this._cacheConfig(directoryPath, baseConfigArray);
             }
@@ -407,12 +434,13 @@ class CascadingConfigArrayFactory {
 
         // Load from the ancestors and merge it.
         const parentPath = path.dirname(directoryPath);
-        const parentConfigArray = parentPath && parentPath !== directoryPath
-            ? this._loadConfigInAncestors(
-                parentPath,
-                configsExistInSubdirs || configArray.length > 0
-            )
-            : baseConfigArray;
+        const parentConfigArray =
+            parentPath && parentPath !== directoryPath
+                ? this._loadConfigInAncestors(
+                      parentPath,
+                      configsExistInSubdirs || configArray.length > 0
+                  )
+                : baseConfigArray;
 
         if (configArray.length > 0) {
             configArray.unshift(...parentConfigArray);
@@ -430,7 +458,8 @@ class CascadingConfigArrayFactory {
      * @param {ConfigArray} configArray The config array as a cache value.
      * @returns {ConfigArray} The `configArray` (frozen).
      */
-    _cacheConfig(directoryPath, configArray) {
+    _cacheConfig(directoryPath: string, configArray: ConfigArray) {
+        // @ts-ignore
         const { configCache } = internalSlotsMap.get(this);
 
         Object.freeze(configArray);
@@ -448,14 +477,14 @@ class CascadingConfigArrayFactory {
      * @returns {ConfigArray} The loaded config.
      * @private
      */
-    _finalizeConfigArray(configArray, directoryPath, ignoreNotFoundError) {
-        const {
-            cliConfigArray,
-            configArrayFactory,
-            finalizeCache,
-            useEslintrc,
-            builtInRules
-        } = internalSlotsMap.get(this);
+    _finalizeConfigArray(
+        configArray: ConfigArray,
+        directoryPath: string,
+        ignoreNotFoundError: boolean
+    ): ConfigArray {
+        // @ts-ignore
+        const { cliConfigArray, configArrayFactory, finalizeCache, useEslintrc, builtInRules } =
+            internalSlotsMap.get(this);
 
         let finalConfigArray = finalizeCache.get(configArray);
 
@@ -465,29 +494,22 @@ class CascadingConfigArrayFactory {
             // Load the personal config if there are no regular config files.
             if (
                 useEslintrc &&
-                configArray.every(c => !c.filePath) &&
-                cliConfigArray.every(c => !c.filePath) // `--config` option can be a file.
+                // @ts-ignore
+                configArray.every((c) => !c.filePath) &&
+                cliConfigArray.every((c: any) => !c.filePath) // `--config` option can be a file.
             ) {
                 const homePath = os.homedir();
 
-                debug("Loading the config file of the home directory:", homePath);
+                debug('Loading the config file of the home directory:', homePath);
 
-                const personalConfigArray = configArrayFactory.loadInDirectory(
-                    homePath,
-                    { name: "PersonalConfig" }
-                );
+                const personalConfigArray = configArrayFactory.loadInDirectory(homePath, {
+                    name: 'PersonalConfig'
+                });
 
-                if (
-                    personalConfigArray.length > 0 &&
-                    !directoryPath.startsWith(homePath)
-                ) {
-                    const lastElement =
-                        personalConfigArray[personalConfigArray.length - 1];
+                if (personalConfigArray.length > 0 && !directoryPath.startsWith(homePath)) {
+                    const lastElement = personalConfigArray[personalConfigArray.length - 1];
 
-                    emitDeprecationWarning(
-                        lastElement.filePath,
-                        "ESLINT_PERSONAL_CONFIG_LOAD"
-                    );
+                    emitDeprecationWarning(lastElement.filePath, 'ESLINT_PERSONAL_CONFIG_LOAD');
                 }
 
                 finalConfigArray = finalConfigArray.concat(personalConfigArray);
@@ -509,11 +531,7 @@ class CascadingConfigArrayFactory {
             Object.freeze(finalConfigArray);
             finalizeCache.set(configArray, finalConfigArray);
 
-            debug(
-                "Configuration was determined: %o on %s",
-                finalConfigArray,
-                directoryPath
-            );
+            debug('Configuration was determined: %o on %s', finalConfigArray, directoryPath);
         }
 
         // At least one element (the default ignore patterns) exists.

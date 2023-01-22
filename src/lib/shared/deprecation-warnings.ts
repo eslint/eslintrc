@@ -7,13 +7,13 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-import path from "path";
+import path from 'path';
 
 //------------------------------------------------------------------------------
 // Private
 //------------------------------------------------------------------------------
 
-// Defitions for deprecation warnings.
+// Definitions for deprecation warnings.
 const deprecationWarningMessages = {
     ESLINT_LEGACY_ECMAFEATURES:
         "The 'ecmaFeatures' config file property is deprecated and has no effect.",
@@ -36,7 +36,7 @@ const sourceFileErrorCache = new Set();
  * @param {string} errorCode The warning message to show.
  * @returns {void}
  */
-function emitDeprecationWarning(source, errorCode) {
+function emitDeprecationWarning(source: string, errorCode: string) {
     const cacheKey = JSON.stringify({ source, errorCode });
 
     if (sourceFileErrorCache.has(cacheKey)) {
@@ -45,19 +45,14 @@ function emitDeprecationWarning(source, errorCode) {
     sourceFileErrorCache.add(cacheKey);
 
     const rel = path.relative(process.cwd(), source);
+    // @ts-ignore
     const message = deprecationWarningMessages[errorCode];
 
-    process.emitWarning(
-        `${message} (found in "${rel}")`,
-        "DeprecationWarning",
-        errorCode
-    );
+    process.emitWarning(`${message} (found in "${rel}")`, 'DeprecationWarning', errorCode);
 }
 
 //------------------------------------------------------------------------------
 // Public Interface
 //------------------------------------------------------------------------------
 
-export {
-    emitDeprecationWarning
-};
+export { emitDeprecationWarning };

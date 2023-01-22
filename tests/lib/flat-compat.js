@@ -10,8 +10,8 @@
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { assert } from "chai";
-import { FlatCompat } from "../../lib/index.js";
-import environments from "../../conf/environments.js";
+import { FlatCompat } from "../../dist/lib/index.js";
+import environments from "../../dist/conf/environments.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,7 +33,7 @@ function normalizePlugin(plugin) {
         rules: {},
         environments: {},
         processors: {},
-        ...plugin
+        ...plugin,
     };
 }
 
@@ -51,27 +51,48 @@ function getFixturePath(dirName) {
 //-----------------------------------------------------------------------------
 
 describe("FlatCompat", () => {
-
     describe("config()", async () => {
-
         let compat;
         const baseDirectory = getFixturePath("config");
-        const pluginFixture1 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default);
-        const pluginFixture2 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default);
-        const pluginFixture3 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3.js")))).default);
+        const pluginFixture1 = normalizePlugin(
+            (
+                await import(
+                    pathToFileURL(
+                        path.join(baseDirectory, "node_modules/eslint-plugin-fixture1.js")
+                    )
+                )
+            ).default
+        );
+        const pluginFixture2 = normalizePlugin(
+            (
+                await import(
+                    pathToFileURL(
+                        path.join(baseDirectory, "node_modules/eslint-plugin-fixture2.js")
+                    )
+                )
+            ).default
+        );
+        const pluginFixture3 = normalizePlugin(
+            (
+                await import(
+                    pathToFileURL(
+                        path.join(baseDirectory, "node_modules/eslint-plugin-fixture3.js")
+                    )
+                )
+            ).default
+        );
 
         beforeEach(() => {
             compat = new FlatCompat({
-                baseDirectory
+                baseDirectory,
             });
         });
 
         describe("top-level", () => {
-
             describe("ignorePatterns", () => {
                 it("should translate ignorePatterns string into ignores array", () => {
                     const result = compat.config({
-                        ignorePatterns: "*.jsx"
+                        ignorePatterns: "*.jsx",
                     });
 
                     assert.strictEqual(result.length, 1);
@@ -82,7 +103,7 @@ describe("FlatCompat", () => {
 
                 it("should translate ignorePatterns array into ignores array", () => {
                     const result = compat.config({
-                        ignorePatterns: ["*.jsx"]
+                        ignorePatterns: ["*.jsx"],
                     });
 
                     assert.strictEqual(result.length, 1);
@@ -93,7 +114,7 @@ describe("FlatCompat", () => {
 
                 it("should ignore second argument of ignore function from ignorePatterns", () => {
                     const result = compat.config({
-                        ignorePatterns: ["*.jsx"]
+                        ignorePatterns: ["*.jsx"],
                     });
 
                     assert.strictEqual(result.length, 1);
@@ -105,80 +126,80 @@ describe("FlatCompat", () => {
                 it("should combine ignorePatterns from extended configs", () => {
                     const result = compat.config({
                         ignorePatterns: ["!foo/bar"],
-                        extends: "ignores-foo"
+                        extends: "ignores-foo",
                     });
 
                     assert.strictEqual(result.length, 1);
                     assert.typeOf(result[0].ignores[0], "function");
                     assert.isTrue(result[0].ignores[0](path.join(baseDirectory, "foo/baz.js")));
-                    assert.isFalse(result[0].ignores[0](path.join(baseDirectory, "foo/bar/baz.js")));
+                    assert.isFalse(
+                        result[0].ignores[0](path.join(baseDirectory, "foo/bar/baz.js"))
+                    );
                 });
-
-
             });
 
             it("should translate settings", () => {
                 const result = compat.config({
                     settings: {
                         foo: true,
-                        bar: false
-                    }
+                        bar: false,
+                    },
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     settings: {
                         foo: true,
-                        bar: false
-                    }
+                        bar: false,
+                    },
                 });
             });
 
             it("should translate plugins without processors", () => {
                 const result = compat.config({
-                    plugins: ["fixture1"]
+                    plugins: ["fixture1"],
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     plugins: {
-                        fixture1: pluginFixture1
-                    }
+                        fixture1: pluginFixture1,
+                    },
                 });
             });
 
             it("should translate plugins with processors", () => {
                 const result = compat.config({
-                    plugins: ["fixture2"]
+                    plugins: ["fixture2"],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     files: ["**/*.md"],
-                    processor: pluginFixture2.processors[".md"]
+                    processor: pluginFixture2.processors[".md"],
                 });
                 assert.deepStrictEqual(result[1], {
                     plugins: {
-                        fixture2: pluginFixture2
-                    }
+                        fixture2: pluginFixture2,
+                    },
                 });
             });
 
             it("should translate multiple plugins", () => {
                 const result = compat.config({
-                    plugins: ["fixture1", "fixture2"]
+                    plugins: ["fixture1", "fixture2"],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     files: ["**/*.md"],
-                    processor: pluginFixture2.processors[".md"]
+                    processor: pluginFixture2.processors[".md"],
                 });
                 assert.deepStrictEqual(result[1], {
                     plugins: {
                         fixture1: pluginFixture1,
-                        fixture2: pluginFixture2
-                    }
+                        fixture2: pluginFixture2,
+                    },
                 });
             });
 
@@ -187,32 +208,31 @@ describe("FlatCompat", () => {
                     plugins: ["fixture3"],
                     env: {
                         "fixture3/a": true,
-                        "fixture3/b": true
-                    }
+                        "fixture3/b": true,
+                    },
                 });
 
                 assert.strictEqual(result.length, 3);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
-                            foo: true
-                        }
-                    }
+                            foo: true,
+                        },
+                    },
                 });
                 assert.deepStrictEqual(result[1], {
                     languageOptions: {
                         globals: {
-                            bar: false
-                        }
-                    }
+                            bar: false,
+                        },
+                    },
                 });
                 assert.deepStrictEqual(result[2], {
                     plugins: {
-                        fixture3: pluginFixture3
-                    }
+                        fixture3: pluginFixture3,
+                    },
                 });
             });
-
         });
 
         describe("extends", () => {
@@ -220,22 +240,22 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: "fixture1",
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
-                            foobar: true
-                        }
-                    }
+                            foobar: true,
+                        },
+                    },
                 });
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -243,16 +263,16 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: "eslint:all",
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:all");
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -260,16 +280,16 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: ["eslint:all"],
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:all");
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -277,16 +297,16 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: "eslint:recommended",
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:recommended");
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -294,16 +314,16 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: ["eslint:recommended"],
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], "eslint:recommended");
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -311,22 +331,22 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: ["fixture1"],
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
-                            foobar: true
-                        }
-                    }
+                            foobar: true,
+                        },
+                    },
                 });
                 assert.deepStrictEqual(result[1], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
 
@@ -334,208 +354,207 @@ describe("FlatCompat", () => {
                 const result = compat.config({
                     extends: ["fixture1", "eslint:all", "fixture2"],
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
 
                 assert.strictEqual(result.length, 4);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
                         globals: {
-                            foobar: true
-                        }
-                    }
+                            foobar: true,
+                        },
+                    },
                 });
                 assert.deepStrictEqual(result[1], "eslint:all");
                 assert.deepStrictEqual(result[2], {
                     languageOptions: {
                         globals: {
-                            foobar: false
-                        }
+                            foobar: false,
+                        },
                     },
                     rules: {
-                        foobar: "error"
-                    }
+                        foobar: "error",
+                    },
                 });
                 assert.deepStrictEqual(result[3], {
                     rules: {
-                        foo: "warn"
-                    }
+                        foo: "warn",
+                    },
                 });
             });
-
         });
 
         describe("overrides", () => {
             it("should translate files string into files array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: "*.jsx",
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate files array into files array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: ["*.jsx"],
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate files array with multiple patterns into files array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: ["*.jsx", "*.js"],
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsm"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate files/excludedFiles strings into files/ignores array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: "*",
                             excludedFiles: "*.jsx",
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsx"));
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate files/excludedFiles arrays into files/ignores array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: ["*"],
                             excludedFiles: ["*.jsx"],
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.jsx"));
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate files/excludedFiles arrays with multiple items into files/ignores array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: ["*.js", "*.jsx"],
                             excludedFiles: ["*.test.js", "*test.jsx"],
                             rules: {
-                                foo: "warn"
-                            }
-                        }
-                    ]
+                                foo: "warn",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 2);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
                 assert.typeOf(result[1].files[0], "function");
                 assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
@@ -543,39 +562,38 @@ describe("FlatCompat", () => {
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.jsx"));
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
             });
 
             it("should translate multiple files/excludedFiles arrays with multiple items into files/ignores array", () => {
                 const result = compat.config({
                     rules: {
-                        foo: "error"
+                        foo: "error",
                     },
                     overrides: [
                         {
                             files: ["*.js", "*.jsx"],
                             excludedFiles: ["*.test.js", "*test.jsx"],
                             rules: {
-                                foo: "warn"
-                            }
+                                foo: "warn",
+                            },
                         },
                         {
                             files: ["*.md", "*.mdx"],
                             excludedFiles: ["*.test.md", "*test.mdx"],
                             rules: {
-                                bar: "error"
-                            }
-                        }
-
-                    ]
+                                bar: "error",
+                            },
+                        },
+                    ],
                 });
 
                 assert.strictEqual(result.length, 3);
                 assert.deepStrictEqual(result[0], {
                     rules: {
-                        foo: "error"
-                    }
+                        foo: "error",
+                    },
                 });
 
                 assert.typeOf(result[1].files[0], "function");
@@ -584,9 +602,8 @@ describe("FlatCompat", () => {
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.jsx"));
                 assert.isFalse(result[1].files[0]("/usr/eslint/foo.test.js"));
                 assert.deepStrictEqual(result[1].rules, {
-                    foo: "warn"
+                    foo: "warn",
                 });
-
 
                 assert.typeOf(result[2].files[0], "function");
                 assert.isTrue(result[2].files[0]("/usr/eslint/foo.mdx"));
@@ -594,55 +611,50 @@ describe("FlatCompat", () => {
                 assert.isFalse(result[2].files[0]("/usr/eslint/foo.test.mdx"));
                 assert.isFalse(result[2].files[0]("/usr/eslint/foo.test.md"));
                 assert.deepStrictEqual(result[2].rules, {
-                    bar: "error"
+                    bar: "error",
                 });
             });
-
         });
 
         describe("linterOptions", () => {
-
-            ["noInlineConfig", "reportUnusedDisableDirectives"].forEach(propertyName => {
+            ["noInlineConfig", "reportUnusedDisableDirectives"].forEach((propertyName) => {
                 it(`should translate ${propertyName} into linterOptions.${propertyName}`, () => {
                     const result = compat.config({
-                        [propertyName]: true
+                        [propertyName]: true,
                     });
 
                     assert.strictEqual(result.length, 1);
                     assert.deepStrictEqual(result[0], {
                         linterOptions: {
-                            [propertyName]: true
-                        }
+                            [propertyName]: true,
+                        },
                     });
                 });
             });
 
-
             it("should translate multiple linteroptions", () => {
                 const result = compat.config({
                     noInlineConfig: true,
-                    reportUnusedDisableDirectives: false
+                    reportUnusedDisableDirectives: false,
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     linterOptions: {
                         noInlineConfig: true,
-                        reportUnusedDisableDirectives: false
-                    }
+                        reportUnusedDisableDirectives: false,
+                    },
                 });
             });
-
         });
 
         describe("languageOptions", () => {
-
             it("should translate globals", () => {
                 const result = compat.config({
                     globals: {
                         foo: true,
-                        bar: false
-                    }
+                        bar: false,
+                    },
                 });
 
                 assert.strictEqual(result.length, 1);
@@ -650,35 +662,35 @@ describe("FlatCompat", () => {
                     languageOptions: {
                         globals: {
                             foo: true,
-                            bar: false
-                        }
-                    }
+                            bar: false,
+                        },
+                    },
                 });
             });
 
             it("should translate env into globals", () => {
                 const result = compat.config({
                     env: {
-                        amd: true
-                    }
+                        amd: true,
+                    },
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
-                        ...environments.get("amd")
-                    }
+                        ...environments.get("amd"),
+                    },
                 });
             });
 
             it("should translate parserOptions", () => {
                 const parserOptions = {
                     foo: true,
-                    bar: false
+                    bar: false,
                 };
 
                 const result = compat.config({
-                    parserOptions
+                    parserOptions,
                 });
 
                 assert.strictEqual(result.length, 1);
@@ -686,9 +698,9 @@ describe("FlatCompat", () => {
                     languageOptions: {
                         parserOptions: {
                             foo: true,
-                            bar: false
-                        }
-                    }
+                            bar: false,
+                        },
+                    },
                 });
 
                 // the object should be a clone, not the original
@@ -697,22 +709,25 @@ describe("FlatCompat", () => {
 
             it("should translate parser string into an object", async () => {
                 const result = compat.config({
-                    parser: "my-parser"
+                    parser: "my-parser",
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
-                        parser: (await import(pathToFileURL(getFixturePath("config/node_modules/my-parser.js")))).default
-                    }
+                        parser: (
+                            await import(
+                                pathToFileURL(getFixturePath("config/node_modules/my-parser.js"))
+                            )
+                        ).default,
+                    },
                 });
             });
 
             it("should throw an error when the parser can't be found", () => {
-
                 assert.throws(() => {
                     compat.config({
-                        parser: "missing-parser"
+                        parser: "missing-parser",
                     });
                 }, /Failed to load parser 'missing-parser'/u);
             });
@@ -720,27 +735,27 @@ describe("FlatCompat", () => {
             it("should translate sourceType", () => {
                 const result = compat.config({
                     parserOptions: {
-                        sourceType: "module"
-                    }
+                        sourceType: "module",
+                    },
                 });
 
                 assert.strictEqual(result.length, 1);
                 assert.deepStrictEqual(result[0], {
                     languageOptions: {
-                        sourceType: "module"
-                    }
+                        sourceType: "module",
+                    },
                 });
             });
 
             it("should translate multiple options", () => {
                 const result = compat.config({
                     parserOptions: {
-                        sourceType: "module"
+                        sourceType: "module",
                     },
                     globals: {
                         foo: true,
-                        bar: false
-                    }
+                        bar: false,
+                    },
                 });
 
                 assert.strictEqual(result.length, 1);
@@ -749,18 +764,15 @@ describe("FlatCompat", () => {
                         sourceType: "module",
                         globals: {
                             foo: true,
-                            bar: false
-                        }
-                    }
+                            bar: false,
+                        },
+                    },
                 });
             });
-
         });
-
     });
 
     describe("env()", () => {
-
         let compat;
 
         beforeEach(() => {
@@ -769,34 +781,34 @@ describe("FlatCompat", () => {
 
         it("should translate env into globals", () => {
             const result = compat.env({
-                amd: true
+                amd: true,
             });
 
             assert.strictEqual(result.length, 1);
             assert.deepStrictEqual(result[0], {
                 languageOptions: {
-                    ...environments.get("amd")
-                }
+                    ...environments.get("amd"),
+                },
             });
         });
 
         it("should not translate env into globals when env is false", () => {
             const result = compat.env({
                 amd: true,
-                node: false
+                node: false,
             });
 
             assert.strictEqual(result.length, 1);
             assert.deepStrictEqual(result[0], {
                 languageOptions: {
-                    ...environments.get("amd")
-                }
+                    ...environments.get("amd"),
+                },
             });
         });
 
         it("should translate env with parserOptions.ecmaVersion into globals and languageOptions.ecmaVersion", () => {
             const result = compat.env({
-                es6: true
+                es6: true,
             });
 
             assert.strictEqual(result.length, 1);
@@ -804,15 +816,15 @@ describe("FlatCompat", () => {
                 languageOptions: {
                     ecmaVersion: 6,
                     globals: {
-                        ...environments.get("es6").globals
-                    }
-                }
+                        ...environments.get("es6").globals,
+                    },
+                },
             });
         });
 
         it("should translate env with parserOptions.ecmaFeatures.globalReturn into globals and languageOptions.parserOptions", () => {
             const result = compat.env({
-                node: true
+                node: true,
             });
 
             assert.strictEqual(result.length, 1);
@@ -820,15 +832,15 @@ describe("FlatCompat", () => {
                 languageOptions: {
                     parserOptions: environments.get("node").parserOptions,
                     globals: {
-                        ...environments.get("node").globals
-                    }
-                }
+                        ...environments.get("node").globals,
+                    },
+                },
             });
         });
 
         it("should translate env with parserOptions.ecmaFeatures.globalReturn into globals and languageOptions.parserOptions", () => {
             const result = compat.env({
-                es2021: true
+                es2021: true,
             });
 
             assert.strictEqual(result.length, 1);
@@ -836,21 +848,19 @@ describe("FlatCompat", () => {
                 languageOptions: {
                     ecmaVersion: 12,
                     globals: {
-                        ...environments.get("es2021").globals
-                    }
-                }
+                        ...environments.get("es2021").globals,
+                    },
+                },
             });
         });
-
     });
 
     describe("extends()", () => {
-
         let compat;
 
         beforeEach(() => {
             compat = new FlatCompat({
-                baseDirectory: getFixturePath("config")
+                baseDirectory: getFixturePath("config"),
             });
         });
 
@@ -861,9 +871,9 @@ describe("FlatCompat", () => {
             assert.deepStrictEqual(result[0], {
                 languageOptions: {
                     globals: {
-                        foobar: true
-                    }
-                }
+                        foobar: true,
+                    },
+                },
             });
         });
 
@@ -888,33 +898,30 @@ describe("FlatCompat", () => {
             assert.deepStrictEqual(result[0], {
                 languageOptions: {
                     globals: {
-                        foobar: true
-                    }
-                }
+                        foobar: true,
+                    },
+                },
             });
             assert.deepStrictEqual(result[1], "eslint:all");
             assert.deepStrictEqual(result[2], {
                 languageOptions: {
                     globals: {
-                        foobar: false
-                    }
+                        foobar: false,
+                    },
                 },
                 rules: {
-                    foobar: "error"
-                }
+                    foobar: "error",
+                },
             });
         });
-
     });
 
-
     describe("plugins()", () => {
-
         let compat;
 
         beforeEach(() => {
             compat = new FlatCompat({
-                baseDirectory: getFixturePath("config")
+                baseDirectory: getFixturePath("config"),
             });
         });
 
@@ -929,9 +936,18 @@ describe("FlatCompat", () => {
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
-                    }
-                }
+                        ...(
+                            await import(
+                                pathToFileURL(
+                                    path.join(
+                                        compat.baseDirectory,
+                                        "node_modules/eslint-plugin-fixture1.js"
+                                    )
+                                )
+                            )
+                        ).default,
+                    },
+                },
             });
         });
 
@@ -943,12 +959,18 @@ describe("FlatCompat", () => {
 
         it("should translate plugins with processors", async () => {
             const result = compat.plugins("fixture2");
-            const plugin = (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default;
+            const plugin = (
+                await import(
+                    pathToFileURL(
+                        path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")
+                    )
+                )
+            ).default;
 
             assert.strictEqual(result.length, 2);
             assert.deepStrictEqual(result[0], {
                 files: ["**/*.md"],
-                processor: plugin.processors[".md"]
+                processor: plugin.processors[".md"],
             });
             assert.deepStrictEqual(result[1], {
                 plugins: {
@@ -957,20 +979,26 @@ describe("FlatCompat", () => {
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...plugin
-                    }
-                }
+                        ...plugin,
+                    },
+                },
             });
         });
 
         it("should translate multiple plugins", async () => {
             const result = compat.plugins("fixture1", "fixture2");
-            const plugin = (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default;
+            const plugin = (
+                await import(
+                    pathToFileURL(
+                        path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js")
+                    )
+                )
+            ).default;
 
             assert.strictEqual(result.length, 2);
             assert.deepStrictEqual(result[0], {
                 files: ["**/*.md"],
-                processor: plugin.processors[".md"]
+                processor: plugin.processors[".md"],
             });
             assert.deepStrictEqual(result[1], {
                 plugins: {
@@ -979,19 +1007,26 @@ describe("FlatCompat", () => {
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
+                        ...(
+                            await import(
+                                pathToFileURL(
+                                    path.join(
+                                        compat.baseDirectory,
+                                        "node_modules/eslint-plugin-fixture1.js"
+                                    )
+                                )
+                            )
+                        ).default,
                     },
                     fixture2: {
                         configs: {},
                         rules: {},
                         environments: {},
                         processors: {},
-                        ...plugin
-                    }
-                }
+                        ...plugin,
+                    },
+                },
             });
         });
-
     });
-
 });

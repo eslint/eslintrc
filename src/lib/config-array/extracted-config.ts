@@ -15,7 +15,10 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import { IgnorePattern } from "./ignore-pattern.js";
+import { GlobalConf, SeverityConf } from '../shared/types.js';
+
+import { DependentParser, DependentPlugin } from './config-dependency.js';
+import { IgnorePattern } from './ignore-pattern.js';
 
 // For VSCode intellisense
 /** @typedef {import("../../shared/types").ConfigData} ConfigData */
@@ -31,7 +34,7 @@ import { IgnorePattern } from "./ignore-pattern.js";
  * @param {T[]} ys The array that may be the first part of `xs`.
  * @returns {boolean} `true` if `xs` starts with `ys`.
  */
-function startsWith(xs, ys) {
+function startsWith<T>(xs: T[], ys: T[]) {
     return xs.length >= ys.length && ys.every((y, i) => y === xs[i]);
 }
 
@@ -39,13 +42,29 @@ function startsWith(xs, ys) {
  * The class for extracted config data.
  */
 class ExtractedConfig {
+    configNameOfNoInlineConfig: string;
+    env: Record<string, boolean>;
+    globals: Record<string, GlobalConf>;
+    ignores:
+        | (((filePath: string, dot?: boolean) => boolean) & {
+              basePath: string;
+              patterns: string[];
+          })
+        | undefined;
+    noInlineConfig: boolean | undefined;
+    parser: DependentParser | null;
+    parserOptions: Record<string, any>;
+    plugins: Record<string, DependentPlugin>;
+    processor: string | null;
+    reportUnusedDisableDirectives: boolean | undefined;
+    rules: Record<string, [SeverityConf, ...any[]]>;
+    settings: Record<string, any>;
     constructor() {
-
         /**
          * The config name what `noInlineConfig` setting came from.
          * @type {string}
          */
-        this.configNameOfNoInlineConfig = "";
+        this.configNameOfNoInlineConfig = '';
 
         /**
          * Environments.
@@ -119,23 +138,22 @@ class ExtractedConfig {
      * @returns {ConfigData} The converted object.
      */
     toCompatibleObjectAsConfigFileContent() {
-        const {
-            /* eslint-disable no-unused-vars */
-            configNameOfNoInlineConfig: _ignore1,
-            processor: _ignore2,
-            /* eslint-enable no-unused-vars */
-            ignores,
-            ...config
-        } = this;
+        const { configNameOfNoInlineConfig, processor, ignores, ...config } = this;
 
+        // @ts-ignore
         config.parser = config.parser && config.parser.filePath;
+        // @ts-ignore
         config.plugins = Object.keys(config.plugins).filter(Boolean).reverse();
+        // @ts-ignore
         config.ignorePatterns = ignores ? ignores.patterns : [];
 
         // Strip the default patterns from `ignorePatterns`.
+        // @ts-ignore
         if (startsWith(config.ignorePatterns, IgnorePattern.DefaultPatterns)) {
-            config.ignorePatterns =
-                config.ignorePatterns.slice(IgnorePattern.DefaultPatterns.length);
+            // @ts-ignore
+            config.ignorePatterns = config.ignorePatterns.slice(
+                IgnorePattern.DefaultPatterns.length
+            );
         }
 
         return config;

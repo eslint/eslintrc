@@ -6,7 +6,11 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { assert } from "chai";
-import { ConfigArray, OverrideTester, getUsedExtractedConfigs } from "../../../lib/config-array/index.js";
+import {
+    ConfigArray,
+    OverrideTester,
+    getUsedExtractedConfigs,
+} from "../../../dist/lib/config-array/index.js";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -21,7 +25,7 @@ describe("ConfigArray", () => {
             { elements: [] },
             { elements: [{ value: 1 }] },
             { elements: [{ value: 2 }, { value: 3 }] },
-            { elements: [{ value: 4 }, { value: 5 }, { value: 6 }] }
+            { elements: [{ value: 4 }, { value: 5 }, { value: 6 }] },
         ];
 
         for (const { elements } of patterns) {
@@ -37,7 +41,8 @@ describe("ConfigArray", () => {
                 });
 
                 for (let i = 0; i < elements.length; ++i) {
-                    it(`should have ${JSON.stringify(elements[i])} at configArray[${i}].`, () => { // eslint-disable-line no-loop-func
+                    it(`should have ${JSON.stringify(elements[i])} at configArray[${i}].`, () => {
+                        // eslint-disable-line no-loop-func
                         assert.strictEqual(configArray[i], elements[i]);
                     });
                 }
@@ -55,7 +60,7 @@ describe("ConfigArray", () => {
             { elements: [{ root: true }, { root: false }], expected: false },
             { elements: [{ root: false }, { root: true }], expected: true },
             { elements: [{ root: false }, { root: true }, { rules: {} }], expected: true }, // ignore undefined.
-            { elements: [{ root: true }, { root: 1 }], expected: true } // ignore non-boolean value
+            { elements: [{ root: true }, { root: 1 }], expected: true }, // ignore non-boolean value
         ];
 
         for (const { elements, expected } of patterns) {
@@ -68,7 +73,7 @@ describe("ConfigArray", () => {
     describe("'pluginEnvironments' property should be the environments of all plugins.", () => {
         const env = {
             "aaa/xxx": {},
-            "bbb/xxx": {}
+            "bbb/xxx": {},
         };
         let configArray;
 
@@ -79,11 +84,11 @@ describe("ConfigArray", () => {
                         aaa: {
                             definition: {
                                 environments: {
-                                    xxx: env["aaa/xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    xxx: env["aaa/xxx"],
+                                },
+                            },
+                        },
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
@@ -91,11 +96,11 @@ describe("ConfigArray", () => {
                         bbb: {
                             definition: {
                                 environments: {
-                                    xxx: env["bbb/xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    xxx: env["bbb/xxx"],
+                                },
+                            },
+                        },
+                    },
                 }
             );
         });
@@ -122,7 +127,7 @@ describe("ConfigArray", () => {
     describe("'pluginProcessors' property should be the processors of all plugins.", () => {
         const processors = {
             "aaa/.xxx": {},
-            "bbb/.xxx": {}
+            "bbb/.xxx": {},
         };
         let configArray;
 
@@ -133,11 +138,11 @@ describe("ConfigArray", () => {
                         aaa: {
                             definition: {
                                 processors: {
-                                    ".xxx": processors["aaa/.xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    ".xxx": processors["aaa/.xxx"],
+                                },
+                            },
+                        },
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
@@ -145,21 +150,27 @@ describe("ConfigArray", () => {
                         bbb: {
                             definition: {
                                 processors: {
-                                    ".xxx": processors["bbb/.xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    ".xxx": processors["bbb/.xxx"],
+                                },
+                            },
+                        },
+                    },
                 }
             );
         });
 
         it("should return 'aaa/.xxx' if it exists.", () => {
-            assert.strictEqual(configArray.pluginProcessors.get("aaa/.xxx"), processors["aaa/.xxx"]);
+            assert.strictEqual(
+                configArray.pluginProcessors.get("aaa/.xxx"),
+                processors["aaa/.xxx"]
+            );
         });
 
         it("should return 'bbb/.xxx' if it exists.", () => {
-            assert.strictEqual(configArray.pluginProcessors.get("bbb/.xxx"), processors["bbb/.xxx"]);
+            assert.strictEqual(
+                configArray.pluginProcessors.get("bbb/.xxx"),
+                processors["bbb/.xxx"]
+            );
         });
 
         it("should throw an error if it tried to mutate.", () => {
@@ -172,7 +183,7 @@ describe("ConfigArray", () => {
     describe("'pluginRules' property should be the rules of all plugins.", () => {
         const rules = {
             "aaa/xxx": {},
-            "bbb/xxx": {}
+            "bbb/xxx": {},
         };
         let configArray;
 
@@ -183,11 +194,11 @@ describe("ConfigArray", () => {
                         aaa: {
                             definition: {
                                 rules: {
-                                    xxx: rules["aaa/xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    xxx: rules["aaa/xxx"],
+                                },
+                            },
+                        },
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
@@ -195,11 +206,11 @@ describe("ConfigArray", () => {
                         bbb: {
                             definition: {
                                 rules: {
-                                    xxx: rules["bbb/xxx"]
-                                }
-                            }
-                        }
-                    }
+                                    xxx: rules["bbb/xxx"],
+                                },
+                            },
+                        },
+                    },
                 }
             );
         });
@@ -226,11 +237,9 @@ describe("ConfigArray", () => {
     describe("'extractConfig(filePath)' method should retrieve the merged config for a given file.", () => {
         it("should throw an error if a 'parser' has the loading error.", () => {
             assert.throws(() => {
-                new ConfigArray(
-                    {
-                        parser: { error: new Error("Failed to load a parser.") }
-                    }
-                ).extractConfig(filename);
+                new ConfigArray({
+                    parser: { error: new Error("Failed to load a parser.") },
+                }).extractConfig(filename);
             }, "Failed to load a parser.");
         });
 
@@ -238,10 +247,10 @@ describe("ConfigArray", () => {
             const parser = { id: "a parser" };
             const config = new ConfigArray(
                 {
-                    parser: { error: new Error("Failed to load a parser.") }
+                    parser: { error: new Error("Failed to load a parser.") },
                 },
                 {
-                    parser
+                    parser,
                 }
             ).extractConfig(filename);
 
@@ -249,37 +258,31 @@ describe("ConfigArray", () => {
         });
 
         it("should not throw if the errored 'parser' was not used; not matched", () => {
-            const config = new ConfigArray(
-                {
-                    criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
-                    parser: { error: new Error("Failed to load a parser.") }
-                }
-            ).extractConfig(filename);
+            const config = new ConfigArray({
+                criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
+                parser: { error: new Error("Failed to load a parser.") },
+            }).extractConfig(filename);
 
             assert.strictEqual(config.parser, null);
         });
 
         it("should throw an error if a 'plugins' value has the loading error.", () => {
             assert.throws(() => {
-                new ConfigArray(
-                    {
-                        plugins: {
-                            foo: { error: new Error("Failed to load a plugin.") }
-                        }
-                    }
-                ).extractConfig(filename);
+                new ConfigArray({
+                    plugins: {
+                        foo: { error: new Error("Failed to load a plugin.") },
+                    },
+                }).extractConfig(filename);
             }, "Failed to load a plugin.");
         });
 
         it("should not throw if the errored 'plugins' value was not used; not matched", () => {
-            const config = new ConfigArray(
-                {
-                    criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
-                    plugins: {
-                        foo: { error: new Error("Failed to load a plugin.") }
-                    }
-                }
-            ).extractConfig(filename);
+            const config = new ConfigArray({
+                criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
+                plugins: {
+                    foo: { error: new Error("Failed to load a plugin.") },
+                },
+            }).extractConfig(filename);
 
             assert.deepStrictEqual(config.plugins, {});
         });
@@ -288,32 +291,36 @@ describe("ConfigArray", () => {
             const config = new ConfigArray(
                 {
                     rules: {
-                        "no-redeclare": "error"
-                    }
+                        "no-redeclare": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.js"], [], process.cwd()),
                     rules: {
-                        "no-undef": "error"
-                    }
+                        "no-undef": "error",
+                    },
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
+                    criteria: OverrideTester.create(
+                        ["*.js"],
+                        [path.basename(filename)],
+                        process.cwd()
+                    ),
                     rules: {
-                        "no-use-before-define": "error"
-                    }
+                        "no-use-before-define": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
                     rules: {
-                        "no-unused-vars": "error"
-                    }
+                        "no-unused-vars": "error",
+                    },
                 }
             ).extractConfig(filename);
 
             assert.deepStrictEqual(config.rules, {
                 "no-redeclare": ["error"],
-                "no-undef": ["error"]
+                "no-undef": ["error"],
             });
         });
 
@@ -321,26 +328,30 @@ describe("ConfigArray", () => {
             const configArray = new ConfigArray(
                 {
                     rules: {
-                        "no-redeclare": "error"
-                    }
+                        "no-redeclare": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.js"], [], process.cwd()),
                     rules: {
-                        "no-undef": "error"
-                    }
+                        "no-undef": "error",
+                    },
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
+                    criteria: OverrideTester.create(
+                        ["*.js"],
+                        [path.basename(filename)],
+                        process.cwd()
+                    ),
                     rules: {
-                        "no-use-before-define": "error"
-                    }
+                        "no-use-before-define": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
                     rules: {
-                        "no-unused-vars": "error"
-                    }
+                        "no-unused-vars": "error",
+                    },
                 }
             );
 
@@ -369,10 +380,7 @@ describe("ConfigArray", () => {
         }
 
         it("should combine two objects when passed two objects with different top-level properties", () => {
-            const config = [
-                { env: { browser: true } },
-                { globals: { foo: "bar" } }
-            ];
+            const config = [{ env: { browser: true } }, { globals: { foo: "bar" } }];
 
             const result = merge(config[0], config[1]);
 
@@ -381,10 +389,7 @@ describe("ConfigArray", () => {
         });
 
         it("should combine without blowing up on null values", () => {
-            const config = [
-                { env: { browser: true } },
-                { env: { node: null } }
-            ];
+            const config = [{ env: { browser: true } }, { env: { node: null } }];
 
             const result = merge(config[0], config[1]);
 
@@ -395,7 +400,7 @@ describe("ConfigArray", () => {
         it("should combine two objects with parser when passed two objects with different top-level properties", () => {
             const config = [
                 { env: { browser: true }, parser: "espree" },
-                { globals: { foo: "bar" } }
+                { globals: { foo: "bar" } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -406,7 +411,7 @@ describe("ConfigArray", () => {
         it("should combine configs and override rules when passed configs with the same rules", () => {
             const config = [
                 { rules: { "no-mixed-requires": [0, false] } },
-                { rules: { "no-mixed-requires": [1, true] } }
+                { rules: { "no-mixed-requires": [1, true] } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -419,7 +424,7 @@ describe("ConfigArray", () => {
         it("should combine configs when passed configs with parserOptions", () => {
             const config = [
                 { parserOptions: { ecmaFeatures: { jsx: true } } },
-                { parserOptions: { ecmaFeatures: { globalReturn: true } } }
+                { parserOptions: { ecmaFeatures: { globalReturn: true } } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -434,25 +439,27 @@ describe("ConfigArray", () => {
                 parserOptions: {
                     ecmaFeatures: {
                         jsx: true,
-                        globalReturn: true
-                    }
+                        globalReturn: true,
+                    },
                 },
                 plugins: {},
                 processor: null,
                 reportUnusedDisableDirectives: void 0,
                 rules: {},
-                settings: {}
+                settings: {},
             });
 
             // double-check that originals were not changed
             assert.deepStrictEqual(config[0], { parserOptions: { ecmaFeatures: { jsx: true } } });
-            assert.deepStrictEqual(config[1], { parserOptions: { ecmaFeatures: { globalReturn: true } } });
+            assert.deepStrictEqual(config[1], {
+                parserOptions: { ecmaFeatures: { globalReturn: true } },
+            });
         });
 
         it("should override configs when passed configs with the same ecmaFeatures", () => {
             const config = [
                 { parserOptions: { ecmaFeatures: { globalReturn: false } } },
-                { parserOptions: { ecmaFeatures: { globalReturn: true } } }
+                { parserOptions: { ecmaFeatures: { globalReturn: true } } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -466,22 +473,21 @@ describe("ConfigArray", () => {
                 parser: null,
                 parserOptions: {
                     ecmaFeatures: {
-                        globalReturn: true
-                    }
+                        globalReturn: true,
+                    },
                 },
                 plugins: {},
                 processor: null,
                 reportUnusedDisableDirectives: void 0,
                 rules: {},
-                settings: {}
+                settings: {},
             });
         });
 
         it("should combine configs and override rules when merging two configs with arrays and int", () => {
-
             const config = [
                 { rules: { "no-mixed-requires": [0, false] } },
-                { rules: { "no-mixed-requires": 1 } }
+                { rules: { "no-mixed-requires": 1 } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -494,25 +500,27 @@ describe("ConfigArray", () => {
         });
 
         it("should combine configs and override rules options completely", () => {
-
             const config = [
                 { rules: { "no-mixed-requires1": [1, { event: ["evt", "e"] }] } },
-                { rules: { "no-mixed-requires1": [1, { err: ["error", "e"] }] } }
+                { rules: { "no-mixed-requires1": [1, { err: ["error", "e"] }] } },
             ];
 
             const result = merge(config[0], config[1]);
 
             assert.isArray(result.rules["no-mixed-requires1"]);
             assert.deepStrictEqual(result.rules["no-mixed-requires1"][1], { err: ["error", "e"] });
-            assert.deepStrictEqual(config[0], { rules: { "no-mixed-requires1": [1, { event: ["evt", "e"] }] } });
-            assert.deepStrictEqual(config[1], { rules: { "no-mixed-requires1": [1, { err: ["error", "e"] }] } });
+            assert.deepStrictEqual(config[0], {
+                rules: { "no-mixed-requires1": [1, { event: ["evt", "e"] }] },
+            });
+            assert.deepStrictEqual(config[1], {
+                rules: { "no-mixed-requires1": [1, { err: ["error", "e"] }] },
+            });
         });
 
         it("should combine configs and override rules options without array or object", () => {
-
             const config = [
                 { rules: { "no-mixed-requires1": ["warn", "nconf", "underscore"] } },
-                { rules: { "no-mixed-requires1": [2, "requirejs"] } }
+                { rules: { "no-mixed-requires1": [2, "requirejs"] } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -520,15 +528,18 @@ describe("ConfigArray", () => {
             assert.strictEqual(result.rules["no-mixed-requires1"][0], 2);
             assert.strictEqual(result.rules["no-mixed-requires1"][1], "requirejs");
             assert.isUndefined(result.rules["no-mixed-requires1"][2]);
-            assert.deepStrictEqual(config[0], { rules: { "no-mixed-requires1": ["warn", "nconf", "underscore"] } });
-            assert.deepStrictEqual(config[1], { rules: { "no-mixed-requires1": [2, "requirejs"] } });
+            assert.deepStrictEqual(config[0], {
+                rules: { "no-mixed-requires1": ["warn", "nconf", "underscore"] },
+            });
+            assert.deepStrictEqual(config[1], {
+                rules: { "no-mixed-requires1": [2, "requirejs"] },
+            });
         });
 
         it("should combine configs and override rules options without array or object but special case", () => {
-
             const config = [
                 { rules: { "no-mixed-requires1": [1, "nconf", "underscore"] } },
-                { rules: { "no-mixed-requires1": "error" } }
+                { rules: { "no-mixed-requires1": "error" } },
             ];
 
             const result = merge(config[0], config[1]);
@@ -536,12 +547,13 @@ describe("ConfigArray", () => {
             assert.strictEqual(result.rules["no-mixed-requires1"][0], "error");
             assert.strictEqual(result.rules["no-mixed-requires1"][1], "nconf");
             assert.strictEqual(result.rules["no-mixed-requires1"][2], "underscore");
-            assert.deepStrictEqual(config[0], { rules: { "no-mixed-requires1": [1, "nconf", "underscore"] } });
+            assert.deepStrictEqual(config[0], {
+                rules: { "no-mixed-requires1": [1, "nconf", "underscore"] },
+            });
             assert.deepStrictEqual(config[1], { rules: { "no-mixed-requires1": "error" } });
         });
 
         it("should combine configs correctly", () => {
-
             const config = [
                 {
                     rules: {
@@ -549,27 +561,27 @@ describe("ConfigArray", () => {
                         "valid-jsdoc": 1,
                         semi: 1,
                         quotes1: [2, { exception: ["hi"] }],
-                        smile: [1, ["hi", "bye"]]
+                        smile: [1, ["hi", "bye"]],
                     },
                     parserOptions: {
-                        ecmaFeatures: { jsx: true }
+                        ecmaFeatures: { jsx: true },
                     },
                     env: { browser: true },
-                    globals: { foo: false }
+                    globals: { foo: false },
                 },
                 {
                     rules: {
                         "no-mixed-requires1": [1, { err: ["error", "e"] }],
                         "valid-jsdoc": 2,
                         test: 1,
-                        smile: [1, ["xxx", "yyy"]]
+                        smile: [1, ["xxx", "yyy"]],
                     },
                     parserOptions: {
-                        ecmaFeatures: { globalReturn: true }
+                        ecmaFeatures: { globalReturn: true },
                     },
                     env: { browser: false },
-                    globals: { foo: true }
-                }
+                    globals: { foo: true },
+                },
             ];
 
             const result = merge(config[0], config[1]);
@@ -580,42 +592,39 @@ describe("ConfigArray", () => {
                 parserOptions: {
                     ecmaFeatures: {
                         jsx: true,
-                        globalReturn: true
-                    }
+                        globalReturn: true,
+                    },
                 },
                 plugins: {},
                 env: {
-                    browser: false
+                    browser: false,
                 },
                 globals: {
-                    foo: true
+                    foo: true,
                 },
                 rules: {
-                    "no-mixed-requires1": [1,
+                    "no-mixed-requires1": [
+                        1,
                         {
-                            err: [
-                                "error",
-                                "e"
-                            ]
-                        }
+                            err: ["error", "e"],
+                        },
                     ],
-                    quotes1: [2,
+                    quotes1: [
+                        2,
                         {
-                            exception: [
-                                "hi"
-                            ]
-                        }
+                            exception: ["hi"],
+                        },
                     ],
                     semi: [1],
                     smile: [1, ["xxx", "yyy"]],
                     test: [1],
-                    "valid-jsdoc": [2]
+                    "valid-jsdoc": [2],
                 },
                 settings: {},
                 processor: null,
                 noInlineConfig: void 0,
                 reportUnusedDisableDirectives: void 0,
-                ignores: void 0
+                ignores: void 0,
             });
             assert.deepStrictEqual(config[0], {
                 rules: {
@@ -623,26 +632,26 @@ describe("ConfigArray", () => {
                     "valid-jsdoc": 1,
                     semi: 1,
                     quotes1: [2, { exception: ["hi"] }],
-                    smile: [1, ["hi", "bye"]]
+                    smile: [1, ["hi", "bye"]],
                 },
                 parserOptions: {
-                    ecmaFeatures: { jsx: true }
+                    ecmaFeatures: { jsx: true },
                 },
                 env: { browser: true },
-                globals: { foo: false }
+                globals: { foo: false },
             });
             assert.deepStrictEqual(config[1], {
                 rules: {
                     "no-mixed-requires1": [1, { err: ["error", "e"] }],
                     "valid-jsdoc": 2,
                     test: 1,
-                    smile: [1, ["xxx", "yyy"]]
+                    smile: [1, ["xxx", "yyy"]],
                 },
                 parserOptions: {
-                    ecmaFeatures: { globalReturn: true }
+                    ecmaFeatures: { globalReturn: true },
                 },
                 env: { browser: false },
-                globals: { foo: true }
+                globals: { foo: true },
             });
         });
 
@@ -669,26 +678,30 @@ describe("ConfigArray", () => {
             configArray = new ConfigArray(
                 {
                     rules: {
-                        "no-redeclare": "error"
-                    }
+                        "no-redeclare": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.js"], [], process.cwd()),
                     rules: {
-                        "no-undef": "error"
-                    }
+                        "no-undef": "error",
+                    },
                 },
                 {
-                    criteria: OverrideTester.create(["*.js"], [path.basename(filename)], process.cwd()),
+                    criteria: OverrideTester.create(
+                        ["*.js"],
+                        [path.basename(filename)],
+                        process.cwd()
+                    ),
                     rules: {
-                        "no-use-before-define": "error"
-                    }
+                        "no-use-before-define": "error",
+                    },
                 },
                 {
                     criteria: OverrideTester.create(["*.ts"], [], process.cwd()),
                     rules: {
-                        "no-unused-vars": "error"
-                    }
+                        "no-unused-vars": "error",
+                    },
                 }
             );
         });
@@ -700,14 +713,17 @@ describe("ConfigArray", () => {
         for (const { filePaths } of [
             { filePaths: [filename] },
             { filePaths: [filename, `${filename}.ts`] },
-            { filePaths: [filename, `${filename}.ts`, path.join(dirname, "foo.js")] }
+            { filePaths: [filename, `${filename}.ts`, path.join(dirname, "foo.js")] },
         ]) {
-            describe(`after it called 'extractConfig(filePath)' ${filePaths.length} time(s) with ${JSON.stringify(filePaths, null, 4)}, the returned array`, () => { // eslint-disable-line no-loop-func
+            describe(`after it called 'extractConfig(filePath)' ${
+                filePaths.length
+            } time(s) with ${JSON.stringify(filePaths, null, 4)}, the returned array`, () => {
+                // eslint-disable-line no-loop-func
                 let configs;
                 let usedConfigs;
 
                 beforeEach(() => {
-                    configs = filePaths.map(filePath => configArray.extractConfig(filePath));
+                    configs = filePaths.map((filePath) => configArray.extractConfig(filePath));
                     usedConfigs = getUsedExtractedConfigs(configArray);
                 });
 
@@ -716,7 +732,8 @@ describe("ConfigArray", () => {
                 });
 
                 for (let i = 0; i < filePaths.length; ++i) {
-                    it(`should contain 'configs[${i}]'.`, () => { // eslint-disable-line no-loop-func
+                    it(`should contain 'configs[${i}]'.`, () => {
+                        // eslint-disable-line no-loop-func
                         assert(usedConfigs.includes(configs[i]));
                     });
                 }
@@ -724,7 +741,6 @@ describe("ConfigArray", () => {
         }
 
         it("should not contain duplicate values.", () => {
-
             // Call some times, including with the same arguments.
             configArray.extractConfig(filename);
             configArray.extractConfig(`${filename}.ts`);

@@ -6,23 +6,26 @@
 // Requirements
 //------------------------------------------------------------------------------
 
+import environments from '../conf/environments.js';
+
+import { CascadingConfigArrayFactory } from './cascading-config-array-factory.js';
+import {
+    ConfigDependency,
+    ExtractedConfig,
+    IgnorePattern,
+    ConfigArray,
+    getUsedExtractedConfigs,
+    OverrideTester
+} from './config-array/index.js';
 import {
     ConfigArrayFactory,
     createContext as createConfigArrayFactoryContext
-} from "./config-array-factory.js";
-
-import { CascadingConfigArrayFactory } from "./cascading-config-array-factory.js";
-import * as ModuleResolver from "./shared/relative-module-resolver.js";
-import { ConfigArray, getUsedExtractedConfigs } from "./config-array/index.js";
-import { ConfigDependency } from "./config-array/config-dependency.js";
-import { ExtractedConfig } from "./config-array/extracted-config.js";
-import { IgnorePattern } from "./config-array/ignore-pattern.js";
-import { OverrideTester } from "./config-array/override-tester.js";
-import * as ConfigOps from "./shared/config-ops.js";
-import ConfigValidator from "./shared/config-validator.js";
-import * as naming from "./shared/naming.js";
-import { FlatCompat } from "./flat-compat.js";
-import environments from "../conf/environments.js";
+} from './config-array-factory.js';
+import { FlatCompat } from './flat-compat.js';
+import * as ConfigOps from './shared/config-ops.js';
+import ConfigValidator from './shared/config-validator.js';
+import * as naming from './shared/naming.js';
+import * as ModuleResolver from './shared/relative-module-resolver.js';
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -47,10 +50,4 @@ const Legacy = {
     naming
 };
 
-export {
-
-    Legacy,
-
-    FlatCompat
-
-};
+export { Legacy, FlatCompat };

@@ -8,7 +8,7 @@
 
 import { assert } from "chai";
 
-import * as naming from "../../../lib/shared/naming.js";
+import * as naming from "../../../dist/lib/shared/naming.js";
 
 //------------------------------------------------------------------------------
 // Tests
@@ -16,7 +16,6 @@ import * as naming from "../../../lib/shared/naming.js";
 
 describe("naming", () => {
     describe("normalizePackageName()", () => {
-
         [
             ["foo", "eslint-config-foo"],
             ["eslint-config-foo", "eslint-config-foo"],
@@ -24,7 +23,7 @@ describe("naming", () => {
             ["@z\\foo", "@z/eslint-config-foo"],
             ["@z\\foo\\bar.js", "@z/eslint-config-foo/bar.js"],
             ["@z/eslint-config", "@z/eslint-config"],
-            ["@z/eslint-config-foo", "@z/eslint-config-foo"]
+            ["@z/eslint-config-foo", "@z/eslint-config-foo"],
         ].forEach(([input, expected]) => {
             it(`should return ${expected} when passed ${input}`, () => {
                 const result = naming.normalizePackageName(input, "eslint-config");
@@ -32,18 +31,16 @@ describe("naming", () => {
                 assert.strictEqual(result, expected);
             });
         });
-
     });
 
     describe("getShorthandName()", () => {
-
         [
             ["foo", "foo"],
             ["eslint-config-foo", "foo"],
             ["@z", "@z"],
             ["@z/eslint-config", "@z"],
             ["@z/foo", "@z/foo"],
-            ["@z/eslint-config-foo", "@z/foo"]
+            ["@z/eslint-config-foo", "@z/foo"],
         ].forEach(([input, expected]) => {
             it(`should return ${expected} when passed ${input}`, () => {
                 const result = naming.getShorthandName(input, "eslint-config");
@@ -51,7 +48,6 @@ describe("naming", () => {
                 assert.strictEqual(result, expected);
             });
         });
-
     });
 
     describe("getNamespaceFromTerm()", () => {

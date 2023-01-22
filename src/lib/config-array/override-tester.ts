@@ -17,10 +17,11 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import assert from "assert";
-import path from "path";
-import util from "util";
-import minimatch from "minimatch";
+import assert from 'assert';
+import path from 'path';
+import util from 'util';
+
+import minimatch from 'minimatch';
 
 const { Minimatch } = minimatch;
 
@@ -32,17 +33,22 @@ const minimatchOpts = { dot: true, matchBase: true };
  * @property {InstanceType<Minimatch>[] | null} excludes The negative matchers.
  */
 
+interface Pattern {
+    includes: InstanceType<typeof Minimatch>[] | null;
+    excludes: InstanceType<typeof Minimatch>[] | null;
+}
+
 /**
  * Normalize a given pattern to an array.
  * @param {string|string[]|undefined} patterns A glob pattern or an array of glob patterns.
  * @returns {string[]|null} Normalized patterns.
  * @private
  */
-function normalizePatterns(patterns) {
+function normalizePatterns(patterns: string | string[] | undefined): string[] {
     if (Array.isArray(patterns)) {
         return patterns.filter(Boolean);
     }
-    if (typeof patterns === "string" && patterns) {
+    if (typeof patterns === 'string' && patterns) {
         return [patterns];
     }
     return [];
@@ -53,11 +59,11 @@ function normalizePatterns(patterns) {
  * @param {string[]} patterns The patterns.
  * @returns {InstanceType<Minimatch>[] | null} The matchers.
  */
-function toMatcher(patterns) {
+function toMatcher(patterns: string[]): InstanceType<typeof Minimatch>[] | null {
     if (patterns.length === 0) {
         return null;
     }
-    return patterns.map(pattern => {
+    return patterns.map((pattern) => {
         if (/^\.[/\\]/u.test(pattern)) {
             return new Minimatch(
                 pattern.slice(2),
@@ -75,10 +81,10 @@ function toMatcher(patterns) {
  * @param {Pattern} matchers The matchers.
  * @returns {string} The string expression of the matcher.
  */
-function patternToJson({ includes, excludes }) {
+function patternToJson({ includes, excludes }: Pattern) {
     return {
-        includes: includes && includes.map(m => m.pattern),
-        excludes: excludes && excludes.map(m => m.pattern)
+        includes: includes && includes.map((m) => m.pattern),
+        excludes: excludes && excludes.map((m) => m.pattern)
     };
 }
 
@@ -86,7 +92,9 @@ function patternToJson({ includes, excludes }) {
  * The class to test given paths are matched by the patterns.
  */
 class OverrideTester {
-
+    private patterns: Pattern[];
+    private basePath: string;
+    private endsWithWildcard: boolean;
     /**
      * Create a tester with given criteria.
      * If there are no criteria, returns `null`.
@@ -95,7 +103,11 @@ class OverrideTester {
      * @param {string} basePath The path to the base directory to test paths.
      * @returns {OverrideTester|null} The created instance or `null`.
      */
-    static create(files, excludedFiles, basePath) {
+    static create(
+        files: string | string[],
+        excludedFiles: string | string[],
+        basePath: string
+    ): OverrideTester | null {
         const includePatterns = normalizePatterns(files);
         const excludePatterns = normalizePatterns(excludedFiles);
         let endsWithWildcard = false;
@@ -106,27 +118,27 @@ class OverrideTester {
 
         // Rejects absolute paths or relative paths to parents.
         for (const pattern of includePatterns) {
-            if (path.isAbsolute(pattern) || pattern.includes("..")) {
-                throw new Error(`Invalid override pattern (expected relative path not containing '..'): ${pattern}`);
+            if (path.isAbsolute(pattern) || pattern.includes('..')) {
+                throw new Error(
+                    `Invalid override pattern (expected relative path not containing '..'): ${pattern}`
+                );
             }
-            if (pattern.endsWith("*")) {
+            if (pattern.endsWith('*')) {
                 endsWithWildcard = true;
             }
         }
         for (const pattern of excludePatterns) {
-            if (path.isAbsolute(pattern) || pattern.includes("..")) {
-                throw new Error(`Invalid override pattern (expected relative path not containing '..'): ${pattern}`);
+            if (path.isAbsolute(pattern) || pattern.includes('..')) {
+                throw new Error(
+                    `Invalid override pattern (expected relative path not containing '..'): ${pattern}`
+                );
             }
         }
 
         const includes = toMatcher(includePatterns);
         const excludes = toMatcher(excludePatterns);
 
-        return new OverrideTester(
-            [{ includes, excludes }],
-            basePath,
-            endsWithWildcard
-        );
+        return new OverrideTester([{ includes, excludes }], basePath, endsWithWildcard);
     }
 
     /**
@@ -137,20 +149,12 @@ class OverrideTester {
      * @param {OverrideTester|null} b Another tester.
      * @returns {OverrideTester|null} Combined tester.
      */
-    static and(a, b) {
+    static and(a: OverrideTester | null, b: OverrideTester | null) {
         if (!b) {
-            return a && new OverrideTester(
-                a.patterns,
-                a.basePath,
-                a.endsWithWildcard
-            );
+            return a && new OverrideTester(a.patterns, a.basePath, a.endsWithWildcard);
         }
         if (!a) {
-            return new OverrideTester(
-                b.patterns,
-                b.basePath,
-                b.endsWithWildcard
-            );
+            return new OverrideTester(b.patterns, b.basePath, b.endsWithWildcard);
         }
 
         assert.strictEqual(a.basePath, b.basePath);
@@ -167,8 +171,7 @@ class OverrideTester {
      * @param {string} basePath The base path.
      * @param {boolean} endsWithWildcard If `true` then a pattern ends with `*`.
      */
-    constructor(patterns, basePath, endsWithWildcard = false) {
-
+    constructor(patterns: Pattern[], basePath: string, endsWithWildcard = false) {
         /** @type {Pattern[]} */
         this.patterns = patterns;
 
@@ -184,19 +187,19 @@ class OverrideTester {
      * @param {string} filePath The absolute path to the target file.
      * @returns {boolean} `true` if the path was matched.
      */
-    test(filePath) {
-        if (typeof filePath !== "string" || !path.isAbsolute(filePath)) {
+    test(filePath: string) {
+        if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) {
             throw new Error(`'filePath' should be an absolute path, but got ${filePath}.`);
         }
         const relativePath = path.relative(this.basePath, filePath);
 
-        return this.patterns.every(({ includes, excludes }) => (
-            (!includes || includes.some(m => m.match(relativePath))) &&
-            (!excludes || !excludes.some(m => m.match(relativePath)))
-        ));
+        return this.patterns.every(
+            ({ includes, excludes }) =>
+                (!includes || includes.some((m) => m.match(relativePath))) &&
+                (!excludes || !excludes.some((m) => m.match(relativePath)))
+        );
     }
 
-    // eslint-disable-next-line jsdoc/require-description
     /**
      * @returns {Object} a JSON compatible object.
      */
@@ -213,7 +216,6 @@ class OverrideTester {
         };
     }
 
-    // eslint-disable-next-line jsdoc/require-description
     /**
      * @returns {Object} an object to display by `console.log()`.
      */

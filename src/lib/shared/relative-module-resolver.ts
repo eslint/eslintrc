@@ -3,13 +3,11 @@
  * @author Teddy Katz
  */
 
-import Module from "module";
-
 /*
  * `Module.createRequire` is added in v12.2.0. It supports URL as well.
  * We only support the case where the argument is a filepath, not a URL.
  */
-const createRequire = Module.createRequire;
+import { createRequire } from 'module';
 
 /**
  * Resolves a Node module relative to another module
@@ -18,16 +16,15 @@ const createRequire = Module.createRequire;
  * a file rather than a directory, but the file need not actually exist.
  * @returns {string} The absolute path that would result from calling `require.resolve(moduleName)` in a file located at `relativeToPath`
  */
-function resolve(moduleName, relativeToPath) {
+function resolve(moduleName: string, relativeToPath: string) {
     try {
         return createRequire(relativeToPath).resolve(moduleName);
-    } catch (error) {
-
+    } catch (error: any) {
         // This `if` block is for older Node.js than 12.0.0. We can remove this block in the future.
         if (
-            typeof error === "object" &&
+            typeof error === 'object' &&
             error !== null &&
-            error.code === "MODULE_NOT_FOUND" &&
+            error.code === 'MODULE_NOT_FOUND' &&
             !error.requireStack &&
             error.message.includes(moduleName)
         ) {
@@ -37,6 +34,4 @@ function resolve(moduleName, relativeToPath) {
     }
 }
 
-export {
-    resolve
-};
+export { resolve };

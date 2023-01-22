@@ -8,12 +8,17 @@
 // Private
 //------------------------------------------------------------------------------
 
-const RULE_SEVERITY_STRINGS = ["off", "warn", "error"],
-    RULE_SEVERITY = RULE_SEVERITY_STRINGS.reduce((map, value, index) => {
-        map[value] = index;
-        return map;
-    }, {}),
-    VALID_SEVERITIES = [0, 1, 2, "off", "warn", "error"];
+const RULE_SEVERITY_STRINGS = ['off', 'warn', 'error'] as const;
+
+type RuleSeverity = {
+    [severity in (typeof RULE_SEVERITY_STRINGS)[number]]?: 0 | 1 | 2;
+};
+
+const RULE_SEVERITY = RULE_SEVERITY_STRINGS.reduce<RuleSeverity>((map, value, index) => {
+    map[value] = index as 0 | 1 | 2;
+    return map;
+}, {});
+const VALID_SEVERITIES = [0, 1, 2, 'off', 'warn', 'error'];
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -27,14 +32,15 @@ const RULE_SEVERITY_STRINGS = ["off", "warn", "error"],
  * whose first element is one of the above values. Strings are matched case-insensitively.
  * @returns {(0|1|2)} The numeric severity value if the config value was valid, otherwise 0.
  */
-function getRuleSeverity(ruleConfig) {
+function getRuleSeverity(ruleConfig: number | string | any[]): 0 | 1 | 2 {
     const severityValue = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
 
     if (severityValue === 0 || severityValue === 1 || severityValue === 2) {
         return severityValue;
     }
 
-    if (typeof severityValue === "string") {
+    if (typeof severityValue === 'string') {
+        // @ts-ignore
         return RULE_SEVERITY[severityValue.toLowerCase()] || 0;
     }
 
@@ -48,15 +54,15 @@ function getRuleSeverity(ruleConfig) {
  * @param {Object} config The config object to normalize.
  * @returns {void}
  */
-function normalizeToStrings(config) {
-
+function normalizeToStrings(config: any) {
     if (config.rules) {
-        Object.keys(config.rules).forEach(ruleId => {
+        Object.keys(config.rules).forEach((ruleId) => {
             const ruleConfig = config.rules[ruleId];
 
-            if (typeof ruleConfig === "number") {
-                config.rules[ruleId] = RULE_SEVERITY_STRINGS[ruleConfig] || RULE_SEVERITY_STRINGS[0];
-            } else if (Array.isArray(ruleConfig) && typeof ruleConfig[0] === "number") {
+            if (typeof ruleConfig === 'number') {
+                config.rules[ruleId] =
+                    RULE_SEVERITY_STRINGS[ruleConfig] || RULE_SEVERITY_STRINGS[0];
+            } else if (Array.isArray(ruleConfig) && typeof ruleConfig[0] === 'number') {
                 ruleConfig[0] = RULE_SEVERITY_STRINGS[ruleConfig[0]] || RULE_SEVERITY_STRINGS[0];
             }
         });
@@ -68,7 +74,7 @@ function normalizeToStrings(config) {
  * @param {int|string|Array} ruleConfig The configuration for an individual rule.
  * @returns {boolean} True if the rule represents an error, false if not.
  */
-function isErrorSeverity(ruleConfig) {
+function isErrorSeverity(ruleConfig: number | string | any[]) {
     return getRuleSeverity(ruleConfig) === 2;
 }
 
@@ -77,10 +83,10 @@ function isErrorSeverity(ruleConfig) {
  * @param {number|string|Array} ruleConfig The configuration for an individual rule.
  * @returns {boolean} `true` if the configuration has valid severity.
  */
-function isValidSeverity(ruleConfig) {
+function isValidSeverity(ruleConfig: number | string | any[]) {
     let severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
 
-    if (typeof severity === "string") {
+    if (typeof severity === 'string') {
         severity = severity.toLowerCase();
     }
     return VALID_SEVERITIES.indexOf(severity) !== -1;
@@ -91,37 +97,42 @@ function isValidSeverity(ruleConfig) {
  * @param {Object} config The configuration for rules.
  * @returns {boolean} `true` if the configuration has valid severity.
  */
-function isEverySeverityValid(config) {
-    return Object.keys(config).every(ruleId => isValidSeverity(config[ruleId]));
+function isEverySeverityValid(config: object) {
+    // @ts-ignore
+    return Object.keys(config).every((ruleId) => isValidSeverity(config[ruleId]));
 }
 
 /**
  * Normalizes a value for a global in a config
  * @param {(boolean|string|null)} configuredValue The value given for a global in configuration or in
  * a global directive comment
- * @returns {("readable"|"writeable"|"off")} The value normalized as a string
+ * @returns {("readonly"|"writeable"|"off")} The value normalized as a string
  * @throws Error if global value is invalid
  */
-function normalizeConfigGlobal(configuredValue) {
+function normalizeConfigGlobal(
+    configuredValue: boolean | string | null
+): 'readonly' | 'writable' | 'off' {
     switch (configuredValue) {
-        case "off":
-            return "off";
+        case 'off':
+            return 'off';
 
         case true:
-        case "true":
-        case "writeable":
-        case "writable":
-            return "writable";
+        case 'true':
+        case 'writeable':
+        case 'writable':
+            return 'writable';
 
         case null:
         case false:
-        case "false":
-        case "readable":
-        case "readonly":
-            return "readonly";
+        case 'false':
+        case 'readable':
+        case 'readonly':
+            return 'readonly';
 
         default:
-            throw new Error(`'${configuredValue}' is not a valid configuration for a global (use 'readonly', 'writable', or 'off')`);
+            throw new Error(
+                `'${configuredValue}' is not a valid configuration for a global (use 'readonly', 'writable', or 'off')`
+            );
     }
 }
 

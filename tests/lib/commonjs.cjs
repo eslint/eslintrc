@@ -10,8 +10,8 @@
 //------------------------------------------------------------------------------
 
 const assert = require("assert");
-const eslintrc = require("../../dist/eslintrc.cjs");
-const universal = require("../../dist/eslintrc-universal.cjs");
+const eslintrc = require("../../out/eslintrc.cjs");
+const universal = require("../../out/eslintrc-universal.cjs");
 const path = require("path");
 const sh = require("shelljs");
 
@@ -81,7 +81,7 @@ describe("eslintrc CommonJS loading", () => {
 
     before(() => {
         sh.mkdir("-p", testDir);
-        sh.cp("", "./dist/eslintrc.cjs", testDir);
+        sh.cp("", "./out/eslintrc.cjs", testDir);
     });
 
     after(() => {

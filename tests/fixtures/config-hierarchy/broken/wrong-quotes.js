@@ -4,4 +4,4 @@ function foo(bar) {
     return bar;
 }
 
-foo('bar');
+foo("bar");

@@ -15,7 +15,7 @@ import sinon from "sinon";
 import systemTempDir from "temp-dir";
 import { fileURLToPath } from "url";
 
-import { Legacy } from "../../lib/index.js";
+import { Legacy } from "../../dist/lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
 
 const require = createRequire(import.meta.url);

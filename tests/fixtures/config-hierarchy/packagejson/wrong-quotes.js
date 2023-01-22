@@ -1,1 +1,1 @@
-var str = 'quotes';
+var str = "quotes";

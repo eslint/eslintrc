@@ -1,3 +1,5 @@
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+
 /**
  * Custom Rollup plugin for `import.meta.url` transformation to commonjs.
  * The default transformation ('file:' + __filename) does not check characters in __filename,
@@ -7,9 +9,9 @@
  */
 function importMetaURLPlugin() {
     return {
-        name: "custom-import-meta-url",
+        name: 'custom-import-meta-url',
         resolveImportMeta(property) {
-            if (property === "url") {
+            if (property === 'url') {
                 return "require('url').pathToFileURL(__filename).toString()";
             }
             return null;
@@ -19,32 +21,54 @@ function importMetaURLPlugin() {
 
 export default [
     {
-        input: "./lib/index.js",
+        input: './dist/lib/index.js',
         external: [
-            "module", "util", "os", "path", "debug", "fs", "import-fresh",
-            "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv",
-            "globals"
+            'module',
+            'util',
+            'os',
+            'path',
+            'debug',
+            'fs',
+            'import-fresh',
+            'strip-json-comments',
+            'assert',
+            'ignore',
+            'minimatch',
+            'url',
+            'ajv',
+            'globals'
         ],
         treeshake: false,
         output: {
-            format: "cjs",
-            file: "dist/eslintrc.cjs",
+            format: 'cjs',
+            file: 'out/eslintrc.cjs',
             sourcemap: true,
             freeze: false
         },
-        plugins: [importMetaURLPlugin()]
+        plugins: [importMetaURLPlugin(), nodeResolve()]
     },
     {
-        input: "./lib/index-universal.js",
+        input: './dist/lib/index-universal.js',
         external: [
-            "module", "util", "os", "path", "debug", "fs", "import-fresh",
-            "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv",
-            "globals"
+            'module',
+            'util',
+            'os',
+            'path',
+            'debug',
+            'fs',
+            'import-fresh',
+            'strip-json-comments',
+            'assert',
+            'ignore',
+            'minimatch',
+            'url',
+            'ajv',
+            'globals'
         ],
         treeshake: false,
         output: {
-            format: "cjs",
-            file: "dist/eslintrc-universal.cjs",
+            format: 'cjs',
+            file: 'out/eslintrc-universal.cjs',
             sourcemap: true,
             freeze: false
         }

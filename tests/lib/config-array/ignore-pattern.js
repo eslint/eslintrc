@@ -6,7 +6,7 @@
 import assert from "assert";
 import path from "path";
 import sinon from "sinon";
-import { IgnorePattern } from "../../../lib/config-array/ignore-pattern.js";
+import { IgnorePattern } from "../../../dist/lib/config-array/ignore-pattern.js";
 
 describe("IgnorePattern", () => {
     describe("constructor(patterns, basePath)", () => {
@@ -32,10 +32,12 @@ describe("IgnorePattern", () => {
             const basePath1 = path.join(process.cwd(), "foo/bar");
             const p = new IgnorePattern(["a.js", "/b.js", "!c.js", "!/d.js"], basePath1);
 
-            assert.deepStrictEqual(
-                p.getPatternsRelativeTo(basePath1),
-                ["a.js", "/b.js", "!c.js", "!/d.js"]
-            );
+            assert.deepStrictEqual(p.getPatternsRelativeTo(basePath1), [
+                "a.js",
+                "/b.js",
+                "!c.js",
+                "!/d.js",
+            ]);
         });
 
         it("should return modified 'patterns' if the argument is different from 'basePath'.", () => {
@@ -43,16 +45,17 @@ describe("IgnorePattern", () => {
             const basePath2 = process.cwd();
             const p = new IgnorePattern(["a.js", "/b.js", "!c.js", "!/d.js"], basePath1);
 
-            assert.deepStrictEqual(
-                p.getPatternsRelativeTo(basePath2),
-                ["/foo/bar/**/a.js", "/foo/bar/b.js", "!/foo/bar/**/c.js", "!/foo/bar/d.js"]
-            );
+            assert.deepStrictEqual(p.getPatternsRelativeTo(basePath2), [
+                "/foo/bar/**/a.js",
+                "/foo/bar/b.js",
+                "!/foo/bar/**/c.js",
+                "!/foo/bar/d.js",
+            ]);
         });
     });
 
     describe("static createIgnore(ignorePatterns)", () => {
         describe("with two patterns should return a function, and the function", () => {
-
             /**
              * performs static createIgnre assertions against the cwd.
              * @param {string} cwd cwd to be the base path for assertions
@@ -63,7 +66,7 @@ describe("IgnorePattern", () => {
                 const basePath2 = path.join(cwd, "abc/");
                 const ignores = IgnorePattern.createIgnore([
                     new IgnorePattern(["*.js", "/*.ts", "!a.*", "!/b.*"], basePath1),
-                    new IgnorePattern(["*.js", "/*.ts", "!a.*", "!/b.*"], basePath2)
+                    new IgnorePattern(["*.js", "/*.ts", "!a.*", "!/b.*"], basePath2),
                 ]);
                 const patterns = [
                     ["a.js", false],
@@ -101,7 +104,7 @@ describe("IgnorePattern", () => {
                     ["abc/dir/b.js", true],
                     ["abc/dir/b.ts", false],
                     ["abc/dir/c.js", true],
-                    ["abc/dir/c.ts", false]
+                    ["abc/dir/c.ts", false],
                 ];
 
                 for (const [filename, expected] of patterns) {
@@ -142,7 +145,6 @@ describe("IgnorePattern", () => {
     });
 
     describe("static createIgnore(ignorePatterns)", () => {
-
         /*
          * This test will catch regressions of Windows specific issue #12850 when run on your local dev box
          * irrespective of if you are running a Windows or *nix style OS.
@@ -151,7 +153,6 @@ describe("IgnorePattern", () => {
          */
         it("with common ancestor of drive root on windows should not throw", () => {
             try {
-
                 /*
                  * When not on Windows return win32 values so local runs on *nix hit the same code path as on Windows
                  * thus enabling developers with *nix style OS to catch and debug any future regression of #12850 without
@@ -165,7 +166,7 @@ describe("IgnorePattern", () => {
 
                 const ignores = IgnorePattern.createIgnore([
                     new IgnorePattern(["*.js"], "C:\\foo\\bar"),
-                    new IgnorePattern(["*.js"], "C:\\abc\\")
+                    new IgnorePattern(["*.js"], "C:\\abc\\"),
                 ]);
 
                 // calls to this should not throw when getCommonAncestor returns root of drive

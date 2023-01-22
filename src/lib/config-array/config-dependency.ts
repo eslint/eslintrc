@@ -15,15 +15,25 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import util from "util";
+import util from 'util';
 
 /**
  * The class is to store parsers or plugins.
  * This class hides the loaded object from `JSON.stringify()` and `console.log`.
  * @template T
  */
-class ConfigDependency {
-
+class ConfigDependency<T = any> {
+    definition: T | null;
+    // @ts-ignore
+    error: Error | null;
+    // @ts-ignore
+    filePath: string | null;
+    // @ts-ignore
+    id: string;
+    // @ts-ignore
+    importerName: string;
+    // @ts-ignore
+    importerPath: string;
     /**
      * Initialize this instance.
      * @param {Object} data The dependency data.
@@ -34,15 +44,22 @@ class ConfigDependency {
      * @param {string} data.importerName The name of the config file which loads this dependency.
      * @param {string} data.importerPath The path to the config file which loads this dependency.
      */
-    constructor({
-        definition = null,
-        error = null,
-        filePath = null,
-        id,
-        importerName,
-        importerPath
+    constructor(data: {
+        definition?: T;
+        error?: Error;
+        filePath?: string;
+        id: string;
+        importerName: string;
+        importerPath: string;
     }) {
-
+        const {
+            definition = null,
+            error = null,
+            filePath = null,
+            id,
+            importerName,
+            importerPath
+        } = data;
         /**
          * The loaded dependency if the loading succeeded.
          * @type {T|null}
@@ -80,7 +97,6 @@ class ConfigDependency {
         this.importerPath = importerPath;
     }
 
-    // eslint-disable-next-line jsdoc/require-description
     /**
      * @returns {Object} a JSON compatible object.
      */
@@ -88,14 +104,15 @@ class ConfigDependency {
         const obj = this[util.inspect.custom]();
 
         // Display `error.message` (`Error#message` is unenumerable).
+        // @ts-ignore
         if (obj.error instanceof Error) {
+            // @ts-ignore
             obj.error = { ...obj.error, message: obj.error.message };
         }
 
         return obj;
     }
 
-    // eslint-disable-next-line jsdoc/require-description
     /**
      * @returns {Object} an object to display by `console.log()`.
      */
@@ -112,4 +129,5 @@ class ConfigDependency {
 /** @typedef {ConfigDependency<import("../../shared/types").Parser>} DependentParser */
 /** @typedef {ConfigDependency<import("../../shared/types").Plugin>} DependentPlugin */
 
+export type { Plugin as DependentPlugin, Parser as DependentParser } from '../shared/types.js';
 export { ConfigDependency };

@@ -11,14 +11,13 @@ import { assert } from "chai";
 
 import util from "util";
 
-import * as ConfigOps from "../../../lib/shared/config-ops.js";
+import * as ConfigOps from "../../../dist/lib/shared/config-ops.js";
 
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
 describe("ConfigOps", () => {
-
     describe("getRuleSeverity()", () => {
         const EXPECTED_RESULTS = new Map([
             [0, 0],
@@ -41,11 +40,13 @@ describe("ConfigOps", () => {
             [3, 0],
             [[3], 0],
             [1.5, 0],
-            [[1.5], 0]
+            [[1.5], 0],
         ]);
 
         for (const key of EXPECTED_RESULTS.keys()) {
-            it(`returns ${util.inspect(EXPECTED_RESULTS.get(key))} for ${util.inspect(key)}`, () => {
+            it(`returns ${util.inspect(EXPECTED_RESULTS.get(key))} for ${util.inspect(
+                key
+            )}`, () => {
                 assert.strictEqual(ConfigOps.getRuleSeverity(key), EXPECTED_RESULTS.get(key));
             });
         }
@@ -56,8 +57,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: 2,
-                    bar: 2
-                }
+                    bar: 2,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -65,8 +66,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: "error",
-                    bar: "error"
-                }
+                    bar: "error",
+                },
             });
         });
 
@@ -74,8 +75,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: [2, "something"],
-                    bar: 2
-                }
+                    bar: 2,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -83,8 +84,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: ["error", "something"],
-                    bar: "error"
-                }
+                    bar: "error",
+                },
             });
         });
 
@@ -92,8 +93,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: 1,
-                    bar: 1
-                }
+                    bar: 1,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -101,8 +102,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: "warn",
-                    bar: "warn"
-                }
+                    bar: "warn",
+                },
             });
         });
 
@@ -110,8 +111,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: [1, "something"],
-                    bar: 1
-                }
+                    bar: 1,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -119,8 +120,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: ["warn", "something"],
-                    bar: "warn"
-                }
+                    bar: "warn",
+                },
             });
         });
 
@@ -128,8 +129,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: 0,
-                    bar: 0
-                }
+                    bar: 0,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -137,8 +138,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: "off",
-                    bar: "off"
-                }
+                    bar: "off",
+                },
             });
         });
 
@@ -146,8 +147,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: [0, "something"],
-                    bar: 0
-                }
+                    bar: 0,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -155,8 +156,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: ["off", "something"],
-                    bar: "off"
-                }
+                    bar: "off",
+                },
             });
         });
 
@@ -164,8 +165,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: 256,
-                    bar: 256
-                }
+                    bar: 256,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -173,8 +174,8 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: "off",
-                    bar: "off"
-                }
+                    bar: "off",
+                },
             });
         });
 
@@ -182,8 +183,8 @@ describe("ConfigOps", () => {
             const config = {
                 rules: {
                     foo: [256, "something"],
-                    bar: 256
-                }
+                    bar: 256,
+                },
             };
 
             ConfigOps.normalizeToStrings(config);
@@ -191,14 +192,13 @@ describe("ConfigOps", () => {
             assert.deepStrictEqual(config, {
                 rules: {
                     foo: ["off", "something"],
-                    bar: "off"
-                }
+                    bar: "off",
+                },
             });
         });
     });
 
     describe("isError()", () => {
-
         [
             ["error", true],
             ["Error", true],
@@ -208,17 +208,14 @@ describe("ConfigOps", () => {
             [[2], true],
             [["error", "foo"], true],
             [["eRror", "bar"], true],
-            [[2, "baz"], true]
+            [[2, "baz"], true],
         ].forEach(([input, expected]) => {
-
             it(`should return ${expected}when passed ${input}`, () => {
                 const result = ConfigOps.isErrorSeverity(input);
 
                 assert.strictEqual(result, expected);
             });
-
         });
-
     });
 
     describe("normalizeConfigGlobal", () => {
@@ -233,7 +230,7 @@ describe("ConfigOps", () => {
             ["writable", "writable"],
             ["readable", "readonly"],
             ["readonly", "readonly"],
-            ["writable", "writable"]
+            ["writable", "writable"],
         ].forEach(([input, output]) => {
             it(util.inspect(input), () => {
                 assert.strictEqual(ConfigOps.normalizeConfigGlobal(input), output);

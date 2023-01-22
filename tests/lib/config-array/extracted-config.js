@@ -4,11 +4,10 @@
  */
 
 import assert from "assert";
-import { ExtractedConfig } from "../../../lib/config-array/extracted-config.js";
+import { ExtractedConfig } from "../../../dist/lib/config-array/extracted-config.js";
 
 describe("'ExtractedConfig' class", () => {
     describe("'constructor()' should create an instance.", () => {
-
         /** @type {ExtractedConfig} */
         let config;
 
@@ -50,7 +49,6 @@ describe("'ExtractedConfig' class", () => {
     });
 
     describe("'toCompatibleObjectAsConfigFileContent()' method should return a valid config data.", () => {
-
         /** @type {ExtractedConfig} */
         let config;
 
@@ -81,7 +79,7 @@ describe("'ExtractedConfig' class", () => {
                 filePath: "/path/to/a/parser",
                 id: "parser",
                 importerName: "importer name",
-                importerPath: "importer path"
+                importerPath: "importer path",
             };
 
             const data = config.toCompatibleObjectAsConfigFileContent();

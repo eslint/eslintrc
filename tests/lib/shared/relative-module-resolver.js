@@ -5,11 +5,9 @@
 import { assert } from "chai";
 import path from "path";
 
-import { Legacy } from "../../../lib/index.js";
+import { Legacy } from "../../../dist/lib/index.js";
 
-const {
-    ModuleResolver
-} = Legacy;
+const { ModuleResolver } = Legacy;
 
 describe("ModuleResolver", () => {
     describe("resolve()", () => {

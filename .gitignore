@@ -110,3 +110,6 @@ pnpm-lock.yaml
 
 # used in tests
 /tmp/
+/.idea/
+
+/out

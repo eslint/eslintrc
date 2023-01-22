@@ -7,19 +7,20 @@ import assert from "assert";
 import { Console } from "console";
 import path from "path";
 import { Writable } from "stream";
-import { OverrideTester } from "../../../lib/config-array/override-tester.js";
+import { OverrideTester } from "../../../dist/lib/config-array/override-tester.js";
 
 describe("OverrideTester", () => {
     describe("'create(files, excludedFiles, basePath)' should create a tester.", () => {
         for (const { files, excludedFiles, basePath } of [
             { files: void 0, excludedFiles: void 0, basePath: process.cwd() },
-            { files: [], excludedFiles: [], basePath: process.cwd() }
+            { files: [], excludedFiles: [], basePath: process.cwd() },
         ]) {
-            it(`should return null if ${JSON.stringify({ files, excludedFiles, basePath })} was given.`, () => {
-                assert.strictEqual(
-                    OverrideTester.create(files, excludedFiles, basePath),
-                    null
-                );
+            it(`should return null if ${JSON.stringify({
+                files,
+                excludedFiles,
+                basePath,
+            })} was given.`, () => {
+                assert.strictEqual(OverrideTester.create(files, excludedFiles, basePath), null);
             });
         }
 
@@ -146,7 +147,9 @@ describe("OverrideTester", () => {
          * @returns {void}
          */
         function match(filePath, patterns, excludedPatterns) {
-            it(`matches ${filePath} given '${patterns.join("','")}' includes and '${excludedPatterns.join("','")}' excludes`, () => {
+            it(`matches ${filePath} given '${patterns.join(
+                "','"
+            )}' includes and '${excludedPatterns.join("','")}' excludes`, () => {
                 const result = test(filePath, patterns, excludedPatterns);
 
                 assert.strictEqual(result, true);
@@ -161,7 +164,9 @@ describe("OverrideTester", () => {
          * @returns {void}
          */
         function noMatch(filePath, patterns, excludedPatterns) {
-            it(`does not match ${filePath} given '${patterns.join("','")}' includes and '${excludedPatterns.join("','")}' excludes`, () => {
+            it(`does not match ${filePath} given '${patterns.join(
+                "','"
+            )}' includes and '${excludedPatterns.join("','")}' excludes`, () => {
                 const result = test(filePath, patterns, excludedPatterns);
 
                 assert.strictEqual(result, false);
@@ -223,9 +228,21 @@ describe("OverrideTester", () => {
         noMatch("subdir/second/foo.js", ["subdir/**"], ["subdir/second/*"]);
 
         // error conditions
-        error("foo.js", ["/*.js"], "Invalid override pattern (expected relative path not containing '..'): /*.js");
-        error("foo.js", ["/foo.js"], "Invalid override pattern (expected relative path not containing '..'): /foo.js");
-        error("foo.js", ["../**"], "Invalid override pattern (expected relative path not containing '..'): ../**");
+        error(
+            "foo.js",
+            ["/*.js"],
+            "Invalid override pattern (expected relative path not containing '..'): /*.js"
+        );
+        error(
+            "foo.js",
+            ["/foo.js"],
+            "Invalid override pattern (expected relative path not containing '..'): /foo.js"
+        );
+        error(
+            "foo.js",
+            ["../**"],
+            "Invalid override pattern (expected relative path not containing '..'): ../**"
+        );
     });
 
     describe("'JSON.stringify(...)' should return readable JSON; not include 'Minimatch' objects", () => {
@@ -237,7 +254,9 @@ describe("OverrideTester", () => {
 
             assert.strictEqual(
                 JSON.stringify(tester),
-                `{"includes":["${files}"],"excludes":["${excludedFiles}"],"basePath":${JSON.stringify(basePath)}}`
+                `{"includes":["${files}"],"excludes":["${excludedFiles}"],"basePath":${JSON.stringify(
+                    basePath
+                )}}`
             );
         });
 
@@ -252,16 +271,13 @@ describe("OverrideTester", () => {
                 OverrideTester.create(files2, excludedFiles2, basePath)
             );
 
-            assert.deepStrictEqual(
-                JSON.parse(JSON.stringify(tester)),
-                {
-                    AND: [
-                        { includes: [files1], excludes: [excludedFiles1] },
-                        { includes: [files2], excludes: [excludedFiles2] }
-                    ],
-                    basePath
-                }
-            );
+            assert.deepStrictEqual(JSON.parse(JSON.stringify(tester)), {
+                AND: [
+                    { includes: [files1], excludes: [excludedFiles1] },
+                    { includes: [files2], excludes: [excludedFiles2] },
+                ],
+                basePath,
+            });
         });
     });
 

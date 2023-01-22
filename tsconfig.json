@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "lib": ["esnext"],
+        "outDir": "dist",
+        "allowJs": true,
+        "skipLibCheck": false,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true,
+        "declaration": true,
+        "declarationMap": true,
+        "noEmitOnError": false,
+        "module": "Node16",
+        "moduleResolution": "Node16",
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "incremental": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitAny": true
+    },
+    "include": ["src"],
+    "exclude": ["**/node_modules", "**/.*/"]
+}
