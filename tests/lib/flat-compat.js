@@ -366,6 +366,26 @@ describe("FlatCompat", () => {
                 });
             });
 
+            it("should throw an error when extending eslint:all without allConfig", () => {
+                const invalidCompat = new FlatCompat();
+
+                assert.throws(() => {
+                    invalidCompat.config({
+                        extends: "eslint:all"
+                    });
+                }, /Missing parameter 'allConfig'/gu);
+            });
+
+            it("should throw an error when extending eslint:recommended without recommendedConfig", () => {
+                const invalidCompat = new FlatCompat();
+
+                assert.throws(() => {
+                    invalidCompat.config({
+                        extends: "eslint:recommended"
+                    });
+                }, /Missing parameter 'recommendedConfig'/gu);
+            });
+
         });
 
         describe("overrides", () => {
@@ -907,6 +927,22 @@ describe("FlatCompat", () => {
                     foobar: "error"
                 }
             });
+        });
+
+        it("should throw an error when extending eslint:all without allConfig", () => {
+            const invalidCompat = new FlatCompat();
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:all");
+            }, /Missing parameter 'allConfig'/gu);
+        });
+
+        it("should throw an error when extending eslint:recommended without recommendedConfig", () => {
+            const invalidCompat = new FlatCompat();
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:recommended");
+            }, /Missing parameter 'recommendedConfig'/gu);
         });
 
     });
