@@ -945,6 +945,16 @@ describe("FlatCompat", () => {
             }, /Missing parameter 'recommendedConfig'/gu);
         });
 
+        it("should throw an error when extending eslint:recommended without recommendedConfig but with allConfig", () => {
+            const invalidCompat = new FlatCompat({
+                allConfig: {}
+            });
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:recommended");
+            }, /Missing parameter 'recommendedConfig'/gu);
+        });
+
     });
 
 
