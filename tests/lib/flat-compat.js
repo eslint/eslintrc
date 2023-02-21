@@ -62,7 +62,9 @@ describe("FlatCompat", () => {
 
         beforeEach(() => {
             compat = new FlatCompat({
-                baseDirectory
+                baseDirectory,
+                recommendedConfig: { settings: { "eslint:recommended": true } },
+                allConfig: { settings: { "eslint:all": true } }
             });
         });
 
@@ -239,7 +241,7 @@ describe("FlatCompat", () => {
                 });
             });
 
-            it("should translate extends eslint:all into a string", () => {
+            it("should translate extends eslint:all into settings", () => {
                 const result = compat.config({
                     extends: "eslint:all",
                     rules: {
@@ -248,7 +250,7 @@ describe("FlatCompat", () => {
                 });
 
                 assert.strictEqual(result.length, 2);
-                assert.deepStrictEqual(result[0], "eslint:all");
+                assert.isTrue(result[0].settings["eslint:all"]);
                 assert.deepStrictEqual(result[1], {
                     rules: {
                         foo: "warn"
@@ -256,7 +258,7 @@ describe("FlatCompat", () => {
                 });
             });
 
-            it("should translate extends [eslint:all] into a string", () => {
+            it("should translate extends [eslint:all] into settings", () => {
                 const result = compat.config({
                     extends: ["eslint:all"],
                     rules: {
@@ -265,7 +267,7 @@ describe("FlatCompat", () => {
                 });
 
                 assert.strictEqual(result.length, 2);
-                assert.deepStrictEqual(result[0], "eslint:all");
+                assert.isTrue(result[0].settings["eslint:all"]);
                 assert.deepStrictEqual(result[1], {
                     rules: {
                         foo: "warn"
@@ -273,7 +275,7 @@ describe("FlatCompat", () => {
                 });
             });
 
-            it("should translate extends eslint:recommended into a string", () => {
+            it("should translate extends eslint:recommended into settings", () => {
                 const result = compat.config({
                     extends: "eslint:recommended",
                     rules: {
@@ -282,7 +284,7 @@ describe("FlatCompat", () => {
                 });
 
                 assert.strictEqual(result.length, 2);
-                assert.deepStrictEqual(result[0], "eslint:recommended");
+                assert.isTrue(result[0].settings["eslint:recommended"]);
                 assert.deepStrictEqual(result[1], {
                     rules: {
                         foo: "warn"
@@ -290,7 +292,7 @@ describe("FlatCompat", () => {
                 });
             });
 
-            it("should translate extends [eslint:recommended] into a string", () => {
+            it("should translate extends [eslint:recommended] into settings", () => {
                 const result = compat.config({
                     extends: ["eslint:recommended"],
                     rules: {
@@ -299,7 +301,7 @@ describe("FlatCompat", () => {
                 });
 
                 assert.strictEqual(result.length, 2);
-                assert.deepStrictEqual(result[0], "eslint:recommended");
+                assert.isTrue(result[0].settings["eslint:recommended"]);
                 assert.deepStrictEqual(result[1], {
                     rules: {
                         foo: "warn"
@@ -346,7 +348,7 @@ describe("FlatCompat", () => {
                         }
                     }
                 });
-                assert.deepStrictEqual(result[1], "eslint:all");
+                assert.isTrue(result[1].settings["eslint:all"]);
                 assert.deepStrictEqual(result[2], {
                     languageOptions: {
                         globals: {
@@ -362,6 +364,26 @@ describe("FlatCompat", () => {
                         foo: "warn"
                     }
                 });
+            });
+
+            it("should throw an error when extending eslint:all without allConfig", () => {
+                const invalidCompat = new FlatCompat();
+
+                assert.throws(() => {
+                    invalidCompat.config({
+                        extends: "eslint:all"
+                    });
+                }, /Missing parameter 'allConfig'/gu);
+            });
+
+            it("should throw an error when extending eslint:recommended without recommendedConfig", () => {
+                const invalidCompat = new FlatCompat();
+
+                assert.throws(() => {
+                    invalidCompat.config({
+                        extends: "eslint:recommended"
+                    });
+                }, /Missing parameter 'recommendedConfig'/gu);
             });
 
         });
@@ -850,7 +872,9 @@ describe("FlatCompat", () => {
 
         beforeEach(() => {
             compat = new FlatCompat({
-                baseDirectory: getFixturePath("config")
+                baseDirectory: getFixturePath("config"),
+                recommendedConfig: { settings: { "eslint:recommended": true } },
+                allConfig: { settings: { "eslint:all": true } }
             });
         });
 
@@ -867,18 +891,18 @@ describe("FlatCompat", () => {
             });
         });
 
-        it("should translate extends eslint:all into a string", () => {
+        it("should translate extends eslint:all into settings", () => {
             const result = compat.extends("eslint:all");
 
             assert.strictEqual(result.length, 1);
-            assert.deepStrictEqual(result[0], "eslint:all");
+            assert.isTrue(result[0].settings["eslint:all"]);
         });
 
-        it("should translate extends eslint:recommended into a string", () => {
+        it("should translate extends eslint:recommended into settings", () => {
             const result = compat.extends("eslint:recommended");
 
             assert.strictEqual(result.length, 1);
-            assert.deepStrictEqual(result[0], "eslint:recommended");
+            assert.isTrue(result[0].settings["eslint:recommended"]);
         });
 
         it("should translate extends array with multiple configs into config objects", () => {
@@ -892,7 +916,7 @@ describe("FlatCompat", () => {
                     }
                 }
             });
-            assert.deepStrictEqual(result[1], "eslint:all");
+            assert.isTrue(result[1].settings["eslint:all"]);
             assert.deepStrictEqual(result[2], {
                 languageOptions: {
                     globals: {
@@ -903,6 +927,32 @@ describe("FlatCompat", () => {
                     foobar: "error"
                 }
             });
+        });
+
+        it("should throw an error when extending eslint:all without allConfig", () => {
+            const invalidCompat = new FlatCompat();
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:all");
+            }, /Missing parameter 'allConfig'/gu);
+        });
+
+        it("should throw an error when extending eslint:recommended without recommendedConfig", () => {
+            const invalidCompat = new FlatCompat();
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:recommended");
+            }, /Missing parameter 'recommendedConfig'/gu);
+        });
+
+        it("should throw an error when extending eslint:recommended without recommendedConfig but with allConfig", () => {
+            const invalidCompat = new FlatCompat({
+                allConfig: {}
+            });
+
+            assert.throws(() => {
+                invalidCompat.extends("eslint:recommended");
+            }, /Missing parameter 'recommendedConfig'/gu);
         });
 
     });
