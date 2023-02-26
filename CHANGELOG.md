@@ -1,3 +1,8 @@
+v2.0.0 - February 25, 2023
+
+* [`013bdf3`](https://github.com/eslint/eslintrc/commit/013bdf3da1cd1509592d6df0dfed031608c23a7c) feat!: Require eslint:all and eslint:recommended as parameters. (#103) (Nicholas C. Zakas)
+* [`f7d0f33`](https://github.com/eslint/eslintrc/commit/f7d0f33b30b3839800df046df1f5139941cdbd1a) chore: Add triage action (#101) (Nicholas C. Zakas)
+
 v1.4.1 - December 30, 2022
 
 * [`5be711e`](https://github.com/eslint/eslintrc/commit/5be711e4e81734f79c62cb9781921a9068de1c54) fix: Update FlatCompat docs + typings to reflect Array (#99) (Wes Bos)
