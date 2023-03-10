@@ -1,3 +1,7 @@
+v2.0.1 - March 10, 2023
+
+* [`5ccb30c`](https://github.com/eslint/eslintrc/commit/5ccb30c229624dd06449570217949a65b9539d21) chore: upgrade espree@9.5.0 (#104) (Milos Djermanovic)
+
 v2.0.0 - February 25, 2023
 
 * [`013bdf3`](https://github.com/eslint/eslintrc/commit/013bdf3da1cd1509592d6df0dfed031608c23a7c) feat!: Require eslint:all and eslint:recommended as parameters. (#103) (Nicholas C. Zakas)
