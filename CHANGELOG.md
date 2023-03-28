@@ -1,3 +1,7 @@
+v2.0.2 - March 28, 2023
+
+* [`e5f9e7e`](https://github.com/eslint/eslintrc/commit/e5f9e7e58c955e879527368905e99e6bc2d971f9) chore: upgrade espree@9.5.1 (#106) (Milos Djermanovic)
+
 v2.0.1 - March 10, 2023
 
 * [`5ccb30c`](https://github.com/eslint/eslintrc/commit/5ccb30c229624dd06449570217949a65b9539d21) chore: upgrade espree@9.5.0 (#104) (Milos Djermanovic)
