@@ -1,3 +1,14 @@
+# Changelog
+
+## [2.0.3](https://github.com/eslint/eslintrc/compare/v2.0.2...v2.0.3) (2023-05-05)
+
+
+### Chores
+
+* run tests on Node.js v20 ([#108](https://github.com/eslint/eslintrc/issues/108)) ([86282a2](https://github.com/eslint/eslintrc/commit/86282a25a6b4411b3cdd90967956b121f17f04a7))
+* set up release-please ([#111](https://github.com/eslint/eslintrc/issues/111)) ([3965c0b](https://github.com/eslint/eslintrc/commit/3965c0ba9994a0529caa4b17623ca8dae769068c))
+* upgrade espree@9.5.2 ([#113](https://github.com/eslint/eslintrc/issues/113)) ([a17cd0a](https://github.com/eslint/eslintrc/commit/a17cd0af447286f66ecff26d2cd75413d15426fb))
+
 v2.0.2 - March 28, 2023
 
 * [`e5f9e7e`](https://github.com/eslint/eslintrc/commit/e5f9e7e58c955e879527368905e99e6bc2d971f9) chore: upgrade espree@9.5.1 (#106) (Milos Djermanovic)
@@ -148,4 +159,3 @@ v0.2.0 - October 16, 2020
 v0.1.3 - September 1, 2020
 
 * [`8647a61`](https://github.com/eslint/eslintrc/commit/8647a61991fe121f923d33e96232475209b78210) Fix: version number and eslint-release version (refs #6) (Nicholas C. Zakas)
-
