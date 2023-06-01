@@ -1,3 +1,8 @@
+# IMPORTANT NOTE
+- This fork is designed to work with "eslint-config-unmind" and "unmind/eslint" only.
+    - plugins are resolved in relation to "eslint-config-unmind" rather than the root of the project
+      - change made to `lib/shared/relative-module-resolver`
+- this will be maintained until we are able to upgrade to the new configuration file format of eslint (https://eslint.org/docs/latest/use/configure/configuration-files-new)
 # ESLintRC Library
 
 This repository contains the legacy ESLintRC configuration file format for ESLint. This package is not intended for use outside of the ESLint ecosystem. It is ESLint-specific and not intended for use in other programs.
