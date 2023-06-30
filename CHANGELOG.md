@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/eslint/eslintrc/compare/v2.0.3...v2.1.0) (2023-06-30)
+
+
+### Features
+
+* add `es2023` and `es2024` environments ([#116](https://github.com/eslint/eslintrc/issues/116)) ([14ddd36](https://github.com/eslint/eslintrc/commit/14ddd3630843485f8f29f4b0402891a26f9fcf9b))
+
+
+### Chores
+
+* upgrade espree@9.6.0 ([#118](https://github.com/eslint/eslintrc/issues/118)) ([2d346d5](https://github.com/eslint/eslintrc/commit/2d346d5b0d926a9388c5a08adebfd218b1f48253))
+
 ## [2.0.3](https://github.com/eslint/eslintrc/compare/v2.0.2...v2.0.3) (2023-05-05)
 
 
