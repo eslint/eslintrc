@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/eslint/eslintrc/compare/v2.1.0...v2.1.1) (2023-07-27)
+
+
+### Chores
+
+* Add PRs to triage ([#121](https://github.com/eslint/eslintrc/issues/121)) ([b3c2d70](https://github.com/eslint/eslintrc/commit/b3c2d70fff4134c6602ad10257776db45281817c))
+* generate provenance statements when release ([#119](https://github.com/eslint/eslintrc/issues/119)) ([584cf79](https://github.com/eslint/eslintrc/commit/584cf79777fbb15147e929c7eeea6f7a56c485b5))
+
 ## [2.1.0](https://github.com/eslint/eslintrc/compare/v2.0.3...v2.1.0) (2023-06-30)
 
 
