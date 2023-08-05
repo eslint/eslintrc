@@ -215,6 +215,92 @@ describe("FlatCompat", () => {
                 });
             });
 
+            it("should translate builtin env with files", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: "*.jsx",
+                            env: {
+                                amd: true
+                            }
+                        }
+                    ]
+                });
+
+                assert.strictEqual(result.length, 3);
+
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+
+                assert.deepStrictEqual(result[1].languageOptions, {
+                    ...environments.get("amd")
+                });
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
+
+                assert.typeOf(result[2].files[0], "function");
+                assert.isTrue(result[2].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[2].files[0]("/usr/eslint/foo.js"));
+            });
+
+            it("should translate plugin env with files", () => {
+                const result = compat.config({
+                    rules: {
+                        foo: "error"
+                    },
+                    overrides: [
+                        {
+                            files: "*.jsx",
+                            plugins: ["fixture3"],
+                            env: {
+                                "fixture3/a": true,
+                                "fixture3/b": true
+                            }
+                        }
+                    ]
+                });
+
+                assert.strictEqual(result.length, 4);
+
+                assert.deepStrictEqual(result[0], {
+                    rules: {
+                        foo: "error"
+                    }
+                });
+
+                assert.deepStrictEqual(result[1].languageOptions, {
+                    globals: {
+                        foo: true
+                    }
+                });
+                assert.typeOf(result[1].files[0], "function");
+                assert.isTrue(result[1].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[1].files[0]("/usr/eslint/foo.js"));
+
+                assert.deepStrictEqual(result[2].languageOptions, {
+                    globals: {
+                        bar: false
+                    }
+                });
+                assert.typeOf(result[2].files[0], "function");
+                assert.isTrue(result[2].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[2].files[0]("/usr/eslint/foo.js"));
+
+                assert.deepStrictEqual(result[3].plugins, {
+                    fixture3: pluginFixture3
+                });
+                assert.typeOf(result[3].files[0], "function");
+                assert.isTrue(result[3].files[0]("/usr/eslint/foo.jsx"));
+                assert.isFalse(result[3].files[0]("/usr/eslint/foo.js"));
+            });
+
         });
 
         describe("extends", () => {
@@ -956,7 +1042,6 @@ describe("FlatCompat", () => {
         });
 
     });
-
 
     describe("plugins()", () => {
 
