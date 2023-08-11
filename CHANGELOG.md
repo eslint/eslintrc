@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.2](https://github.com/eslint/eslintrc/compare/v2.1.1...v2.1.2) (2023-08-05)
+
+
+### Bug Fixes
+
+* Ensure environments in overrides respect files patterns ([#126](https://github.com/eslint/eslintrc/issues/126)) ([6745421](https://github.com/eslint/eslintrc/commit/67454216a9dc4ecb850fd80d67ae39cf5799986d)), closes [#125](https://github.com/eslint/eslintrc/issues/125)
+
+
+### Chores
+
+* Remove add-to-triage ([#123](https://github.com/eslint/eslintrc/issues/123)) ([6827766](https://github.com/eslint/eslintrc/commit/6827766123137592b13c16c2ddd241fea42aae10))
+* standardize npm script names ([#122](https://github.com/eslint/eslintrc/issues/122)) ([6cfa046](https://github.com/eslint/eslintrc/commit/6cfa0466c192f5c2aff1cdf9554836acd4fcce68))
+
 ## [2.1.1](https://github.com/eslint/eslintrc/compare/v2.1.0...v2.1.1) (2023-07-27)
 
 
