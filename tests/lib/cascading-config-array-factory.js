@@ -37,9 +37,8 @@ const {
 /** @typedef {ReturnType<CascadingConfigArrayFactory["getConfigArrayForFile"]>} ConfigArray */
 
 const cwdIgnorePatterns = new ConfigArrayFactory()
-    .loadDefaultESLintIgnore()[0]
-    .ignorePattern
-    .patterns;
+    .loadDefaultESLintIgnore().flatMap(c => c.ignorePattern.patterns);
+
 
 const eslintAllPath = path.resolve(dirname, "../fixtures/eslint-all.cjs");
 const eslintRecommendedPath = path.resolve(dirname, "../fixtures/eslint-recommended.cjs");
