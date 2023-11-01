@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.3](https://github.com/eslint/eslintrc/compare/v2.1.2...v2.1.3) (2023-11-01)
+
+
+### Documentation
+
+* Add CommonJS example to README ([#134](https://github.com/eslint/eslintrc/issues/134)) ([ad511f8](https://github.com/eslint/eslintrc/commit/ad511f80971301199b74973fef196c8f6ebd36bc)), closes [#133](https://github.com/eslint/eslintrc/issues/133)
+
+
+### Chores
+
+* run tests in Node.js 21 ([#130](https://github.com/eslint/eslintrc/issues/130)) ([3b386f7](https://github.com/eslint/eslintrc/commit/3b386f790119553fb0d800b65454abf89b56a7aa))
+
 ## [2.1.2](https://github.com/eslint/eslintrc/compare/v2.1.1...v2.1.2) (2023-08-05)
 
 
