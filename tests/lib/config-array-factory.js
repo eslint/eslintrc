@@ -631,6 +631,10 @@ describe("ConfigArrayFactory", () => {
                 it("should have the path to the package at 'plugins[id].filePath' property.", () => {
                     assert.strictEqual(element.plugins.xxx.filePath, path.join(getPath(), "node_modules/custom-eslint-plugin-xxx/index.js"));
                 });
+
+                it("should have the original definition equal to the origina plugin object", () => {
+                    assert.strictEqual(element.plugins.xxx.original, require(path.join(getPath(), "node_modules/custom-eslint-plugin-xxx/index.js")));
+                });
             });
 
             describe("if 'extends' property was 'foo', the returned value", () => {

@@ -12,8 +12,10 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { assert } from "chai";
 import { FlatCompat } from "../../lib/index.js";
 import environments from "../../conf/environments.js";
+import { createRequire } from "module";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -56,9 +58,9 @@ describe("FlatCompat", () => {
 
         let compat;
         const baseDirectory = getFixturePath("config");
-        const pluginFixture1 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default);
-        const pluginFixture2 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default);
-        const pluginFixture3 = normalizePlugin((await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3.js")))).default);
+        const pluginFixture1 = (await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default;
+        const pluginFixture2 = (await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture2.js")))).default;
+        const pluginFixture3 = (await import(pathToFileURL(path.join(baseDirectory, "node_modules/eslint-plugin-fixture3.js")))).default;
 
         beforeEach(() => {
             compat = new FlatCompat({
@@ -1059,13 +1061,7 @@ describe("FlatCompat", () => {
             assert.strictEqual(result.length, 1);
             assert.deepStrictEqual(result[0], {
                 plugins: {
-                    fixture1: {
-                        configs: {},
-                        rules: {},
-                        environments: {},
-                        processors: {},
-                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
-                    }
+                    fixture1: (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
                 }
             });
         });
@@ -1087,13 +1083,7 @@ describe("FlatCompat", () => {
             });
             assert.deepStrictEqual(result[1], {
                 plugins: {
-                    fixture2: {
-                        configs: {},
-                        rules: {},
-                        environments: {},
-                        processors: {},
-                        ...plugin
-                    }
+                    fixture2: plugin
                 }
             });
         });
@@ -1109,22 +1099,17 @@ describe("FlatCompat", () => {
             });
             assert.deepStrictEqual(result[1], {
                 plugins: {
-                    fixture1: {
-                        configs: {},
-                        rules: {},
-                        environments: {},
-                        processors: {},
-                        ...(await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default
-                    },
-                    fixture2: {
-                        configs: {},
-                        rules: {},
-                        environments: {},
-                        processors: {},
-                        ...plugin
-                    }
+                    fixture1: (await import(pathToFileURL(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture1.js")))).default,
+                    fixture2: plugin
                 }
             });
+        });
+
+        it("should use the same plugin instance as require()", async () => {
+            const result = compat.config({ plugins: ["fixture2"]});
+            const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js"));
+
+            assert.strictEqual(result[1].plugins.fixture2, plugin);
         });
 
     });
