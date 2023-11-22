@@ -24,22 +24,6 @@ const require = createRequire(import.meta.url);
 const FIXTURES_BASE_PATH = path.resolve(dirname, "../fixtures/flat-compat/");
 
 /**
- * Normalizes a plugin object to have all available keys. This matches what
- * ConfigArrayFactory does.
- * @param {Object} plugin The plugin object to normalize.
- * @returns {Object} The normalized plugin object.
- */
-function normalizePlugin(plugin) {
-    return {
-        configs: {},
-        rules: {},
-        environments: {},
-        processors: {},
-        ...plugin
-    };
-}
-
-/**
  * Returns the full directory path for a fixture directory.
  * @param {string} dirName The directory name to resolve.
  * @returns {string} The full directory path to the fixture.
@@ -1106,7 +1090,7 @@ describe("FlatCompat", () => {
         });
 
         it("should use the same plugin instance as require()", async () => {
-            const result = compat.config({ plugins: ["fixture2"]});
+            const result = compat.config({ plugins: ["fixture2"] });
             const plugin = require(path.join(compat.baseDirectory, "node_modules/eslint-plugin-fixture2.js"));
 
             assert.strictEqual(result[1].plugins.fixture2, plugin);
