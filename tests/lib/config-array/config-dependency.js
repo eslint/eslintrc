@@ -68,8 +68,7 @@ describe("ConfigDependency", () => {
                     filePath: "filePath?",
                     id: "id?",
                     importerName: "importerName?",
-                    importerPath: "importerPath?",
-                    original: null
+                    importerPath: "importerPath?"
                 }
             );
         });
@@ -106,7 +105,6 @@ describe("ConfigDependency", () => {
             // Make expected output; no `definition` property.
             output = "";
             localConsole.log({
-                original: null,
                 error,
                 filePath: "filePath?",
                 id: "id?",
