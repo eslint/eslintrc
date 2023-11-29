@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 import { assert } from "chai";
+import nodeAssert from "assert";
 
 import ConfigValidator from "../../../lib/shared/config-validator.js";
 
@@ -33,6 +34,34 @@ const mockObjectRule = {
     meta: {
         schema: {
             enum: ["first", "second"]
+        }
+    },
+    create(context) {
+        return {
+            Program(node) {
+                context.report(node, "Expected a validation error.");
+            }
+        };
+    }
+};
+
+const mockInvalidSchemaTypeRule = {
+    meta: {
+        schema: true
+    },
+    create(context) {
+        return {
+            Program(node) {
+                context.report(node, "Expected a validation error.");
+            }
+        };
+    }
+};
+
+const mockInvalidJSONSchemaRule = {
+    meta: {
+        schema: {
+            minItems: []
         }
     },
     create(context) {
@@ -197,6 +226,30 @@ describe("ConfigValidator", () => {
             const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [2, "first", "second"], "tests");
 
             assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue [\"first\",\"second\"] should NOT have more than 1 items.\n");
+        });
+
+        it("should throw with error code ESLINT_INVALID_RULE_OPTIONS_SCHEMA for rule with an invalid schema type", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockInvalidSchemaTypeRule, "invalid-schema-rule", [2], "tests");
+
+            nodeAssert.throws(
+                fn,
+                {
+                    code: "ESLINT_INVALID_RULE_OPTIONS_SCHEMA",
+                    message: "tests:\n\tError while processing options validation schema of rule 'invalid-schema-rule': Rule's `meta.schema` must be an array or object"
+                }
+            );
+        });
+
+        it("should throw with error code ESLINT_INVALID_RULE_OPTIONS_SCHEMA for rule with an invalid JSON schema", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockInvalidJSONSchemaRule, "invalid-schema-rule", [2], "tests");
+
+            nodeAssert.throws(
+                fn,
+                {
+                    code: "ESLINT_INVALID_RULE_OPTIONS_SCHEMA",
+                    message: "tests:\n\tError while processing options validation schema of rule 'invalid-schema-rule': minItems must be number"
+                }
+            );
         });
 
     });
