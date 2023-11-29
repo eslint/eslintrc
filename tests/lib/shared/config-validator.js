@@ -14,6 +14,21 @@ import ConfigValidator from "../../../lib/shared/config-validator.js";
 // Helpers
 //------------------------------------------------------------------------------
 
+const mockRule = {
+    meta: {
+        schema: [{
+            enum: ["first", "second"]
+        }]
+    },
+    create(context) {
+        return {
+            Program(node) {
+                context.report(node, "Expected a validation error.");
+            }
+        };
+    }
+};
+
 const mockObjectRule = {
     meta: {
         schema: {
@@ -138,6 +153,50 @@ describe("ConfigValidator", () => {
             const result = validator.getRuleOptionsSchema(rule);
 
             assert.deepStrictEqual(result, noOptionsSchema);
+        });
+
+    });
+
+    describe("validateRuleOptions", () => {
+
+        it("should throw for incorrect warning level number", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", 3, "tests");
+
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tSeverity should be one of the following: 0 = off, 1 = warn, 2 = error (you passed '3').\n");
+        });
+
+        it("should throw for incorrect warning level string", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", "booya", "tests");
+
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tSeverity should be one of the following: 0 = off, 1 = warn, 2 = error (you passed '\"booya\"').\n");
+        });
+
+        it("should throw for invalid-type warning level", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [["error"]], "tests");
+
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tSeverity should be one of the following: 0 = off, 1 = warn, 2 = error (you passed '[ \"error\" ]').\n");
+        });
+
+        it("should only check warning level for nonexistent rules", () => {
+            const fn1 = validator.validateRuleOptions.bind(validator, void 0, "non-existent-rule", [3, "foobar"], "tests");
+
+            assert.throws(fn1, "tests:\n\tConfiguration for rule \"non-existent-rule\" is invalid:\n\tSeverity should be one of the following: 0 = off, 1 = warn, 2 = error (you passed '3').\n");
+
+            const fn2 = validator.validateRuleOptions.bind(validator, null, "non-existent-rule", [3, "foobar"], "tests");
+
+            assert.throws(fn2, "tests:\n\tConfiguration for rule \"non-existent-rule\" is invalid:\n\tSeverity should be one of the following: 0 = off, 1 = warn, 2 = error (you passed '3').\n");
+        });
+
+        it("should throw for incorrect configuration values", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [2, "frist"], "tests");
+
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue \"frist\" should be equal to one of the allowed values.\n");
+        });
+
+        it("should throw for too many configuration values", () => {
+            const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [2, "first", "second"], "tests");
+
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue [\"first\",\"second\"] should NOT have more than 1 items.\n");
         });
 
     });
