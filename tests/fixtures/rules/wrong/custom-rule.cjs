@@ -1,5 +1,7 @@
-module.exports = function() {
+"use strict";
 
-    "use strict";
-    return (null).something;
+module.exports = {
+    create() {
+        return (null).something;
+    }
 };

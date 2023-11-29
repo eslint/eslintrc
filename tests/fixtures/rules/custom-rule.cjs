@@ -1,15 +1,17 @@
-module.exports = function(context) {
+"use strict";
 
-    "use strict";
+module.exports = {
+    meta: {
+        schema: []
+    },
 
-    return {
-        "Identifier": function(node) {
-            if (node.name === "foo") {
-                context.report(node, "Identifier cannot be named 'foo'.");
+    create(context) {
+        return {
+            "Identifier": function(node) {
+                if (node.name === "foo") {
+                    context.report(node, "Identifier cannot be named 'foo'.");
+                }
             }
-        }
-    };
-
+        };
+    }
 };
-
-module.exports.schema = [];
