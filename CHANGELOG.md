@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.4](https://github.com/eslint/eslintrc/compare/v2.1.3...v2.1.4) (2023-11-27)
+
+
+### Bug Fixes
+
+* Use original plugin from disk in FlatCompat ([#137](https://github.com/eslint/eslintrc/issues/137)) ([1c4cf6a](https://github.com/eslint/eslintrc/commit/1c4cf6a71378d480323bfdd404c9585bd0d21d65))
+
 ## [2.1.3](https://github.com/eslint/eslintrc/compare/v2.1.2...v2.1.3) (2023-11-01)
 
 
