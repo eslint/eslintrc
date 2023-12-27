@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.0.0](https://github.com/eslint/eslintrc/compare/v2.1.4...v3.0.0) (2023-12-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* Require Node.js `^18.18.0 || ^20.9.0 || >=21.1.0` ([#142](https://github.com/eslint/eslintrc/issues/142))
+* Set default `schema: []`, drop support for function-style rules ([#139](https://github.com/eslint/eslintrc/issues/139))
+
+### Features
+
+* Require Node.js `^18.18.0 || ^20.9.0 || &gt;=21.1.0` ([#142](https://github.com/eslint/eslintrc/issues/142)) ([737eb25](https://github.com/eslint/eslintrc/commit/737eb25ac686550020b838ccf6efd5cd2aaa449e))
+* Set default `schema: []`, drop support for function-style rules ([#139](https://github.com/eslint/eslintrc/issues/139)) ([a6c240d](https://github.com/eslint/eslintrc/commit/a6c240de244b0e94ace4a518f2c67876a91f5882))
+
+
+### Chores
+
+* upgrade github actions ([#143](https://github.com/eslint/eslintrc/issues/143)) ([de34faf](https://github.com/eslint/eslintrc/commit/de34fafed28aaf1936845d51309f28484ed29e2f))
+
 ## [2.1.4](https://github.com/eslint/eslintrc/compare/v2.1.3...v2.1.4) (2023-11-27)
 
 
