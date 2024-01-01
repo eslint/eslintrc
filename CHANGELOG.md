@@ -10,7 +10,7 @@
 
 ### Features
 
-* Require Node.js `^18.18.0 || ^20.9.0 || &gt;=21.1.0` ([#142](https://github.com/eslint/eslintrc/issues/142)) ([737eb25](https://github.com/eslint/eslintrc/commit/737eb25ac686550020b838ccf6efd5cd2aaa449e))
+* Require Node.js `^18.18.0 || ^20.9.0 || >=21.1.0` ([#142](https://github.com/eslint/eslintrc/issues/142)) ([737eb25](https://github.com/eslint/eslintrc/commit/737eb25ac686550020b838ccf6efd5cd2aaa449e))
 * Set default `schema: []`, drop support for function-style rules ([#139](https://github.com/eslint/eslintrc/issues/139)) ([a6c240d](https://github.com/eslint/eslintrc/commit/a6c240de244b0e94ace4a518f2c67876a91f5882))
 
 
