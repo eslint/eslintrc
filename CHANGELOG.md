@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.0.1](https://github.com/eslint/eslintrc/compare/v3.0.0...v3.0.1) (2024-02-09)
+
+
+### Documentation
+
+* fix changelog for v3.0.0 ([#144](https://github.com/eslint/eslintrc/issues/144)) ([a613847](https://github.com/eslint/eslintrc/commit/a61384731aff386a8260a80d9710c912e4f62aaa))
+* More explicit about all and recommended configs ([#150](https://github.com/eslint/eslintrc/issues/150)) ([0fabc74](https://github.com/eslint/eslintrc/commit/0fabc7406e5a281a4e72be33de6e3bf8642aa746))
+
+
+### Chores
+
+* upgrade espree@10.0.1 ([#151](https://github.com/eslint/eslintrc/issues/151)) ([8c39944](https://github.com/eslint/eslintrc/commit/8c399441f47009344888e181c6aa2ecdc74ce8ea))
+
 ## [3.0.0](https://github.com/eslint/eslintrc/compare/v2.1.4...v3.0.0) (2023-12-27)
 
 
