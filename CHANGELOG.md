@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/eslint/eslintrc/compare/v3.0.1...v3.0.2) (2024-02-12)
+
+
+### Chores
+
+* maintenance update of `globals` to `v14` ([#152](https://github.com/eslint/eslintrc/issues/152)) ([4151865](https://github.com/eslint/eslintrc/commit/4151865b09084369e89d591eb2e01b9617287982))
+
 ## [3.0.1](https://github.com/eslint/eslintrc/compare/v3.0.0...v3.0.1) (2024-02-09)
 
 
