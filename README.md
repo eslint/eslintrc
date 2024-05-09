@@ -33,6 +33,7 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,                  // optional; default: process.cwd()
     resolvePluginsRelativeTo: __dirname,       // optional
+    resolveSharedConfigsRelativeTo: __dirname, // optional
     recommendedConfig: js.configs.recommended, // optional unless you're using "eslint:recommended"
     allConfig: js.configs.all,                 // optional unless you're using "eslint:all"
 });

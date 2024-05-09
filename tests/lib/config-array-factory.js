@@ -3155,7 +3155,9 @@ env:
                 "node_modules/@foo/eslint-plugin/index.js": "exports.configs = { bar: {} }",
                 "node_modules/@foo/eslint-plugin-bar/index.js": "exports.configs = { baz: {} }",
                 "foo/bar/.eslintrc": "",
-                ".eslintrc": ""
+                ".eslintrc": "",
+                "another/dir/node_modules/eslint-config-rel/index.js": "",
+                "another/dir/.eslintrc": ""
             }
         });
 
@@ -3223,6 +3225,29 @@ env:
             ]) {
                 it(`should return ${expected} when passed ${input}`, () => {
                     const result = resolve(input, relativePath);
+
+                    assert.strictEqual(result.filePath, expected);
+                });
+            }
+        });
+
+        describe("relative to 'resolveSharedConfigsRelativeTo' config option", () => {
+            beforeEach(() => {
+                factory = new ConfigArrayFactory({
+                    cwd: getPath(),
+                    resolveSharedConfigsRelativeTo: path.resolve(tempDir, "another/dir")
+                });
+            });
+
+            for (const { input, expected } of [
+                { input: ".eslintrc", expected: path.resolve(tempDir, "another/dir/.eslintrc") },
+                { input: "rel", expected: path.resolve(tempDir, "another/dir/node_modules/eslint-config-rel/index.js") },
+                { input: "plugin:foo/bar", expected: path.resolve(tempDir, "node_modules/eslint-plugin-foo/index.js") },
+                { input: "plugin:@foo/bar", expected: path.resolve(tempDir, "node_modules/@foo/eslint-plugin/index.js") },
+                { input: "plugin:@foo/bar/baz", expected: path.resolve(tempDir, "node_modules/@foo/eslint-plugin-bar/index.js") }
+            ]) {
+                it(`should return ${expected} when passed ${input}`, () => {
+                    const result = resolve(input);
 
                     assert.strictEqual(result.filePath, expected);
                 });
