@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.1.0](https://github.com/eslint/eslintrc/compare/v3.0.2...v3.1.0) (2024-05-17)
+
+
+### Features
+
+* Expose loadConfigFile() function ([#160](https://github.com/eslint/eslintrc/issues/160)) ([59e890f](https://github.com/eslint/eslintrc/commit/59e890fcd9e03663ac185640d5bed5f1a85bd39b))
+
+
+### Chores
+
+* run tests in Node.js 22 ([#154](https://github.com/eslint/eslintrc/issues/154)) ([5e526f2](https://github.com/eslint/eslintrc/commit/5e526f2e2897b87d7a704391cec74702d4bed38c))
+* update dependency shelljs to ^0.8.5 ([#156](https://github.com/eslint/eslintrc/issues/156)) ([903b887](https://github.com/eslint/eslintrc/commit/903b8875581ee731fd1a9424f83f785359cfb22e))
+
 ## [3.0.2](https://github.com/eslint/eslintrc/compare/v3.0.1...v3.0.2) (2024-02-12)
 
 
