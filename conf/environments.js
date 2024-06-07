@@ -31,7 +31,7 @@ function getDiff(current, prev) {
     return retv;
 }
 
-const newGlobals2015 = getDiff(globals.es2015, globals.es5); // 19 variables such as Promise, Map, ...
+const newGlobals2015 = getDiff(globals.es2015, globals.es5); // 20 variables such as Promise, Map, ...
 
 //------------------------------------------------------------------------------
 // Public Interface
