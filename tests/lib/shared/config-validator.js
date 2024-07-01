@@ -73,6 +73,21 @@ const mockInvalidJSONSchemaRule = {
     }
 };
 
+const mockMaxPropertiesSchema = {
+    meta: {
+        defaultOptions: [{
+            foo: 42
+        }],
+        schema: [{
+            type: "object",
+            maxProperties: 2
+        }]
+    },
+    create() {
+        return {};
+    }
+};
+
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
@@ -248,6 +263,21 @@ describe("ConfigValidator", () => {
                 {
                     code: "ESLINT_INVALID_RULE_OPTIONS_SCHEMA",
                     message: "tests:\n\tError while processing options validation schema of rule 'invalid-schema-rule': minItems must be number"
+                }
+            );
+        });
+
+    });
+
+    describe("validateRuleSchema", () => {
+
+        it("should throw when rule options are invalid after defaults are applied", () => {
+            const fn = validator.validateRuleSchema.bind(validator, mockMaxPropertiesSchema, [{ bar: 6, baz: 7 }]);
+
+            nodeAssert.throws(
+                fn,
+                {
+                    message: '\tValue {"foo":42,"bar":6,"baz":7} should NOT have more than 2 properties.\n'
                 }
             );
         });
