@@ -1,5 +1,3 @@
-/* eslint-disable no-undefined -- `null` and `undefined` are different in options */
-
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
@@ -23,21 +21,21 @@ function toTestCaseName(value) {
 
 describe("deepMerge", () => {
     for (const [first, second, result] of [
-        [undefined, undefined, []],
-        [[], undefined, []],
-        [["abc"], undefined, ["abc"]],
-        [undefined, ["abc"], ["abc"]],
+        [void 0, void 0, []],
+        [[], void 0, []],
+        [["abc"], void 0, ["abc"]],
+        [void 0, ["abc"], ["abc"]],
         [[], ["abc"], ["abc"]],
-        [[undefined], ["abc"], ["abc"]],
-        [[undefined, undefined], ["abc"], ["abc", undefined]],
-        [[undefined, undefined], ["abc", "def"], ["abc", "def"]],
-        [[undefined, null], ["abc"], ["abc", null]],
-        [[undefined, null], ["abc", "def"], ["abc", "def"]],
+        [[void 0], ["abc"], ["abc"]],
+        [[void 0, void 0], ["abc"], ["abc", void 0]],
+        [[void 0, void 0], ["abc", "def"], ["abc", "def"]],
+        [[void 0, null], ["abc"], ["abc", null]],
+        [[void 0, null], ["abc", "def"], ["abc", "def"]],
         [[null], ["abc"], ["abc"]],
-        [[123], [undefined], [123]],
+        [[123], [void 0], [123]],
         [[123], [null], [null]],
         [[123], [{ a: 0 }], [{ a: 0 }]],
-        [["abc"], [undefined], ["abc"]],
+        [["abc"], [void 0], ["abc"]],
         [["abc"], [null], [null]],
         [["abc"], ["def"], ["def"]],
         [["abc"], [{ a: 0 }], [{ a: 0 }]],
@@ -47,12 +45,12 @@ describe("deepMerge", () => {
         [[{ abc: true }], ["def"], ["def"]],
         [[{ abc: true }], [["def"]], [["def"]]],
         [[null], [{ abc: true }], [{ abc: true }]],
-        [[{ a: undefined }], [{ a: 0 }], [{ a: 0 }]],
+        [[{ a: void 0 }], [{ a: 0 }], [{ a: 0 }]],
         [[{ a: null }], [{ a: 0 }], [{ a: 0 }]],
         [[{ a: null }], [{ a: { b: 0 } }], [{ a: { b: 0 } }]],
         [[{ a: 0 }], [{ a: 1 }], [{ a: 1 }]],
         [[{ a: 0 }], [{ a: null }], [{ a: null }]],
-        [[{ a: 0 }], [{ a: undefined }], [{ a: 0 }]],
+        [[{ a: 0 }], [{ a: void 0 }], [{ a: 0 }]],
         [[{ a: 0 }], ["abc"], ["abc"]],
         [[{ a: 0 }], [123], [123]],
         [[[{ a: 0 }]], [123], [123]],
@@ -97,9 +95,9 @@ describe("deepMerge", () => {
             [{ hasOwnProperty: null }]
         ],
         [
-            [{ hasOwnProperty: undefined }],
+            [{ hasOwnProperty: void 0 }],
             [{}],
-            [{ hasOwnProperty: undefined }]
+            [{ hasOwnProperty: void 0 }]
         ],
         [
             [{}],
@@ -108,8 +106,8 @@ describe("deepMerge", () => {
         ],
         [
             [{}],
-            [{ hasOwnProperty: undefined }],
-            [{ hasOwnProperty: undefined }]
+            [{ hasOwnProperty: void 0 }],
+            [{ hasOwnProperty: void 0 }]
         ],
         [
             [{
@@ -134,5 +132,3 @@ describe("deepMerge", () => {
         });
     }
 });
-
-/* eslint-enable no-undefined -- `null` and `undefined` are different in options */
