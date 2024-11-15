@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/eslint/eslintrc/compare/v3.1.0...v3.2.0) (2024-11-14)
+
+
+### Features
+
+* merge rule.meta.defaultOptions before validation ([#166](https://github.com/eslint/eslintrc/issues/166)) ([d02f914](https://github.com/eslint/eslintrc/commit/d02f91452b81caff971f7895237cc4fb002e31da))
+
 ## [3.1.0](https://github.com/eslint/eslintrc/compare/v3.0.2...v3.1.0) (2024-05-17)
 
 
