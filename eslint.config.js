@@ -22,7 +22,7 @@ export default [
             "coverage",
             "docs",
             "jsdoc",
-            "dist"
+            "dist",
         ]
     },
 
