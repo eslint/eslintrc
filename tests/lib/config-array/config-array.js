@@ -3,8 +3,8 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assert } from "chai";
 import { ConfigArray, OverrideTester, getUsedExtractedConfigs } from "../../../lib/config-array/index.js";
 
@@ -37,7 +37,7 @@ describe("ConfigArray", () => {
                 });
 
                 for (let i = 0; i < elements.length; ++i) {
-                    it(`should have ${JSON.stringify(elements[i])} at configArray[${i}].`, () => { // eslint-disable-line no-loop-func
+                    it(`should have ${JSON.stringify(elements[i])} at configArray[${i}].`, () => { // eslint-disable-line no-loop-func -- needed for test
                         assert.strictEqual(configArray[i], elements[i]);
                     });
                 }
@@ -702,7 +702,7 @@ describe("ConfigArray", () => {
             { filePaths: [filename, `${filename}.ts`] },
             { filePaths: [filename, `${filename}.ts`, path.join(dirname, "foo.js")] }
         ]) {
-            describe(`after it called 'extractConfig(filePath)' ${filePaths.length} time(s) with ${JSON.stringify(filePaths, null, 4)}, the returned array`, () => { // eslint-disable-line no-loop-func
+            describe(`after it called 'extractConfig(filePath)' ${filePaths.length} time(s) with ${JSON.stringify(filePaths, null, 4)}, the returned array`, () => { // eslint-disable-line no-loop-func -- needed for test
                 let configs;
                 let usedConfigs;
 
@@ -716,7 +716,7 @@ describe("ConfigArray", () => {
                 });
 
                 for (let i = 0; i < filePaths.length; ++i) {
-                    it(`should contain 'configs[${i}]'.`, () => { // eslint-disable-line no-loop-func
+                    it(`should contain 'configs[${i}]'.`, () => { // eslint-disable-line no-loop-func -- needed for test
                         assert(usedConfigs.includes(configs[i]));
                     });
                 }

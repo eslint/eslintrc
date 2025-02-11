@@ -7,12 +7,12 @@
 // Requirements
 //-----------------------------------------------------------------------------
 
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { assert } from "chai";
 import { FlatCompat } from "../../lib/index.js";
 import environments from "../../conf/environments.js";
-import { createRequire } from "module";
+import { createRequire } from "node:module";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);

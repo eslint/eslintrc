@@ -8,12 +8,12 @@
 //-----------------------------------------------------------------------------
 
 import { assert } from "chai";
-import fs from "fs";
-import { createRequire } from "module";
-import path from "path";
+import fs from "node:fs";
+import { createRequire } from "node:module";
+import path from "node:path";
 import sinon from "sinon";
 import systemTempDir from "temp-dir";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 
 import { Legacy } from "../../lib/index.js";
 import { createCustomTeardown } from "../_utils/index.js";
@@ -173,7 +173,7 @@ describe("ConfigArrayFactory", () => {
         it("should return a config array that contains the yielded elements from '_normalizeConfigData(configData, ctx)'.", () => {
             const elements = [{}, {}];
 
-            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle
+            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle -- needed for test
 
             const configArray = factory.create({});
 
@@ -237,7 +237,7 @@ describe("ConfigArrayFactory", () => {
         });
 
         for (const filePath of Object.keys(basicFiles)) {
-            it(`should load '${filePath}' then return a config array what contains that file content.`, () => { // eslint-disable-line no-loop-func
+            it(`should load '${filePath}' then return a config array what contains that file content.`, () => { // eslint-disable-line no-loop-func -- needed for test
                 const configArray = factory.loadFile(filePath);
 
                 assert.strictEqual(configArray.length, 1);
@@ -267,7 +267,7 @@ describe("ConfigArrayFactory", () => {
         it("should return a config array that contains the yielded elements from '_normalizeConfigData(configData, ctx)'.", () => {
             const elements = [{}, {}];
 
-            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle
+            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle -- needed for test
 
             const configArray = factory.loadFile("js/.eslintrc.js");
 
@@ -335,7 +335,7 @@ describe("ConfigArrayFactory", () => {
         for (const filePath of Object.keys(basicFiles)) {
             const directoryPath = filePath.split("/")[0];
 
-            it(`should load '${directoryPath}' then return a config array what contains the config file of that directory.`, () => { // eslint-disable-line no-loop-func
+            it(`should load '${directoryPath}' then return a config array what contains the config file of that directory.`, () => { // eslint-disable-line no-loop-func -- needed for test
                 const configArray = factory.loadInDirectory(directoryPath);
 
                 assert.strictEqual(configArray.length, 1);
@@ -365,7 +365,7 @@ describe("ConfigArrayFactory", () => {
         it("should return a config array that contains the yielded elements from '_normalizeConfigData(configData, ctx)'.", () => {
             const elements = [{}, {}];
 
-            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle
+            factory._normalizeConfigData = () => elements; // eslint-disable-line no-underscore-dangle -- needed for test
 
             const configArray = factory.loadInDirectory("js");
 
@@ -395,7 +395,7 @@ describe("ConfigArrayFactory", () => {
         function create(configData, { filePath, name } = {}) {
             const ctx = createContext({ cwd: tempDir }, void 0, name, filePath, void 0);
 
-            return new ConfigArray(...factory._normalizeConfigData(configData, ctx)); // eslint-disable-line no-underscore-dangle
+            return new ConfigArray(...factory._normalizeConfigData(configData, ctx)); // eslint-disable-line no-underscore-dangle -- needed for test
         }
 
         describe("misc", () => {

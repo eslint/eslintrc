@@ -3,10 +3,10 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import assert from "assert";
-import { Console } from "console";
-import path from "path";
-import { Writable } from "stream";
+import assert from "node:assert";
+import { Console } from "node:console";
+import path from "node:path";
+import { Writable } from "node:stream";
 import { OverrideTester } from "../../../lib/config-array/override-tester.js";
 
 describe("OverrideTester", () => {
