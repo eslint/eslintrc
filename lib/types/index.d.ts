@@ -51,26 +51,26 @@ export class FlatCompat {
      * @param eslintrcConfig The ESLintRC-style config object.
      * @returns A flag-config-style config object.
      */
-    config(eslintrcConfig: Linter.LegacyConfig): Linter.FlatConfig[];
+    config(eslintrcConfig: Linter.LegacyConfig): Linter.Config[];
 
     /**
      * Translates the `env` section of an ESLintRC-style config.
      * @param envConfig The `env` section of an ESLintRC config.
      * @returns An array of flag-config objects representing the environments.
      */
-    env(envConfig: { [name: string]: boolean }): Linter.FlatConfig[];
+    env(envConfig: { [name: string]: boolean }): Linter.Config[];
 
     /**
      * Translates the `extends` section of an ESLintRC-style config.
      * @param configsToExtend The names of the configs to load.
      * @returns An array of flag-config objects representing the config.
      */
-    extends(...configsToExtend: string[]): Linter.FlatConfig[];
+    extends(...configsToExtend: string[]): Linter.Config[];
 
     /**
      * Translates the `plugins` section of an ESLintRC-style config.
      * @param plugins The names of the plugins to load.
      * @returns An array of flag-config objects representing the plugins.
      */
-    plugins(...plugins: string[]): Linter.FlatConfig[];
+    plugins(...plugins: string[]): Linter.Config[];
 }
