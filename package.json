@@ -4,10 +4,12 @@
   "description": "The legacy ESLintRC config file format for ESLint",
   "type": "module",
   "main": "./dist/eslintrc.cjs",
+  "types": "./dist/eslintrc.d.ts",
   "exports": {
     ".": {
       "import": "./lib/index.js",
-      "require": "./dist/eslintrc.cjs"
+      "require": "./dist/eslintrc.cjs",
+      "types": "./types/index.d.ts"
     },
     "./package.json": "./package.json",
     "./universal": {
@@ -26,7 +28,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && node -e \"fs.copyFileSync('./lib/types/index.d.ts', './dist/eslintrc.d.cts')\"",
     "lint": "eslint . --report-unused-disable-directives",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build",
@@ -35,7 +37,8 @@
     "release:generate:beta": "eslint-generate-prerelease beta",
     "release:generate:rc": "eslint-generate-prerelease rc",
     "release:publish": "eslint-publish-release",
-    "test": "mocha -R progress -c 'tests/lib/*.cjs' && c8 mocha -R progress -c 'tests/lib/**/*.js'"
+    "test": "mocha -R progress -c 'tests/lib/*.cjs' && c8 mocha -R progress -c 'tests/lib/**/*.js'",
+    "test:types": "tsc -p tests/lib/types/tsconfig.json"
   },
   "repository": "eslint/eslintrc",
   "funding": "https://opencollective.com/eslint",
