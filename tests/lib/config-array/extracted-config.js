@@ -3,7 +3,7 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import assert from "assert";
+import assert from "node:assert";
 import { ExtractedConfig } from "../../../lib/config-array/extracted-config.js";
 
 describe("'ExtractedConfig' class", () => {

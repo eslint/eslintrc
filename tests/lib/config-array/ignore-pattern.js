@@ -3,8 +3,8 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import assert from "assert";
-import path from "path";
+import assert from "node:assert";
+import path from "node:path";
 import sinon from "sinon";
 import { IgnorePattern } from "../../../lib/config-array/ignore-pattern.js";
 

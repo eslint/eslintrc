@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 
 import { assert } from "chai";
-import nodeAssert from "assert";
+import nodeAssert from "node:assert";
 
 import ConfigValidator from "../../../lib/shared/config-validator.js";
 

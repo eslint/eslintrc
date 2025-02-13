@@ -3,9 +3,9 @@
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
 
-import assert from "assert";
-import { Console } from "console";
-import { Writable } from "stream";
+import assert from "node:assert";
+import { Console } from "node:console";
+import { Writable } from "node:stream";
 import { ConfigDependency } from "../../../lib/config-array/config-dependency.js";
 
 describe("ConfigDependency", () => {
@@ -80,7 +80,7 @@ describe("ConfigDependency", () => {
         let output = "";
         const localConsole = new Console(
             new class extends Writable {
-                write(chunk) { // eslint-disable-line class-methods-use-this
+                write(chunk) { // eslint-disable-line class-methods-use-this -- needed for test
                     output += chunk;
                 }
             }()
