@@ -61,14 +61,6 @@ export default [
             "no-restricted-syntax": ["error", {
                 selector: "CallExpression[callee.object.name='assert'][callee.property.name='doesNotThrow']",
                 message: "`assert.doesNotThrow()` should be replaced with a comment next to the code."
-            }],
-
-            // Overcome https://github.com/mysticatea/eslint-plugin-node/issues/250
-            "n/no-unsupported-features/es-syntax": ["error", {
-                ignores: [
-                    "modules",
-                    "dynamicImport"
-                ]
             }]
         }
     }
