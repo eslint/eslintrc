@@ -8,6 +8,8 @@
 //-----------------------------------------------------------------------------
 
 import eslintConfigESLint from "eslint-config-eslint";
+import eslintConfigESLintFormatting from "eslint-config-eslint/formatting";
+
 //-----------------------------------------------------------------------------
 // Config
 //-----------------------------------------------------------------------------
@@ -20,11 +22,12 @@ export default [
             "coverage",
             "docs",
             "jsdoc",
-            "dist",
+            "dist"
         ]
     },
 
     ...eslintConfigESLint,
+    eslintConfigESLintFormatting,
     {
         files: ["tests/**/*"],
         languageOptions: {
