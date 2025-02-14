@@ -9,7 +9,7 @@
 
 import { assert } from "chai";
 
-import util from "util";
+import util from "node:util";
 
 import * as ConfigOps from "../../../lib/shared/config-ops.js";
 

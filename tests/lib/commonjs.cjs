@@ -9,10 +9,10 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-const assert = require("assert");
+const assert = require("node:assert");
 const eslintrc = require("../../dist/eslintrc.cjs");
 const universal = require("../../dist/eslintrc-universal.cjs");
-const path = require("path");
+const path = require("node:path");
 const sh = require("shelljs");
 
 //------------------------------------------------------------------------------
