@@ -36,20 +36,16 @@ const compat = new FlatCompat({
     resolvePluginsRelativeTo: __dirname,
 });
 
-const config: Linter.FlatConfig[] = [
-    // $ExpectType FlatConfig
+const config: Linter.Config[] = [
     ...compat.extends("standard", "example"),
 
-    // $ExpectType FlatConfig
     ...compat.env({
         es2020: true,
         node: true,
     }),
 
-    // $ExpectType FlatConfig
     ...compat.plugins("airbnb", "react"),
 
-    // $ExpectType FlatConfig
     ...compat.config({
         plugins: ["airbnb", "react"],
         extends: "standard",
