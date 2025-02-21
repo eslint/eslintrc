@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/eslint/eslintrc/compare/v3.2.0...v3.3.0) (2025-02-21)
+
+
+### Features
+
+* Add types to package ([#179](https://github.com/eslint/eslintrc/issues/179)) ([cb546be](https://github.com/eslint/eslintrc/commit/cb546be8ba53abcb4c64ed2fdd3a729dd1337f61))
+
 ## [3.2.0](https://github.com/eslint/eslintrc/compare/v3.1.0...v3.2.0) (2024-11-14)
 
 
