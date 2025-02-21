@@ -9,7 +9,7 @@
     ".": {
       "import": "./lib/index.js",
       "require": "./dist/eslintrc.cjs",
-      "types": "./types/index.d.ts"
+      "types": "./lib/types/index.d.ts"
     },
     "./package.json": "./package.json",
     "./universal": {
