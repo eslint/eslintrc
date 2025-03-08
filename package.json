@@ -4,7 +4,7 @@
   "description": "The legacy ESLintRC config file format for ESLint",
   "type": "module",
   "main": "./dist/eslintrc.cjs",
-  "types": "./dist/eslintrc.d.ts",
+  "types": "./dist/eslintrc.d.cts",
   "exports": {
     ".": {
       "import": "./lib/index.js",
