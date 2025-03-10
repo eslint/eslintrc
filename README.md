@@ -8,12 +8,14 @@ This repository contains the legacy ESLintRC configuration file format for ESLin
 
 You can install the package as follows:
 
-```bash
-npm install @eslint/eslintrc --save-dev
+```shell
+npm install @eslint/eslintrc -D
 # or
 yarn add @eslint/eslintrc -D
 # or
-bun add @eslint/eslintrc -D
+pnpm install @eslint/eslintrc -D
+# or
+bun install @eslint/eslintrc -D
 ```
 
 ## Usage (ESM)
