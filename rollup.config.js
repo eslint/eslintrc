@@ -1,3 +1,21 @@
+/** List of modules not included in the bundle. */
+const external = [
+    "node:assert",
+    "node:fs",
+    "node:module",
+    "node:os",
+    "node:path",
+    "node:url",
+    "node:util",
+    "ajv",
+    "debug",
+    "globals",
+    "ignore",
+    "import-fresh",
+    "minimatch",
+    "strip-json-comments"
+];
+
 /**
  * Custom Rollup plugin for `import.meta.url` transformation to commonjs.
  * The default transformation ('file:' + __filename) does not check characters in __filename,
@@ -20,11 +38,7 @@ function importMetaURLPlugin() {
 export default [
     {
         input: "./lib/index.js",
-        external: [
-            "module", "util", "os", "path", "debug", "fs", "import-fresh",
-            "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv",
-            "globals"
-        ],
+        external,
         treeshake: false,
         output: {
             format: "cjs",
@@ -36,11 +50,7 @@ export default [
     },
     {
         input: "./lib/index-universal.js",
-        external: [
-            "module", "util", "os", "path", "debug", "fs", "import-fresh",
-            "strip-json-comments", "assert", "ignore", "minimatch", "url", "ajv",
-            "globals"
-        ],
+        external,
         treeshake: false,
         output: {
             format: "cjs",
