@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/eslint/eslintrc/compare/v3.3.0...v3.3.1) (2025-03-11)
+
+
+### Bug Fixes
+
+* correct `types` field in package.json ([#184](https://github.com/eslint/eslintrc/issues/184)) ([2f4cf3f](https://github.com/eslint/eslintrc/commit/2f4cf3fe36ee0df93c1c53f32c030c58db1816a2))
+
 ## [3.3.0](https://github.com/eslint/eslintrc/compare/v3.2.0...v3.3.0) (2025-02-21)
 
 
