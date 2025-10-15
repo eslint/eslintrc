@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+
 name: release-please
 jobs:
   release-please:
@@ -30,12 +31,18 @@ jobs:
           node-version: lts/*
           registry-url: https://registry.npmjs.org
         if: ${{ steps.release.outputs.release_created }}
-      - run: npm install
+
+        # npm 11.5.1 or later is required so update to latest to be sure
+      - name: Update npm
+        run: npm install -g npm@latest
         if: ${{ steps.release.outputs.release_created }}
-      - run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        run: |
+            npm install
+            npm publish --provenance
         if: ${{ steps.release.outputs.release_created }}
+
       - run: 'npx @humanwhocodes/tweet "eslint/eslintrc ${{ steps.release.outputs.tag_name }} has been released: ${{ steps.release.outputs.html_url }}"'
         if: ${{ steps.release.outputs.release_created }}
         env:
