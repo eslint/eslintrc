@@ -1027,6 +1027,29 @@ describe("FlatCompat", () => {
             }, /Missing parameter 'recommendedConfig'/gu);
         });
 
+        it("should remove name property from eslint:all and eslint:recommended configs", () => {
+            const compatWithNames = new FlatCompat({
+                baseDirectory: getFixturePath("config"),
+                recommendedConfig: {
+                    name: "eslint:recommended",
+                    settings: { "eslint:recommended": true }
+                },
+                allConfig: {
+                    name: "eslint:all",
+                    settings: { "eslint:all": true }
+                }
+            });
+
+            const allResult = compatWithNames.extends("eslint:all");
+            const recommendedResult = compatWithNames.extends("eslint:recommended");
+
+            assert.strictEqual(allResult.length, 1);
+            assert.isTrue(allResult[0].settings["eslint:all"]);
+
+            assert.strictEqual(recommendedResult.length, 1);
+            assert.isTrue(recommendedResult[0].settings["eslint:recommended"]);
+        });
+
     });
 
     describe("plugins()", () => {
