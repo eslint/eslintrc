@@ -110,3 +110,10 @@ pnpm-lock.yaml
 
 # used in tests
 /tmp/
+
+# IDEs and editors
+/.vscode
+*.code-workspace
+
+# Automatically generated files by GitHub Actions workflow
+tools/update-readme.js
