@@ -1049,7 +1049,6 @@ describe("FlatCompat", () => {
             assert.strictEqual(recommendedResult.length, 1);
             assert.isTrue(recommendedResult[0].settings["eslint:recommended"]);
         });
-
     });
 
     describe("plugins()", () => {
