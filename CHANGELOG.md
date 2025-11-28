@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.3](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.2...eslintrc-v3.3.3) (2025-11-28)
+
+
+### Bug Fixes
+
+* release v3.3.3 because publishing v3.3.2 failed ([#211](https://github.com/eslint/eslintrc/issues/211)) ([8aa555a](https://github.com/eslint/eslintrc/commit/8aa555a3f5fcfb7d99249fb57e819a7b6f635496))
+
 ## [3.3.2](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.1...eslintrc-v3.3.2) (2025-11-25)
 
 
