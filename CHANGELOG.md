@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.2](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.1...eslintrc-v3.3.2) (2025-11-25)
+
+
+### Bug Fixes
+
+* Remove name property from all and recommended configs ([#200](https://github.com/eslint/eslintrc/issues/200)) ([344da49](https://github.com/eslint/eslintrc/commit/344da491898a2a3595943d4528ba78fe2f238217))
+
 ## [3.3.1](https://github.com/eslint/eslintrc/compare/v3.3.0...v3.3.1) (2025-03-11)
 
 
