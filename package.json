@@ -64,7 +64,7 @@
   "dependencies": {
     "ajv": "^6.12.4",
     "debug": "^4.3.2",
-    "espree": "^10.0.1",
+    "espree": "^11.0.0",
     "globals": "^14.0.0",
     "ignore": "^5.2.0",
     "import-fresh": "^3.2.1",
