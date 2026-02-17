@@ -234,13 +234,13 @@ describe("ConfigValidator", () => {
         it("should throw for incorrect configuration values", () => {
             const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [2, "frist"], "tests");
 
-            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue \"frist\" should be equal to one of the allowed values.\n");
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue \"frist\" must be equal to one of the allowed values.\n");
         });
 
         it("should throw for too many configuration values", () => {
             const fn = validator.validateRuleOptions.bind(validator, mockRule, "mock-rule", [2, "first", "second"], "tests");
 
-            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue [\"first\",\"second\"] should NOT have more than 1 items.\n");
+            assert.throws(fn, "tests:\n\tConfiguration for rule \"mock-rule\" is invalid:\n\tValue [\"first\",\"second\"] must NOT have more than 1 items.\n");
         });
 
         it("should throw with error code ESLINT_INVALID_RULE_OPTIONS_SCHEMA for rule with an invalid schema type", () => {
@@ -262,7 +262,7 @@ describe("ConfigValidator", () => {
                 fn,
                 {
                     code: "ESLINT_INVALID_RULE_OPTIONS_SCHEMA",
-                    message: "tests:\n\tError while processing options validation schema of rule 'invalid-schema-rule': minItems must be number"
+                    message: "tests:\n\tError while processing options validation schema of rule 'invalid-schema-rule': minItems value must be [\"number\"]"
                 }
             );
         });
@@ -277,7 +277,7 @@ describe("ConfigValidator", () => {
             nodeAssert.throws(
                 fn,
                 {
-                    message: '\tValue {"foo":42,"bar":6,"baz":7} should NOT have more than 2 properties.\n'
+                    message: '\tValue {"foo":42,"bar":6,"baz":7} must NOT have more than 2 properties.\n'
                 }
             );
         });
