@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.4](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.3...eslintrc-v3.3.4) (2026-02-22)
+
+
+### Bug Fixes
+
+* update `ajv` to `6.14.0` to address security vulnerabilities ([#221](https://github.com/eslint/eslintrc/issues/221)) ([9139140](https://github.com/eslint/eslintrc/commit/9139140aece172fa4c11a466c493609be31cfa54))
+* update `minimatch` to `3.1.3` to address security vulnerabilities ([#224](https://github.com/eslint/eslintrc/issues/224)) ([30339d0](https://github.com/eslint/eslintrc/commit/30339d036361c13362d5a38191bb2388ad56bb6f))
+
 ## [3.3.3](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.2...eslintrc-v3.3.3) (2025-11-28)
 
 
