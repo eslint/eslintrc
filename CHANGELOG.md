@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.5](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.4...eslintrc-v3.3.5) (2026-02-25)
+
+
+### Bug Fixes
+
+* update dependency minimatch to ^3.1.5 ([#227](https://github.com/eslint/eslintrc/issues/227)) ([3dc2381](https://github.com/eslint/eslintrc/commit/3dc2381e3e063f41e6b135650d05cdfe4045804e))
+
 ## [3.3.4](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.3...eslintrc-v3.3.4) (2026-02-22)
 
 
