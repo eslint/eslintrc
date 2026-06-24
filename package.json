@@ -32,7 +32,8 @@
     "lint": "eslint . --report-unused-disable-directives",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build",
-    "test": "mocha -R progress -c 'tests/lib/*.cjs' && c8 mocha -R progress -c 'tests/lib/**/*.js'",
+    "test": "mocha -R progress -c 'tests/lib/*.cjs' && mocha -R progress -c 'tests/lib/**/*.js'",
+    "test:coverage": "c8 npm test",
     "test:types": "tsc -p tests/lib/types/tsconfig.json"
   },
   "repository": "eslint/eslintrc",
