@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.7](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.6...eslintrc-v3.3.7) (2026-09-01)
+
+
+### Bug Fixes
+
+* Bump js-yaml to 4.3.1 ([#239](https://github.com/eslint/eslintrc/issues/239)) ([f27e7c9](https://github.com/eslint/eslintrc/commit/f27e7c94e6d9438bd51cb483d8d5da768e1cc0b9))
+* update js-yaml to 4.3.2 to address security vulnerability ([#243](https://github.com/eslint/eslintrc/issues/243)) ([bb0d97a](https://github.com/eslint/eslintrc/commit/bb0d97a338937b88fa99d6bbc0a904e34eda3d5f))
+
 ## [3.3.6](https://github.com/eslint/eslintrc/compare/eslintrc-v3.3.5...eslintrc-v3.3.6) (2026-07-10)
 
 
