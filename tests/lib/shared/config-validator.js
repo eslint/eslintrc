@@ -283,4 +283,32 @@ describe("ConfigValidator", () => {
         });
 
     });
+
+    describe("validateConfigSchema", () => {
+
+        it("should not throw a circular structure error when the invalid value is circular", () => {
+
+            // `plugins` expects an array; passing a circular object triggers a
+            // "type" schema error whose `error.data` is the circular object.
+            const circular = { name: "eslint-plugin-react" };
+
+            circular.self = circular;
+
+            const config = { plugins: circular };
+
+            nodeAssert.throws(
+                () => validator.validateConfigSchema(config, "test-config"),
+                error => {
+                    nodeAssert.doesNotMatch(
+                        error.message,
+                        /circular structure/u,
+                        "Expected a config validation error, not a JSON circular structure error"
+                    );
+                    nodeAssert.match(error.message, /ESLint configuration in test-config is invalid/u);
+                    return true;
+                }
+            );
+        });
+
+    });
 });
